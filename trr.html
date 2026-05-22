@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TRR Transport — ระบบต้นทุนน้ำมันขนส่ง</title>
+<link rel="icon" type="image/png" href="TRR999logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ══ Base ══════════════════════════════════════════════════════════════════ */
@@ -664,7 +665,7 @@ input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--navy); c
 <aside id="sidebar">
   <div id="sidebar-top">
     <div id="logo-wrap">
-      <img src="../project3/assets/logo.png" alt="logo"
+      <img src="TRR999logo.png" alt="logo"
            onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
       <span class="logo-fallback">⛽</span>
     </div>
@@ -829,6 +830,22 @@ input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--navy); c
             <h3 class="section-title" style="margin:0;">สถานที่ทั้งหมด</h3>
             <button class="btn btn-navy btn-sm" onclick="openAddLocation()">➕ เพิ่มสถานที่</button>
           </div>
+          <div class="filters mb-12">
+            <div class="filter-group">
+              <label>ประเภท:</label>
+              <select id="loc-type-filter" style="min-width:140px;" onchange="renderLocTab()">
+                <option value="">ทั้งหมด</option>
+                <option value="origin">ต้นทาง</option>
+                <option value="destination">ปลายทาง</option>
+                <option value="depot">ที่พักรถ</option>
+                <option value="waypoint">จุดขึ้นแป้ง</option>
+              </select>
+            </div>
+            <div class="filter-group flex-1">
+              <label>ค้นหา:</label>
+              <input type="text" id="loc-search" placeholder="พิมพ์ชื่อสถานที่หรือจังหวัด..." oninput="renderLocTab()">
+            </div>
+          </div>
           <div class="tbl-wrap">
             <table>
               <thead>
@@ -968,6 +985,7 @@ input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--navy); c
    ถ้าเว้นว่าง ('') จะใช้ localStorage (offline mode)
 ════════════════════════════════════════════════════════════════════════════ */
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyeGakSanGKfI1i73uUdZ0gTJzRPlwu_bcqh0sW7mZadiBN2VDGhqRJwyfL0tvWY0xPRA/exec';   // ← ใส่ URL ตรงนี้  เช่น 'https://script.google.com/macros/s/ABC.../exec'
+const RESET_PASSWORD = 'TRR999';  // password for Reset all data
 
 /* ════════════════════════════════════════════════════════════════════════════
    CONSTANTS
@@ -1685,7 +1703,13 @@ function renderActiveTab() {
 
 /* ── Locations tab ── */
 function renderLocTab() {
-  const locs = DB.getLocs().sort((a,b) => {
+  const typeF   = document.getElementById('loc-type-filter')?.value || '';
+  const searchF = (document.getElementById('loc-search')?.value || '').trim().toLowerCase();
+  const locs = DB.getLocs().filter(l => {
+    if (typeF && l.type !== typeF) return false;
+    if (searchF && !l.name.toLowerCase().includes(searchF) && !(l.province||'').toLowerCase().includes(searchF)) return false;
+    return true;
+  }).sort((a,b) => {
     const to = {origin:0,destination:1,depot:2,waypoint:3};
     return (to[a.type]||9) - (to[b.type]||9) || a.name.localeCompare(b.name,'th');
   });
@@ -2153,13 +2177,30 @@ function msAddStop() {
   const div = document.createElement('div');
   div.className = 'ms-stop-row';
   div.dataset.idx = idx;
+  div._locs = locs;
   const lbl = isOrigin ? 'ต้นทาง:' : `จุดส่งที่ ${idx}:`;
   const delBtn = idx >= 2 ? `<button class="btn btn-red btn-sm" style="padding:5px 10px;" onclick="msRemoveStop(this)">✕</button>` : '';
+  const searchInp = isOrigin ? '' : `<input type="text" placeholder="🔍 จังหวัด/ชื่อ" style="width:140px;flex-shrink:0;" oninput="msFilterSelect(this)">`;
   div.innerHTML = `<label>${lbl}</label>
+    ${searchInp}
     <select class="flex-1" onchange="msOnChange()">${locOpts(locs, ph, null)}</select>
     ${delBtn}`;
   container.appendChild(div);
   _msStops.push(div);
+  msOnChange();
+}
+
+function msFilterSelect(inp) {
+  const q = inp.value.trim().toLowerCase();
+  const div = inp.closest('.ms-stop-row');
+  const allLocs = div._locs || [];
+  const sel = div.querySelector('select');
+  const currentVal = sel.value;
+  const filtered = q ? allLocs.filter(l =>
+    l.name.toLowerCase().includes(q) || (l.province||'').toLowerCase().includes(q)
+  ) : allLocs;
+  sel.innerHTML = locOpts(filtered, 'เลือกปลายทาง', parseInt(currentVal) || null);
+  if (currentVal) sel.value = currentVal;
   msOnChange();
 }
 
@@ -2395,15 +2436,28 @@ function settingsClearHistory() {
 }
 
 function settingsReset() {
-  if (!confirm2('⚠️ Reset ข้อมูลทั้งหมด?\n(ข้อมูลที่ลบจะไม่สามารถกู้คืนได้)')) return;
-  if (!confirm2('ยืนยันอีกครั้ง: ลบทุกอย่างใช่ไหม?')) return;
-  localStorage.removeItem('trr_db');
-  DB.d = DB._blank();
-  if (GAS_URL) {
-    fetch(GAS_URL + '?action=reset', { mode: 'no-cors' }).catch(() => {});
-  }
-  refreshFuelDisplay(); refreshSettings();
-  toast('Reset เรียบร้อย','warn');
+  openModal('🔐 ยืนยัน Reset ข้อมูลทั้งหมด',
+    `<div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:12px 16px;color:#991B1B;font-weight:700;margin-bottom:16px;">
+       ⚠️ ข้อมูลทั้งหมดจะถูกลบถาวร — ไม่สามารถกู้คืนได้
+     </div>
+     <div class="form-grid" style="gap:12px;">
+       <label>รหัสผ่าน:</label>
+       <input id="reset-pw" type="password" placeholder="ใส่รหัสผ่านเพื่อยืนยัน" autofocus
+              onkeydown="if(event.key==='Enter')document.getElementById('modal-save-btn').click()">
+     </div>`,
+    () => {
+      const pw = document.getElementById('reset-pw')?.value || '';
+      if (pw !== RESET_PASSWORD) { toast('รหัสผ่านไม่ถูกต้อง', 'error'); return; }
+      closeModal();
+      localStorage.removeItem('trr_db');
+      DB.d = DB._blank();
+      if (GAS_URL) fetch(GAS_URL + '?action=reset', { mode: 'no-cors' }).catch(() => {});
+      refreshFuelDisplay(); refreshSettings();
+      toast('Reset เรียบร้อย', 'warn');
+    },
+    '⚠️ Reset ทั้งหมด'
+  );
+  setTimeout(() => document.getElementById('reset-pw')?.focus(), 100);
 }
 
 /* ════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>กระดานราคา — ธรารินทร์ 999</title>
+<link rel="icon" type="image/png" href="../TRR999logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1B2770;--navy2:#2233A0;--navy-dark:#141D5C;
+  --gold:#F5A623;--gold2:#FBBF24;
+  --bg:#F0F2F5;--white:#fff;--border:#E2E8F0;
+  --text:#2D3748;--muted:#64748B;
+  --green:#16a34a;--red:#DC2626;--blue:#2563eb;
+}
+body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color:var(--text);background:var(--bg);min-height:100vh}
+
+/* ── Topbar ── */
+#topbar{background:var(--navy);border-bottom:3px solid var(--gold);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:200}
+.tb-left{display:flex;align-items:center;gap:12px}
+.tb-logo{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;flex-shrink:0}
+.tb-logo img{width:100%;height:100%;object-fit:cover}
+.tb-title{font-size:15px;font-weight:700;color:#fff}
+.tb-sub{font-size:11px;color:rgba(255,255,255,.55)}
+.tb-right{display:flex;align-items:center;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border:none;border-radius:7px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;text-decoration:none;white-space:nowrap}
+.btn-ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.btn-ghost:hover{background:rgba(255,255,255,.22)}
+.btn-gold{background:var(--gold);color:var(--navy-dark)}
+.btn-gold:hover{background:var(--gold2)}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:#15803d}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:#1d4ed8}
+.btn-soft{background:#EEF2FF;color:var(--navy);border:1px solid #C7D2FE}
+.btn-soft:hover{background:#E0E7FF}
+
+/* ── Controls ── */
+#controls{background:var(--white);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.ctrl-group{display:flex;align-items:center;gap:8px;font-size:13px}
+.ctrl-group label{font-weight:700;color:var(--navy);white-space:nowrap}
+.ctrl-input{width:100px;border:1.5px solid var(--border);border-radius:6px;padding:5px 10px;font-family:inherit;font-size:13px;text-align:right;color:var(--text)}
+.ctrl-input:focus{border-color:var(--navy);outline:none}
+.fuel-badge{background:#FFF8E7;border:2px solid var(--gold);border-radius:6px;padding:3px 12px;font-size:12px;font-weight:700;color:#92400E}
+
+/* ── Tabs ── */
+#tabs{display:flex;gap:2px;padding:14px 24px 0;background:var(--bg)}
+.tab-btn{background:#F8FAFC;color:#4B5563;border:1px solid var(--border);border-bottom:none;border-radius:7px 7px 0 0;padding:8px 20px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.1s}
+.tab-btn.active{background:var(--white);color:var(--navy);border-top:2px solid var(--gold)}
+
+/* ── Content ── */
+#content{padding:0 24px 40px}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ══ Tab 1: Matrix ══════════════════════════════════════════ */
+#matrix-wrap{overflow-x:auto;background:var(--white);border:1px solid var(--border);border-top:none;border-radius:0 8px 8px 8px}
+#matrix-table{border-collapse:collapse;font-size:12px;white-space:nowrap}
+#matrix-table th{background:var(--navy);color:#fff;padding:7px 10px;font-weight:700;font-size:11px;text-align:center;white-space:nowrap;position:sticky;top:0}
+#matrix-table th.th-left{text-align:left}
+#matrix-table th.active-th{background:var(--gold);color:var(--navy-dark)}
+#matrix-table th.markup-th{background:#7c3aed;color:#fff}
+#matrix-table td{padding:5px 10px;border-bottom:1px solid #F1F5F9;text-align:right}
+#matrix-table td.td-left{text-align:left}
+#matrix-table td.dest-cell{color:var(--navy);font-weight:700}
+#matrix-table td.active-cell{background:#FFF8E7;font-weight:700;color:#92400E}
+#matrix-table td.markup-cell{background:#EDE9FE;font-weight:700;color:#5b21b6}
+#matrix-table tbody tr:hover td{background:#F1F5FF}
+#matrix-table tbody tr:hover td.active-cell{background:#FEF3C7}
+#matrix-table tbody tr:hover td.markup-cell{background:#DDD6FE}
+
+/* ══ Tab 2: New Board ═══════════════════════════════════════ */
+.col-hidden{display:none!important}
+
+#new-board-toolbar{background:var(--white);border:1px solid var(--border);border-top:none;padding:9px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--gold)}
+.sel-label{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;user-select:none;white-space:nowrap}
+.sel-label input[type=checkbox]{width:16px;height:16px;accent-color:var(--navy);cursor:pointer}
+#col-count{font-size:12px;color:var(--muted);padding:3px 12px;background:#EEF2FF;border-radius:99px;border:1px solid #C7D2FE;font-weight:600}
+
+#new-board-wrap{overflow-x:auto;background:var(--white);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px}
+#new-board-table{border-collapse:collapse;font-size:12px;white-space:nowrap}
+#new-board-table thead th{background:var(--navy);color:#fff;font-size:10px;font-weight:700;padding:0;text-align:center;white-space:nowrap;position:sticky;top:0;z-index:10;vertical-align:bottom}
+#new-board-table thead th.th-left{text-align:left}
+#new-board-table thead th.active-th{background:var(--gold);color:var(--navy-dark)}
+.th-inner{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 8px;cursor:pointer;width:100%}
+.col-chk{width:14px;height:14px;cursor:pointer;accent-color:#fff;flex-shrink:0}
+.active-th .col-chk{accent-color:var(--navy-dark)}
+
+#new-board-table tbody td{padding:5px 10px;border-bottom:1px solid #F1F5F9;text-align:right;font-size:12px}
+#new-board-table tbody td.td-left{text-align:left}
+#new-board-table tbody td.active-cell{background:#FFF8E7;font-weight:700;color:#92400E}
+#new-board-table tbody tr:hover td{background:#F1F5FF}
+#new-board-table tbody tr:hover td.active-cell{background:#FEF3C7}
+
+/* ══ Print header ══════════════════════════════════════════ */
+.print-header{display:none;align-items:center;gap:16px;padding:12px 16px 10px;border-bottom:3px solid var(--gold);margin-bottom:10px}
+.ph-logo{width:52px;height:52px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;flex-shrink:0}
+.ph-logo img{width:100%;height:100%;object-fit:cover}
+.ph-text h1{font-size:13pt;font-weight:700;color:var(--navy)}
+.ph-text h2{font-size:10pt;color:#555;font-weight:400}
+.ph-text p{font-size:9pt;color:var(--text);margin-top:2px}
+.ph-spacer{flex:1}
+.ph-meta{text-align:right;font-size:9pt;color:#555;line-height:1.7}
+
+/* ══ Tab 3: Comparison ══════════════════════════════════════ */
+#cmp-bar{background:var(--white);border:1px solid var(--border);border-top:none;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+#cmp-ref-label{font-size:13px;color:var(--navy);font-weight:700}
+.cmp-legend{display:flex;gap:14px;font-size:11.5px;flex-wrap:wrap}
+.cmp-legend span{display:flex;align-items:center;gap:4px}
+
+#cmp-summary-bar{background:#F8FAFC;border:1px solid var(--border);border-top:none;padding:8px 16px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;min-height:36px;border-bottom:2px solid var(--gold)}
+#cmp-summary{display:flex;gap:20px;align-items:center;flex-wrap:wrap;font-size:12.5px}
+
+#cmp-wrap{overflow-x:auto;background:var(--white);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px}
+#cmp-table{border-collapse:collapse;width:100%;font-size:13px}
+#cmp-table thead th{background:var(--navy);color:#fff;padding:9px 14px;font-weight:700;font-size:12px;white-space:nowrap}
+#cmp-table thead th.th-r{text-align:right}
+#cmp-table thead th.th-cust{background:#1a4a8a;text-align:right}
+#cmp-table tbody td{padding:7px 14px;border-bottom:1px solid #F1F5F9}
+#cmp-table tbody tr:nth-child(even) td{background:#FAFAFA}
+#cmp-table tbody tr:hover td{background:#EEF2FF}
+.td-r{text-align:right}
+.td-c{text-align:center}
+.cmp-input{border:1.5px solid var(--border);border-radius:5px;padding:4px 8px;font-family:inherit;font-size:13px;width:110px;text-align:right;background:#fff}
+.cmp-input:focus{border-color:var(--navy);outline:none;background:#FFFBF0}
+.fw6{font-weight:600}.fw7{font-weight:700}
+.clr-g{color:var(--green)}.clr-r{color:var(--red)}.clr-m{color:var(--muted)}.clr-navy{color:var(--navy)}
+
+/* ══ Sticky columns (lock # + ระยะทาง when scrolling) ══════ */
+.stk0{position:sticky;left:0;z-index:5}
+.stk1{position:sticky;left:36px;z-index:5;box-shadow:2px 0 6px rgba(0,0,0,.1)}
+/* matrix */
+#matrix-table thead .stk0,#matrix-table thead .stk1{z-index:12;background:var(--navy)}
+#matrix-table tbody .stk0,#matrix-table tbody .stk1{background:var(--white)}
+#matrix-table tbody tr:hover .stk0,#matrix-table tbody tr:hover .stk1{background:#F1F5FF}
+/* new-board */
+#new-board-table thead .stk0,#new-board-table thead .stk1{z-index:12;background:var(--navy)}
+#new-board-table tbody .stk0,#new-board-table tbody .stk1{background:var(--white)}
+#new-board-table tbody tr:hover .stk0,#new-board-table tbody tr:hover .stk1{background:#F1F5FF}
+
+/* ══ Print ══════════════════════════════════════════════════ */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .no-print{display:none!important}
+  body{background:#fff}
+  #topbar,#controls,#tabs,#new-board-toolbar{display:none!important}
+  #content{padding:0}
+  #tab-matrix,#tab-compare{display:none!important}
+  #tab-new-board{display:block!important}
+  #new-board-wrap{border:none;border-radius:0;overflow:visible}
+  .print-header{display:flex!important}
+  .col-chk{display:none!important}
+  #new-board-table{font-size:7pt;width:100%}
+  #new-board-table thead th{padding:0;font-size:7pt;background:var(--navy)!important;color:#fff!important}
+  #new-board-table thead th.active-th{background:var(--gold)!important;color:var(--navy-dark)!important}
+  .th-inner{padding:3px 4px;gap:0}
+  #new-board-table tbody td{padding:2px 5px}
+  #new-board-table tbody td.active-cell{background:#FFF8E7!important;color:#92400E!important}
+  @page{size:A4 landscape;margin:8mm 6mm}
+}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#F1F5F9}
+::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<header id="topbar" class="no-print">
+  <div class="tb-left">
+    <div class="tb-logo"><img src="../TRR999logo.png" alt="TRR" onerror="this.style.display='none'"></div>
+    <div>
+      <div class="tb-title">กระดานราคาค่าขนส่ง</div>
+      <div class="tb-sub">บจก.ธรารินทร์ 999 ขนส่ง จำกัด · รถ 6 ล้อ 5 เมตร</div>
+    </div>
+  </div>
+  <div class="tb-right">
+    <a href="../index.html" class="btn btn-ghost">← หน้าแรก</a>
+    <button class="btn btn-gold" onclick="buildBoard()">⚡ สร้างกระดานใหม่</button>
+  </div>
+</header>
+
+<!-- Controls -->
+<div id="controls" class="no-print">
+  <div class="ctrl-group">
+    <label>⛽ ราคาน้ำมันวันนี้:</label>
+    <input id="fuel-price" class="ctrl-input" type="number" value="29.50"
+           min="15.01" max="58.99" step="0.01" oninput="onUpdate()">
+    <span style="font-size:13px;color:var(--muted)">บาท/ลิตร</span>
+    <span class="fuel-badge" id="fuel-col-label">—</span>
+  </div>
+  <div class="ctrl-group">
+    <label>📈 ปรับราคาเพิ่ม:</label>
+    <input id="markup-pct" class="ctrl-input" type="number" value="0"
+           min="-50" max="300" step="0.5" oninput="onUpdate()">
+    <span style="font-size:13px;color:var(--muted)">%</span>
+  </div>
+  <div style="flex:1"></div>
+  <span style="font-size:12px;color:var(--muted)">อ้างอิงข้อมูล: <span id="data-date"></span></span>
+</div>
+
+<!-- Tabs -->
+<div id="tabs" class="no-print">
+  <button class="tab-btn active" onclick="switchTab('matrix')">📊 กระดานต้นฉบับ</button>
+  <button class="tab-btn"        onclick="switchTab('new-board')">📋 กระดานราคาใหม่</button>
+  <button class="tab-btn"        onclick="switchTab('compare')">🔍 เปรียบเทียบราคาลูกค้า</button>
+</div>
+
+<div id="content">
+
+<!-- ═══ Tab 1: กระดานต้นฉบับ ═══════════════════════════════ -->
+<div class="tab-pane active" id="tab-matrix">
+  <div id="matrix-wrap">
+    <table id="matrix-table">
+      <thead id="matrix-head"></thead>
+      <tbody id="matrix-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ Tab 2: กระดานราคาใหม่ ══════════════════════════════ -->
+<div class="tab-pane" id="tab-new-board">
+
+  <div id="new-board-toolbar" class="no-print">
+    <label class="sel-label">
+      <input type="checkbox" id="chk-all-cols" checked onchange="selectAllCols(this.checked)">
+      เลือกทุกคอลัมน์
+    </label>
+    <span id="col-count">เลือก 44/44 คอลัมน์</span>
+    <span style="font-size:12px;color:var(--muted)">· คลิก checkbox บนหัวคอลัมน์เพื่อเลือก/ซ่อน</span>
+    <div style="flex:1"></div>
+    <button class="btn btn-green" onclick="exportExcel()">📥 บันทึก Excel</button>
+    <button class="btn btn-blue"  onclick="exportPDF()">🖨 บันทึก PDF</button>
+  </div>
+
+  <!-- print header -->
+  <div class="print-header">
+    <div class="ph-logo"><img src="../TRR999logo.png" alt="TRR" onerror="this.style.display='none'"></div>
+    <div class="ph-text">
+      <h1>บริษัท ธรารินทร์ 999 ขนส่ง จำกัด</h1>
+      <h2>กระดานราคาค่าขนส่งสินค้า — ประเภทรถ 6 ล้อ</h2>
+      <p id="print-meta"></p>
+    </div>
+    <div class="ph-spacer"></div>
+    <div class="ph-meta" id="print-date-meta"></div>
+  </div>
+
+  <div id="new-board-wrap">
+    <table id="new-board-table">
+      <thead id="new-board-head"></thead>
+      <tbody id="new-board-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ Tab 3: เปรียบเทียบราคาลูกค้า ═════════════════════ -->
+<div class="tab-pane" id="tab-compare">
+
+  <div id="cmp-bar" class="no-print">
+    <div style="font-size:13px;font-weight:700;color:var(--navy)">ราคาอ้างอิงของเรา:</div>
+    <div id="cmp-ref-label" style="font-size:13px;color:var(--muted)"></div>
+    <div style="flex:1"></div>
+    <div class="cmp-legend">
+      <span><b class="clr-g">+%</b> = ลูกค้าแพงกว่าเรา</span>
+      <span><b class="clr-r">−%</b> = ลูกค้าถูกกว่าเรา</span>
+    </div>
+    <button class="btn btn-soft" onclick="clearCustPrices()">🗑 ล้างค่า</button>
+    <button class="btn btn-green" onclick="exportCompareExcel()">📥 ส่งออก Excel</button>
+  </div>
+
+  <div id="cmp-summary-bar">
+    <div id="cmp-summary" style="color:var(--muted);font-size:12px">กรอกราคาลูกค้าอย่างน้อย 1 แถวเพื่อดูสรุป</div>
+  </div>
+
+  <div id="cmp-wrap">
+    <table id="cmp-table">
+      <thead>
+        <tr>
+          <th style="width:40px;text-align:center">#</th>
+          <th style="text-align:left;min-width:150px">ระยะทาง (กม.)</th>
+          <th class="th-r" style="min-width:140px">ราคาของเรา (บาท)</th>
+          <th class="th-cust" style="min-width:150px">ราคาลูกค้า (บาท)</th>
+          <th class="th-r" style="min-width:120px">ต่าง (บาท)</th>
+          <th class="th-r" style="min-width:100px">ต่าง (%)</th>
+        </tr>
+      </thead>
+      <tbody id="cmp-body"></tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- #content -->
+
+<script>
+/* ══ DATA ════════════════════════════════════════════════════════════ */
+const ROWS = [
+  {km:[0,25],      dest:'',                        base:1956},
+  {km:[26,50],     dest:'',                        base:2257},
+  {km:[51,80],     dest:'',                        base:2582},
+  {km:[81,110],    dest:'',                        base:2936},
+  {km:[111,140],   dest:'',                        base:3290},
+  {km:[141,170],   dest:'',                        base:3644},
+  {km:[171,200],   dest:'นครสวรรค์',               base:3998},
+  {km:[201,230],   dest:'',                        base:4352},
+  {km:[231,260],   dest:'โคราช',                   base:4706},
+  {km:[261,290],   dest:'',                        base:5060},
+  {km:[291,320],   dest:'เพชรบูรณ์',               base:6319},
+  {km:[321,350],   dest:'พิษณุโลก',                base:6673},
+  {km:[351,380],   dest:'',                        base:7027},
+  {km:[381,410],   dest:'โนนสมบูรณ์',              base:7381},
+  {km:[411,440],   dest:'อุตรดิตถ์',               base:7735},
+  {km:[441,470],   dest:'',                        base:8089},
+  {km:[471,500],   dest:'ร้อยเอ็ด',                base:8443},
+  {km:[501,530],   dest:'อุดรธานี',                base:8797},
+  {km:[531,560],   dest:'ลำปาง / อุบลฯ',           base:9151},
+  {km:[561,590],   dest:'',                        base:9505},
+  {km:[591,620],   dest:'',                        base:9860},
+  {km:[621,650],   dest:'มุกดาหาร / เชียงใหม่',    base:11118},
+  {km:[651,680],   dest:'',                        base:11472},
+  {km:[681,710],   dest:'สุราษฎร์ธานี',            base:11826},
+  {km:[711,740],   dest:'เชียงราย',                base:12180},
+  {km:[741,770],   dest:'',                        base:12534},
+  {km:[771,800],   dest:'',                        base:12888},
+  {km:[801,830],   dest:'ทุ่งสง',                  base:13242},
+  {km:[831,860],   dest:'',                        base:13596},
+  {km:[861,890],   dest:'ภูเก็ต',                  base:13951},
+  {km:[891,920],   dest:'',                        base:14305},
+  {km:[921,950],   dest:'',                        base:14659},
+  {km:[951,980],   dest:'',                        base:15013},
+  {km:[981,1010],  dest:'หาดใหญ่',                 base:15367},
+  {km:[1011,1040], dest:'',                        base:15721},
+  {km:[1041,1070], dest:'',                        base:16075},
+  {km:[1071,1100], dest:'',                        base:16429},
+  {km:[1101,1130], dest:'',                        base:16783},
+  {km:[1131,1160], dest:'',                        base:17137},
+  {km:[1161,1190], dest:'',                        base:17491},
+  {km:[1191,1220], dest:'',                        base:17845},
+];
+
+const FUEL_COLS = Array.from({length:44}, (_, i) => ({
+  label: `${15+i}.01–${16+i}.00`,
+  delta: parseFloat((-0.28 + i * 0.02).toFixed(4)),
+}));
+
+/* ══ HELPERS ═════════════════════════════════════════════════════════ */
+const fmtB   = n => Math.round(n).toLocaleString('th-TH');
+const fmtPct = n => (n >= 0 ? '+' : '') + n.toFixed(1) + '%';
+
+function getFuelIdx(diesel) {
+  return Math.max(0, Math.min(43, Math.floor(diesel - 0.01) - 15));
+}
+function getState() {
+  return {
+    diesel: parseFloat(document.getElementById('fuel-price').value) || 29.5,
+    markup: parseFloat(document.getElementById('markup-pct').value) || 0,
+  };
+}
+function ourPrice(r, fi, markup) {
+  return Math.round(r.base * (1 + FUEL_COLS[fi].delta) * (1 + markup / 100));
+}
+
+/* ══ TABS ════════════════════════════════════════════════════════════ */
+const TAB_IDS = ['matrix', 'new-board', 'compare'];
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) =>
+    b.classList.toggle('active', TAB_IDS[i] === name));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  if (name === 'new-board') renderNewBoard();
+  if (name === 'compare')   renderCompare();
+}
+
+function activeTabName() {
+  const p = document.querySelector('.tab-pane.active');
+  return p ? p.id.replace('tab-', '') : '';
+}
+
+/* ══ TAB 1: MATRIX ═══════════════════════════════════════════════════ */
+function renderMatrix() {
+  const {diesel, markup} = getState();
+  const fi = getFuelIdx(diesel);
+  const hasMarkup = markup !== 0;
+
+  let hHtml = `<tr>
+    <th class="th-left stk0" style="width:36px;min-width:36px">#</th>
+    <th class="th-left stk1" style="min-width:145px">ระยะทาง (กม.)</th>
+    <th style="min-width:95px">ราคาฐาน SCG</th>`;
+  if (hasMarkup) hHtml += `<th class="markup-th" style="min-width:110px">ปรับ +${markup}%</th>`;
+  FUEL_COLS.forEach((fc, i) => {
+    hHtml += `<th class="${i===fi?'active-th':''}" style="min-width:82px">${fc.label}</th>`;
+  });
+  document.getElementById('matrix-head').innerHTML = hHtml + `</tr>`;
+
+  document.getElementById('matrix-body').innerHTML = ROWS.map((r, i) => {
+    let row = `<tr>
+      <td class="td-left stk0" style="color:var(--muted);font-size:11px">${i+1}</td>
+      <td class="td-left stk1">${r.km[0].toLocaleString()}–${r.km[1].toLocaleString()} กม.</td>
+      <td>${fmtB(r.base)}</td>`;
+    if (hasMarkup) row += `<td class="markup-cell">${fmtB(r.base*(1+FUEL_COLS[fi].delta)*(1+markup/100))}</td>`;
+    FUEL_COLS.forEach((fc, ci) => {
+      row += `<td class="${ci===fi?'active-cell':''}">${fmtB(r.base*(1+fc.delta))}</td>`;
+    });
+    return row + `</tr>`;
+  }).join('');
+}
+
+/* ══ TAB 2: COLUMN SELECTION STATE ═══════════════════════════════════ */
+let checkedCols = new Array(44).fill(true);
+
+function toggleCol(ci, val) {
+  checkedCols[ci] = val;
+  // toggle th + all td in that column
+  document.querySelectorAll(`#new-board-table .fc${ci}`).forEach(el =>
+    el.classList.toggle('col-hidden', !val));
+  updateColCount();
+}
+
+function selectAllCols(val) {
+  checkedCols.fill(val);
+  FUEL_COLS.forEach((_, ci) => {
+    document.querySelectorAll(`#new-board-table .fc${ci}`).forEach(el =>
+      el.classList.toggle('col-hidden', !val));
+  });
+  document.querySelectorAll('#new-board-table .col-chk').forEach(c => c.checked = val);
+  const ha = document.getElementById('chk-all-cols');
+  if (ha) { ha.checked = val; ha.indeterminate = false; }
+  updateColCount();
+}
+
+function updateColCount() {
+  const n = checkedCols.filter(Boolean).length;
+  document.getElementById('col-count').textContent = `เลือก ${n}/44 คอลัมน์`;
+  const ha = document.getElementById('chk-all-cols');
+  if (ha) { ha.checked = n===44; ha.indeterminate = n>0 && n<44; }
+}
+
+/* ══ TAB 2: RENDER NEW BOARD ════════════════════════════════════════ */
+function renderNewBoard() {
+  const {diesel, markup} = getState();
+  const fi = getFuelIdx(diesel);
+
+  // thead — one row; fuel cols have checkbox + label inside
+  let hHtml = `<tr>
+    <th class="th-left stk0" style="width:36px;min-width:36px;padding:8px 10px">#</th>
+    <th class="th-left stk1" style="min-width:145px;padding:8px 10px">ระยะทาง (กม.)</th>`;
+  FUEL_COLS.forEach((fc, i) => {
+    const isAct = i === fi;
+    const hidden = !checkedCols[i] ? ' col-hidden' : '';
+    hHtml += `<th class="fc${i}${hidden}${isAct?' active-th':''}" style="min-width:82px">
+      <label class="th-inner" title="${isAct?'คอลัมน์น้ำมันปัจจุบัน':''}">
+        <input type="checkbox" class="col-chk" ${checkedCols[i]?'checked':''}
+          onchange="toggleCol(${i},this.checked)">
+        <span>${fc.label}</span>
+      </label>
+    </th>`;
+  });
+  document.getElementById('new-board-head').innerHTML = hHtml + `</tr>`;
+
+  // tbody
+  document.getElementById('new-board-body').innerHTML = ROWS.map((r, ri) => {
+    let row = `<tr>
+      <td class="td-left stk0" style="color:var(--muted);font-size:11px">${ri+1}</td>
+      <td class="td-left stk1">${r.km[0].toLocaleString()}–${r.km[1].toLocaleString()} กม.</td>`;
+    FUEL_COLS.forEach((fc, ci) => {
+      const p = r.base * (1 + fc.delta) * (1 + markup / 100);
+      const hidden = !checkedCols[ci] ? ' col-hidden' : '';
+      row += `<td class="fc${ci}${hidden}${ci===fi?' active-cell':''}">${fmtB(p)}</td>`;
+    });
+    return row + `</tr>`;
+  }).join('');
+
+  updateColCount();
+}
+
+/* ══ TAB 3: COMPARISON STATE ════════════════════════════════════════ */
+let custPrices = new Array(ROWS.length).fill('');
+
+function updateCustPrice(ri, val) {
+  custPrices[ri] = val;
+  updateCompareRow(ri);
+  updateCompareSummary();
+}
+
+function updateCompareRow(ri) {
+  const {diesel, markup} = getState();
+  const fi = getFuelIdx(diesel);
+  const op = ourPrice(ROWS[ri], fi, markup);
+  const cv = custPrices[ri];
+  const cp = cv !== '' ? parseFloat(cv) : NaN;
+  const ok = !isNaN(cp) && cp > 0;
+  const db = ok ? cp - op : NaN;
+  const dp = ok ? db / op * 100 : NaN;
+
+  const dc = document.getElementById(`cdiff-${ri}`);
+  const pc = document.getElementById(`cpct-${ri}`);
+  if (dc) {
+    dc.textContent = ok ? (db>=0?'+':'')+fmtB(db) : '—';
+    dc.className   = `td-r fw7 ${ok ? (db>=0?'clr-g':'clr-r') : 'clr-m'}`;
+  }
+  if (pc) {
+    pc.textContent = ok ? fmtPct(dp) : '—';
+    pc.className   = `td-r fw7 ${ok ? (dp>=0?'clr-g':'clr-r') : 'clr-m'}`;
+  }
+}
+
+function updateCompareSummary() {
+  const {diesel, markup} = getState();
+  const fi = getFuelIdx(diesel);
+  const diffs = [];
+  ROWS.forEach((r, ri) => {
+    const v = custPrices[ri];
+    if (v === '') return;
+    const cp = parseFloat(v);
+    if (isNaN(cp) || cp <= 0) return;
+    const op = ourPrice(r, fi, markup);
+    diffs.push((cp - op) / op * 100);
+  });
+
+  const el = document.getElementById('cmp-summary');
+  if (!el) return;
+  if (diffs.length === 0) {
+    el.innerHTML = `<span style="color:var(--muted)">กรอกราคาลูกค้าอย่างน้อย 1 แถวเพื่อดูสรุป</span>`;
+    return;
+  }
+  const avg = diffs.reduce((a,b)=>a+b,0) / diffs.length;
+  const mn  = Math.min(...diffs);
+  const mx  = Math.max(...diffs);
+  el.innerHTML = `
+    <span style="color:var(--navy);font-weight:700">${diffs.length} แถว</span>
+    <span>· เฉลี่ย: <b class="${avg>=0?'clr-g':'clr-r'}">${fmtPct(avg)}</b></span>
+    <span>· ต่ำสุด: <b class="${mn>=0?'clr-g':'clr-r'}">${fmtPct(mn)}</b></span>
+    <span>· สูงสุด: <b class="${mx>=0?'clr-g':'clr-r'}">${fmtPct(mx)}</b></span>
+  `;
+}
+
+function updateCompareRef() {
+  const {diesel, markup} = getState();
+  const fi = getFuelIdx(diesel);
+  document.getElementById('cmp-ref-label').textContent =
+    `น้ำมัน ${diesel.toFixed(2)} บาท/ลิตร  (ช่วง ${FUEL_COLS[fi].label})` +
+    (markup !== 0 ? `  ·  markup ${markup>0?'+':''}${markup}%` : '');
+}
+
+/* ══ TAB 3: RENDER COMPARE ══════════════════════════════════════════ */
+function renderCompare() {
+  const {diesel, markup} = getState();
+  const fi = getFuelIdx(diesel);
+
+  updateCompareRef();
+
+  document.getElementById('cmp-body').innerHTML = ROWS.map((r, ri) => {
+    const op = ourPrice(r, fi, markup);
+    const cv = custPrices[ri];
+    const cp = cv !== '' ? parseFloat(cv) : NaN;
+    const ok = !isNaN(cp) && cp > 0;
+    const db = ok ? cp - op : NaN;
+    const dp = ok ? db / op * 100 : NaN;
+
+    return `<tr>
+      <td class="td-c" style="color:var(--muted);font-size:11px">${ri+1}</td>
+      <td>${r.km[0].toLocaleString()}–${r.km[1].toLocaleString()} กม.</td>
+      <td class="td-r fw6 clr-navy" id="cour-${ri}">${fmtB(op)}</td>
+      <td class="td-r" style="padding:4px 14px">
+        <input type="number" class="cmp-input" value="${cv}"
+          oninput="updateCustPrice(${ri},this.value)" placeholder="—">
+      </td>
+      <td id="cdiff-${ri}" class="td-r fw7 ${ok?(db>=0?'clr-g':'clr-r'):'clr-m'}">
+        ${ok ? (db>=0?'+':'')+fmtB(db) : '—'}
+      </td>
+      <td id="cpct-${ri}" class="td-r fw7 ${ok?(dp>=0?'clr-g':'clr-r'):'clr-m'}">
+        ${ok ? fmtPct(dp) : '—'}
+      </td>
+    </tr>`;
+  }).join('');
+
+  updateCompareSummary();
+}
+
+function refreshOurPriceCells() {
+  const {diesel, markup} = getState();
+  const fi = getFuelIdx(diesel);
+  updateCompareRef();
+  ROWS.forEach((r, ri) => {
+    const el = document.getElementById(`cour-${ri}`);
+    if (el) el.textContent = fmtB(ourPrice(r, fi, markup));
+    if (custPrices[ri] !== '') updateCompareRow(ri);
+  });
+  updateCompareSummary();
+}
+
+function clearCustPrices() {
+  custPrices.fill('');
+  document.querySelectorAll('.cmp-input').forEach(inp => inp.value = '');
+  for (let ri = 0; ri < ROWS.length; ri++) {
+    const dc = document.getElementById(`cdiff-${ri}`);
+    const pc = document.getElementById(`cpct-${ri}`);
+    if (dc) { dc.textContent='—'; dc.className='td-r fw7 clr-m'; }
+    if (pc) { pc.textContent='—'; pc.className='td-r fw7 clr-m'; }
+  }
+  updateCompareSummary();
+}
+
+/* ══ ACTIONS ═════════════════════════════════════════════════════════ */
+function onUpdate() {
+  const diesel = parseFloat(document.getElementById('fuel-price').value) || 29.5;
+  const fi = getFuelIdx(diesel);
+  document.getElementById('fuel-col-label').textContent =
+    `คอลัมน์: ${FUEL_COLS[fi].label} บาท/ลิตร`;
+
+  renderMatrix();
+  const tab = activeTabName();
+  if (tab === 'new-board') renderNewBoard();
+  if (tab === 'compare')   refreshOurPriceCells();
+}
+
+function buildBoard() { switchTab('new-board'); }
+
+/* ══ EXPORT PDF ══════════════════════════════════════════════════════ */
+async function exportPDF() {
+  if (typeof html2canvas === 'undefined') {
+    alert('html2canvas ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่'); return;
+  }
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert('jsPDF ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่'); return;
+  }
+
+  if (activeTabName() !== 'new-board') {
+    switchTab('new-board');
+    await new Promise(r => setTimeout(r, 100));
+  }
+
+  const {diesel} = getState();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+  const sel = checkedCols.filter(Boolean).length;
+  if (!sel) { alert('กรุณาเลือกอย่างน้อย 1 คอลัมน์'); return; }
+
+  document.getElementById('print-meta').textContent = `ราคาน้ำมันดีเซล: ${diesel.toFixed(2)} บาท/ลิตร`;
+  document.getElementById('print-date-meta').innerHTML = `วันที่: ${dateStr}<br>ประเภทรถ: 6 ล้อ<br>ราคายังไม่รวม VAT`;
+
+  // ── Convert logo to data URL to avoid "Tainted canvas" error ──────
+  // Images loaded normally taint the canvas; data URLs don't.
+  let logoDataUrl = null;
+  try {
+    const resp = await fetch('../TRR999logo.png');
+    const blob = await resp.blob();
+    logoDataUrl = await new Promise((res, rej) => {
+      const rd = new FileReader();
+      rd.onloadend = () => res(rd.result);
+      rd.onerror   = rej;
+      rd.readAsDataURL(blob);
+    });
+  } catch(e) { /* fetch failed — logo will be hidden during capture */ }
+
+  // ── Prep DOM for capture ──────────────────────────────────────────
+  const wrap     = document.getElementById('new-board-wrap');
+  const pHdr     = document.querySelector('#tab-new-board .print-header');
+  const tbar     = document.getElementById('new-board-toolbar');
+  const chks     = [...document.querySelectorAll('#new-board-table .col-chk')];
+  const phImgs   = [...document.querySelectorAll('#tab-new-board .ph-logo img')];
+  const origWrap = wrap.style.cssText;
+  const origSrcs = phImgs.map(i => i.src);
+
+  wrap.style.cssText = 'overflow:visible;width:max-content;background:#fff';
+  pHdr.style.display = 'flex';
+  tbar.style.display = 'none';
+  chks.forEach(c => c.style.visibility = 'hidden');
+  phImgs.forEach(img => {
+    if (logoDataUrl) img.src = logoDataUrl;   // clean data URL → no taint
+    else             img.style.display = 'none'; // fallback: hide
+  });
+
+  await new Promise(r => setTimeout(r, 300));
+
+  const restore = () => {
+    wrap.style.cssText = origWrap;
+    pHdr.style.display = '';
+    tbar.style.display = '';
+    chks.forEach(c => c.style.visibility = '');
+    phImgs.forEach((img, i) => { img.src = origSrcs[i]; img.style.display = ''; });
+  };
+
+  // ── Capture ───────────────────────────────────────────────────────
+  let canvas;
+  try {
+    canvas = await html2canvas(document.getElementById('tab-new-board'), {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: false,
+      allowTaint: false,
+      logging: false,
+      imageTimeout: 8000,
+      onclone: (doc) => {
+        doc.querySelectorAll('.stk0,.stk1').forEach(el => {
+          el.style.position = 'static';
+          el.style.boxShadow = 'none';
+        });
+      },
+    });
+  } catch(e) {
+    restore();
+    alert('html2canvas error: ' + (e.message || e));
+    return;
+  }
+
+  restore();
+  if (!canvas || canvas.width < 10) { alert('แคปตารางไม่สำเร็จ'); return; }
+
+  // ── Build PDF ─────────────────────────────────────────────────────
+  try {
+    const PAD = 8, A4W = 297, A4H = 210;
+    const uw = A4W - PAD * 2, uh = A4H - PAD * 2;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+    const pxPerMm = canvas.width / uw;
+    const slicePx = Math.round(uh * pxPerMm);
+
+    for (let srcY = 0, pg = 0; srcY < canvas.height; srcY += slicePx, pg++) {
+      if (pg) doc.addPage();
+      const h = Math.min(slicePx, canvas.height - srcY);
+      const s = document.createElement('canvas');
+      s.width = canvas.width; s.height = h;
+      s.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, h, 0, 0, canvas.width, h);
+      doc.addImage(s.toDataURL('image/jpeg', 0.93), 'JPEG', PAD, PAD, uw, h / pxPerMm);
+    }
+
+    const ds = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+    doc.save(`กระดานราคา_TRR999_${ds}.pdf`);
+  } catch(e) {
+    alert('jsPDF error: ' + (e.message || e));
+  }
+}
+
+/* ══ EXPORT EXCEL — New Board ════════════════════════════════════════ */
+function exportExcel() {
+  const {diesel, markup} = getState();
+  const fi = getFuelIdx(diesel);
+  const selCols = checkedCols.map((v,i)=>v?i:-1).filter(i=>i>=0);
+  if (selCols.length === 0) { alert('กรุณาเลือกอย่างน้อย 1 คอลัมน์'); return; }
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+  const aoa = [
+    ['บริษัท ธรารินทร์ 999 ขนส่ง จำกัด — กระดานราคาค่าขนส่ง รถ 6 ล้อ 5 เมตร'],
+    [`วันที่: ${dateStr}  |  น้ำมัน: ${diesel.toFixed(2)} บาท/ลิตร` +
+     (markup!==0 ? `  |  ปรับราคา ${markup>0?'+':''}${markup}%` : '')],
+    [],
+    ['#', 'ระยะทาง (กม.)', ...selCols.map(ci => FUEL_COLS[ci].label)],
+    ...ROWS.map((r, ri) => [
+      ri+1,
+      `${r.km[0]}–${r.km[1]} กม.`,
+      ...selCols.map(ci => Math.round(r.base*(1+FUEL_COLS[ci].delta)*(1+markup/100))),
+    ]),
+  ];
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:5},{wch:20},...selCols.map(()=>({wch:11}))];
+  ws['!merges'] = [
+    {s:{r:0,c:0},e:{r:0,c:selCols.length+1}},
+    {s:{r:1,c:0},e:{r:1,c:selCols.length+1}},
+  ];
+  ws['!freeze'] = {xSplit:2,ySplit:4,topLeftCell:'C5',activePane:'bottomRight',state:'frozen'};
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'กระดานราคาใหม่');
+  const ds = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+  XLSX.writeFile(wb, `กระดานราคา_TRR999_${ds}.xlsx`);
+}
+
+/* ══ EXPORT EXCEL — Comparison ══════════════════════════════════════ */
+function exportCompareExcel() {
+  const {diesel, markup} = getState();
+  const fi = getFuelIdx(diesel);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+
+  const rows = [];
+  ROWS.forEach((r, ri) => {
+    const op = ourPrice(r, fi, markup);
+    const cv = custPrices[ri];
+    const cp = cv !== '' ? parseFloat(cv) : NaN;
+    const ok = !isNaN(cp) && cp > 0;
+    const db = ok ? cp - op : '';
+    const dp = ok ? parseFloat(((cp-op)/op*100).toFixed(1)) : '';
+    rows.push([ri+1, `${r.km[0]}–${r.km[1]} กม.`, op, ok?cp:'', db, dp]);
+  });
+
+  const aoa = [
+    ['บริษัท ธรารินทร์ 999 ขนส่ง จำกัด — เปรียบเทียบราคากับลูกค้า'],
+    [`วันที่: ${dateStr}  |  อ้างอิง: น้ำมัน ${diesel.toFixed(2)} บาท/ลิตร (ช่วง ${FUEL_COLS[fi].label})`+
+     (markup?`  |  markup ${markup>0?'+':''}${markup}%`:'')],
+    [],
+    ['#','ระยะทาง (กม.)','ราคาของเรา (บาท)','ราคาลูกค้า (บาท)','ต่าง (บาท)','ต่าง (%)'],
+    ...rows,
+  ];
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:5},{wch:18},{wch:18},{wch:18},{wch:14},{wch:10}];
+  ws['!merges'] = [
+    {s:{r:0,c:0},e:{r:0,c:5}},
+    {s:{r:1,c:0},e:{r:1,c:5}},
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'เปรียบเทียบ');
+  const ds = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+  XLSX.writeFile(wb, `เปรียบเทียบราคา_TRR999_${ds}.xlsx`);
+}
+
+/* ══ INIT ════════════════════════════════════════════════════════════ */
+document.getElementById('data-date').textContent =
+  new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+onUpdate();
+</script>
+</body>
+</html>

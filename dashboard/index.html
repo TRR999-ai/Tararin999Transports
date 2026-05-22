@@ -153,6 +153,9 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
       <span style="font-size:20px">📊</span>
       <span class="tb-title">Executive Dashboard</span>
       <span class="tb-period" id="period-label">— ยังไม่มีข้อมูล —</span>
+      <select id="month-select" onchange="switchMonth(this.value)"
+        style="display:none;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:4px 10px;font-family:inherit;font-size:12px;cursor:pointer;margin-left:4px;">
+      </select>
     </div>
     <div class="tb-right">
       <a class="btn-back" href="../index.html">← หน้าแรก</a>
@@ -322,13 +325,13 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
 <script>
 // ─── State ────────────────────────────────────────────────────────────────
 let ST = {
-  excel: { summary:[], transactions:[], meta:{} },  // from Excel
+  statements:  {},   // 'MM/YYYY' → { summary, transactions, meta }
+  activeMonth: '',
+  excel: { summary:[], transactions:[], meta:{} },  // active statement (derived)
   trips: [],                                         // from GAS Sheet
   gasUrl: localStorage.getItem('dash_gas_url') || '',
 };
 let CHARTS = {};
-// Backwards-compat alias
-const getExcel = () => ST.excel;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 const fmt  = n => Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -405,6 +408,42 @@ function getStatementMonth() {
   return p.length === 3 ? p[1] + '/' + p[2] : '';
 }
 
+// ─── Month key helpers ────────────────────────────────────────────────────
+function getMonthKey(statementDate) {
+  if (!statementDate) return '';
+  const p = String(statementDate).split('/');
+  return p.length === 3 ? p[1] + '/' + p[2] : '';
+}
+
+function updateMonthSelect() {
+  const sel = document.getElementById('month-select');
+  const months = Object.keys(ST.statements).sort((a, b) => {
+    const [ma, ya] = a.split('/'); const [mb, yb] = b.split('/');
+    return new Date(ya, ma - 1) - new Date(yb, mb - 1);
+  });
+  if (!months.length) { sel.style.display = 'none'; return; }
+  sel.style.display = '';
+  sel.innerHTML = months.map(m =>
+    `<option value="${m}" ${m === ST.activeMonth ? 'selected' : ''}>${m}</option>`
+  ).join('');
+}
+
+function switchMonth(month) {
+  if (!month || !ST.statements[month]) return;
+  ST.activeMonth = month;
+  ST.excel = ST.statements[month];
+  localStorage.setItem('trr_dashboard_active', month);
+  // Clear cached trips so they reload for this month
+  ST.trips = [];
+  localStorage.removeItem('dash_trips');
+  document.getElementById('trip-kpi-row').style.display = 'none';
+  document.getElementById('variance-row').style.display  = 'none';
+  setSheetBtn(false);
+  setGasStatus('เปลี่ยนเดือน — กด 🔄 Refresh เพื่อโหลดเที่ยวรถใหม่', '');
+  renderAll();
+  toast('📅 เปลี่ยนเป็นเดือน ' + month);
+}
+
 // ─── File handler ─────────────────────────────────────────────────────────
 function handleFile(file) {
   if (!file) return;
@@ -415,12 +454,17 @@ function handleFile(file) {
       const wb = XLSX.read(e.target.result, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(ws, { header:1, defval:null, raw:true });
-      ST.excel = parseStatement(data);
-      try { localStorage.setItem('trr_dashboard_excel', JSON.stringify(ST.excel)); } catch(_) {}
+      const parsed = parseStatement(data);
+      const key = getMonthKey(parsed.meta.statementDate) || 'imported';
+      ST.statements[key] = parsed;
+      ST.activeMonth = key;
+      ST.excel = parsed;
+      try { localStorage.setItem('trr_dashboard_statements', JSON.stringify(ST.statements)); } catch(_) {}
+      try { localStorage.setItem('trr_dashboard_active', key); } catch(_) {}
+      updateMonthSelect();
       renderAll();
-      // Re-render variance if trip data already loaded
       if (ST.trips.length > 0) renderVariance();
-      toast('✅ โหลด ' + ST.excel.summary.length + ' รถ, ' + ST.excel.transactions.length + ' รายการ');
+      toast('✅ โหลด ' + parsed.summary.length + ' รถ, ' + parsed.transactions.length + ' รายการ (' + key + ')');
     } catch(err) {
       toast('❌ อ่านไฟล์ไม่สำเร็จ: ' + err.message);
       console.error(err);
@@ -816,16 +860,46 @@ function renderTable() {
     document.getElementById('gas-url-input').value = ST.gasUrl;
   }
 
-  // Restore Excel data
+  // Restore multi-statements
   try {
-    const exSaved = localStorage.getItem('trr_dashboard_excel');
-    if (exSaved) {
-      ST.excel = JSON.parse(exSaved);
-      if (ST.excel.summary && ST.excel.summary.length > 0) {
-        renderAll();
-      }
-    }
+    const saved = localStorage.getItem('trr_dashboard_statements');
+    if (saved) ST.statements = JSON.parse(saved);
   } catch(_) {}
+
+  // Migrate old single-statement format
+  if (!Object.keys(ST.statements).length) {
+    try {
+      const old = localStorage.getItem('trr_dashboard_excel');
+      if (old) {
+        const parsed = JSON.parse(old);
+        if (parsed.summary && parsed.summary.length > 0) {
+          const key = getMonthKey(parsed.meta?.statementDate) || 'imported';
+          ST.statements[key] = parsed;
+          localStorage.setItem('trr_dashboard_statements', JSON.stringify(ST.statements));
+          localStorage.removeItem('trr_dashboard_excel');
+        }
+      }
+    } catch(_) {}
+  }
+
+  // Set active month
+  const months = Object.keys(ST.statements);
+  const savedActive = localStorage.getItem('trr_dashboard_active');
+  if (savedActive && ST.statements[savedActive]) {
+    ST.activeMonth = savedActive;
+  } else if (months.length) {
+    ST.activeMonth = months.sort((a, b) => {
+      const [ma, ya] = a.split('/'); const [mb, yb] = b.split('/');
+      return new Date(ya, ma - 1) - new Date(yb, mb - 1);
+    }).pop();
+  }
+
+  updateMonthSelect();
+
+  if (ST.activeMonth && ST.statements[ST.activeMonth]) {
+    ST.excel = ST.statements[ST.activeMonth];
+    renderAll();
+  }
 
   // Restore trip data
   try {
@@ -838,15 +912,13 @@ function renderTable() {
         renderTripKPIs();
         if (ST.excel.summary.length > 0) renderVariance();
         renderTable();
-        toast('📂 โหลด cache: Statement + ' + ST.trips.length + ' เที่ยว');
+        if (months.length) toast('📂 โหลด cache: ' + months.length + ' เดือน + ' + ST.trips.length + ' เที่ยว');
         return;
       }
     }
   } catch(_) {}
 
-  if (ST.excel.summary && ST.excel.summary.length > 0) {
-    toast('📂 โหลด Statement จาก cache');
-  }
+  if (months.length) toast('📂 โหลด Statement ' + months.length + ' เดือน จาก cache');
 })();
 </script>
 </body>
