@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TARARIN 999 — User Portal</title>
+<title>ธรารินทร์ 999 ขนส่ง จำกัด — User Portal</title>
+<link rel="icon" type="image/png" href="./TRR999logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -53,10 +54,11 @@ body {
   width: 60px; height: 60px;
   border-radius: 50%;
   border: 2.5px solid var(--gold);
-  background: rgba(245,166,35,0.1);
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
   display: flex; align-items: center; justify-content: center;
-  font-size: 28px;
 }
+.sb-icon img { width: 100%; height: 100%; object-fit: cover; }
 .sb-name {
   font-size: 13px; font-weight: 700;
   color: var(--gold);
@@ -298,10 +300,11 @@ body {
   width: 52px; height: 52px;
   border-radius: 50%;
   background: var(--navy);
+  overflow: hidden;
   display: flex; align-items: center; justify-content: center;
-  font-size: 24px;
   border: 2px solid rgba(27,39,112,0.3);
 }
+.brand-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
 .brand-name-big {
   font-size: 30px; font-weight: 700;
   color: var(--navy);
@@ -348,6 +351,45 @@ body {
   font-weight: 500;
   letter-spacing: 0.3px;
 }
+
+/* ══ Contact Modal ══════════════════════════════════════════════════════════ */
+#contact-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  align-items: center; justify-content: center;
+}
+#contact-overlay.show { display: flex; }
+.contact-box {
+  background: #fff;
+  border-radius: 18px;
+  padding: 32px 36px 28px;
+  max-width: 400px; width: 92%;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+  position: relative;
+}
+.contact-box h2 {
+  font-size: 16px; font-weight: 700;
+  color: var(--navy); margin-bottom: 18px;
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 2px solid var(--gold); padding-bottom: 10px;
+}
+.contact-row {
+  display: flex; gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  font-size: 13.5px; color: #333;
+  line-height: 1.5;
+}
+.contact-row .ci { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.contact-row strong { color: var(--navy); display: block; font-size: 11px; letter-spacing: 0.5px; }
+.contact-close {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: none; font-size: 22px;
+  cursor: pointer; color: #999; line-height: 1;
+}
+.contact-close:hover { color: var(--navy); }
 </style>
 </head>
 <body>
@@ -355,9 +397,9 @@ body {
 <!-- ══ Sidebar ══════════════════════════════════════════════════════════════ -->
 <aside id="sidebar">
   <div class="sb-logo">
-    <div class="sb-icon">⛽</div>
+    <div class="sb-icon"><img src="./TRR999logo.png" alt="TRR999"></div>
     <div class="sb-name">TARARIN 999</div>
-    <div class="sb-sub">TRANSPORT CO.,LTD.<br>ตารินทร์ 999 ขนส่ง</div>
+    <div class="sb-sub">TRANSPORT CO.,LTD.<br>ธรารินทร์ 999 ขนส่ง จำกัด</div>
   </div>
 
   <nav class="sb-nav">
@@ -365,11 +407,11 @@ body {
       <span class="nav-icon">🏠</span>
       <span>Portal</span>
     </div>
-    <a class="nav-item" href="../project1/transport.html" target="_blank">
+    <a class="nav-item" href="./project1/transport.html" target="_blank">
       <span class="nav-icon">🚚</span>
       <span>งานขนส่ง</span>
     </a>
-    <a class="nav-item" href="../project2/index.html">
+    <a class="nav-item" href="./project2/index.html">
       <span class="nav-icon">💳</span>
       <span>Fleet Card</span>
     </a>
@@ -411,7 +453,7 @@ body {
       <div class="cards-row">
 
         <!-- ── งานขนส่ง ── -->
-        <a class="portal-card" href="../project1/transport.html" target="_blank">
+        <a class="portal-card" href="./project1/transport.html" target="_blank">
           <div class="card-icon-area">
             <div class="card-icon-circle">🚚</div>
           </div>
@@ -420,7 +462,7 @@ body {
         </a>
 
         <!-- ── Fleet Card ── -->
-        <a class="portal-card" href="../project2/index.html">
+        <a class="portal-card" href="./project2/index.html">
           <div class="card-icon-area">
             <div class="card-icon-circle">💳</div>
           </div>
@@ -442,22 +484,54 @@ body {
       <!-- ── Brand section ── -->
       <div class="brand-section">
         <div class="brand-logo-row">
-          <div class="brand-logo-icon">⛽</div>
+          <div class="brand-logo-icon"><img src="./TRR999logo.png" alt="TRR999"></div>
           <div class="brand-name-big">TARARIN 999</div>
         </div>
-        <div class="brand-tagline">ส่งความสำเร็จ สู่ธุรกิจคุณ</div>
-        <button class="brand-contact-btn">CONTACT US</button>
+        <div class="brand-tagline">ธรารินทร์ 999 ขนส่ง จำกัด — ส่งความสำเร็จ สู่ธุรกิจคุณ</div>
+        <button class="brand-contact-btn" onclick="document.getElementById('contact-overlay').classList.add('show')">CONTACT US</button>
         <div class="brand-icons">
-          <div class="brand-icon-btn" title="Facebook">📘</div>
-          <div class="brand-icon-btn" title="LINE">💬</div>
-          <div class="brand-icon-btn" title="Email">✉️</div>
+          <a class="brand-icon-btn" title="โทรศัพท์" href="tel:0857613929">📞</a>
+          <a class="brand-icon-btn" title="Email" href="mailto:Pu_kanittha2529@hotmail.co.th">✉️</a>
+          <div class="brand-icon-btn" title="ที่อยู่" onclick="document.getElementById('contact-overlay').classList.add('show')">🏢</div>
         </div>
       </div>
 
-      <p class="portal-footer">©2026 TARARIN 999 TRANSPORT CO.,LTD.</p>
+      <p class="portal-footer">©2026 บริษัท ธรารินทร์ 999 ขนส่ง จำกัด — TARARIN 999 TRANSPORT CO.,LTD.</p>
     </div>
   </div>
 
 </div>
+
+<!-- ══ Contact Modal ════════════════════════════════════════════════════════ -->
+<div id="contact-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="contact-box">
+    <button class="contact-close" onclick="document.getElementById('contact-overlay').classList.remove('show')">×</button>
+    <h2>📞 ติดต่อสมัครงาน</h2>
+    <div class="contact-row">
+      <span class="ci">📞</span>
+      <div>
+        <strong>โทรศัพท์</strong>
+        <a href="tel:0857613929" style="color:#1B2770;font-weight:600;text-decoration:none;">085-761-3929</a> คุณธรา
+      </div>
+    </div>
+    <div class="contact-row">
+      <span class="ci">📩</span>
+      <div>
+        <strong>อีเมล</strong>
+        <a href="mailto:Pu_kanittha2529@hotmail.co.th" style="color:#1B2770;font-weight:600;text-decoration:none;">Pu_kanittha2529@hotmail.co.th</a>
+      </div>
+    </div>
+    <div class="contact-row">
+      <span class="ci">🏢</span>
+      <div>
+        <strong>สำนักงาน</strong>
+        บริษัท ธรารินทร์ 999 ขนส่ง จำกัด<br>
+        888/4 ม.2 ต.คลองจิก อ.บางปะอิน<br>
+        จ.พระนครศรีอยุธยา 13160
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

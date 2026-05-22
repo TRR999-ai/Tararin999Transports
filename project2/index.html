@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleet Card Batch Update</title>
+
+  <!-- Handsontable 6.2.2 — MIT licensed, free for all use -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@6.2.2/dist/handsontable.full.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/handsontable@6.2.2/dist/handsontable.full.min.js"></script>
+  <!-- SheetJS for xlsx export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sarabun', 'Noto Sans Thai', Arial, sans-serif;
+      font-size: 14px;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Header ─── */
+    #header {
+      background: #1B2770;
+      border-bottom: 3px solid #F5A623;
+      color: #fff;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: 0 2px 4px rgba(0,0,0,.25);
+    }
+    #header .logo { font-size: 22px; font-weight: 900; letter-spacing: -1px; color: #F5A623; }
+    #header h1   { font-size: 15px; font-weight: 600; line-height: 1.3; }
+    #header small { display: block; font-size: 11px; opacity: .75; font-weight: 400; }
+
+    /* ─── Stats bar ─── */
+    #stats-bar {
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 6px 16px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+    .stat { color: #555; }
+    .stat b { color: #1B2770; }
+
+    /* ─── Instructions ─── */
+    #instructions {
+      margin: 8px 8px 0;
+      background: #EEF2FF;
+      border-left: 4px solid #F5A623;
+      padding: 7px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #1B2770;
+      line-height: 1.5;
+    }
+    #instructions code {
+      background: #dde3ff;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    /* ─── Warning bar (hidden by default) ─── */
+    #warning-bar {
+      display: none;
+      margin: 6px 8px 0;
+      background: #fff3e0;
+      border-left: 4px solid #f57c00;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #e65100;
+    }
+
+    /* ─── Table container ─── */
+    #table-wrap {
+      margin: 8px;
+      flex: 1;
+      overflow: auto;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.12);
+      background: #fff;
+      max-height: calc(100vh - 210px);
+    }
+    /* mobile: ยืดตารางเต็ม ให้ page scroll แทน HOT scroll */
+    @media (max-width: 639px) {
+      #table-wrap {
+        max-height: none;
+        overflow: visible;
+      }
+    }
+    #hot-container { min-width: 100%; }
+
+    /* ─── Handsontable overrides ─── */
+    .handsontable thead th {
+      background: #1B2770 !important;
+      color: #fff !important;
+      font-weight: 600;
+    }
+    .handsontable .htReadOnly {
+      background: #f5f5f5 !important;
+      color: #444;
+    }
+    .handsontable td.cell-warn { background: #fff3e0 !important; }
+    .handsontable td.cell-limit { background: #e8f5e9 !important; font-weight: 600; color: #1b5e20; }
+    .handsontable td.cell-limit-default { color: #999; }
+
+    /* ─── Export bar ─── */
+    #export-bar {
+      position: sticky;
+      bottom: 0;
+      background: #fff;
+      border-top: 1px solid #e0e0e0;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      z-index: 100;
+    }
+    #status-msg { font-size: 12px; color: #666; flex: 1; }
+    #status-msg.error { color: #c62828; }
+    #status-msg.ok    { color: #2e7d32; }
+
+    #export-btn {
+      background: #1b5e20;
+      color: #fff;
+      border: none;
+      padding: 9px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s;
+    }
+    #export-btn:hover:not(:disabled) { background: #2e7d32; }
+    #export-btn:disabled { background: #9e9e9e; cursor: default; }
+
+    /* ─── Paste button bar ─── */
+    #paste-bar {
+      margin: 6px 8px 0;
+    }
+    #paste-btn {
+      background: #EEF2FF;
+      color: #1B2770;
+      border: 1.5px solid rgba(245,166,35,0.5);
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+    #paste-btn:active { background: #dde3ff; }
+
+    /* ─── Paste modal ─── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 8000;
+      padding: 16px;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-box {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.25);
+    }
+    .modal-box h3 { font-size: 16px; font-weight: 700; color: #1B2770; margin-bottom: 6px; }
+    .modal-box p  { font-size: 13px; color: #555; margin-bottom: 10px; line-height: 1.5; }
+    #paste-area {
+      width: 100%;
+      height: 180px;
+      border: 1.5px solid rgba(245,166,35,0.4);
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 16px;
+      font-family: monospace;
+      resize: vertical;
+    }
+    #paste-area:focus { outline: none; border-color: #F5A623; }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      justify-content: flex-end;
+    }
+    .modal-actions button {
+      padding: 9px 22px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+    #modal-cancel { background: #f5f5f5; color: #444; }
+    #modal-ok     { background: #1b5e20; color: #fff; }
+
+    /* ─── Loading overlay ─── */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 5px solid #e0e0e0;
+      border-top-color: #1B2770;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading p { margin-top: 14px; color: #555; font-size: 14px; }
+    #loading.hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p>กำลังโหลดข้อมูล...</p>
+</div>
+
+<!-- Header -->
+<div id="header">
+  <div class="logo">ttb</div>
+  <div>
+    <small>Fleet Card Management</small>
+    <h1>Batch Update — วงเงินบัตรน้ำมัน</h1>
+  </div>
+  <a href="../index.html" style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.35);border-radius:8px;color:#fff;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;">&#8592; หน้าแรก</a>
+</div>
+
+<!-- Stats -->
+<div id="stats-bar">
+  <span class="stat">บัตรทั้งหมด <b id="s-total">—</b></span>
+  <span class="stat">กรอกแล้ว <b id="s-filled">—</b></span>
+  <span class="stat">ยังเป็น default (1) <b id="s-default">—</b></span>
+</div>
+
+<!-- Instructions -->
+<div id="instructions">
+  💡 <b>คอมพิวเตอร์:</b> คลิกช่อง <b>วงเงิน</b> แถวแรก → <code>Ctrl+V</code><br>
+  📱 <b>มือถือ:</b> กดปุ่ม <b>📋 วางวงเงิน</b> → วางตัวเลข → กด ตกลง<br>
+  ค่า <b>0</b> หรือ <b>ว่าง</b> → เปลี่ยนเป็น <b>1</b> อัตโนมัติ
+</div>
+
+<!-- Paste button -->
+<div id="paste-bar">
+  <button id="paste-btn" onclick="openPasteModal()">📋 วางวงเงิน (คัดลอกทีละบรรทัด)</button>
+</div>
+
+<!-- Warning bar -->
+<div id="warning-bar"></div>
+
+<!-- Paste modal -->
+<div id="paste-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h3>📋 วางวงเงิน</h3>
+    <p>วางตัวเลขวงเงิน <b>ทีละบรรทัด</b> ตามลำดับบัตร<br>
+       (คัดลอกจาก Excel หรือ Spreadsheet แล้ววางตรงนี้)</p>
+    <textarea id="paste-area" placeholder="เช่น&#10;500&#10;1000&#10;2000&#10;1500&#10;..."></textarea>
+    <div class="modal-actions">
+      <button id="modal-cancel" onclick="closePasteModal()">ปิด</button>
+      <button id="modal-clear" onclick="clearPasteArea()" style="background:#fff3e0;color:#e65100;border:1.5px solid #ffcc80;padding:9px 16px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">ล้าง</button>
+      <button id="modal-ok" onclick="applyPastedLimits()">ตกลง</button>
+    </div>
+  </div>
+</div>
+
+<!-- Handsontable -->
+<div id="table-wrap">
+  <div id="hot-container"></div>
+</div>
+
+<!-- Export bar -->
+<div id="export-bar">
+  <span id="status-msg"></span>
+  <button id="export-btn" disabled>⬇ Export to Excel (.xlsx)</button>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────
+var hot = null;
+var templateBase64 = null;
+
+// ─────────────────────────────────────────────
+// Column definitions (mobile: วงเงิน อยู่ col 3 เข้าถึงได้ทันที)
+// ─────────────────────────────────────────────
+var isMobile = window.innerWidth < 640;
+
+var COL_DEFS = isMobile ? [
+  { data: 'no',         title: '#',                  readOnly: true,  width: 36  },
+  { data: 'cardNumber', title: 'หมายเลขบัตร',        readOnly: true,  width: 145 },
+  { data: 'limit',      title: 'วงเงิน (บาท/เดือน)', type: 'numeric', width: 130 },
+  { data: 'name',       title: 'ชื่อพนักงาน',        readOnly: true,  width: 150 },
+  { data: 'department', title: 'แผนก',                readOnly: true,  width: 90  }
+] : [
+  { data: 'no',         title: 'ลำดับ',              readOnly: true,  width: 60  },
+  { data: 'cardNumber', title: 'หมายเลขบัตร',        readOnly: true,  width: 175 },
+  { data: 'name',       title: 'ชื่อพนักงาน',        readOnly: true,  width: 210 },
+  { data: 'department', title: 'แผนก',                readOnly: true,  width: 130 },
+  { data: 'limit',      title: 'วงเงิน (บาท/เดือน)', type: 'numeric', width: 155 }
+];
+
+// ─────────────────────────────────────────────
+// Init table
+// ─────────────────────────────────────────────
+function initTable(data) {
+  var container = document.getElementById('hot-container');
+
+  hot = new Handsontable(container, {
+    data: data,
+    columns: COL_DEFS,
+    colHeaders: COL_DEFS.map(function(c) { return c.title; }),
+    rowHeaders: false,
+    stretchH: 'none',
+    autoColumnSize: false,
+    manualColumnResize: true,
+    height: undefined,
+    fixedColumnsLeft: isMobile ? 2 : 3,    // mobile: pin # + หมายเลขบัตร เท่านั้น
+    contextMenu: false,
+    allowInsertRow: false,
+    allowRemoveRow: false,
+    allowInsertColumn: false,
+    allowRemoveColumn: false,
+
+    // Cell renderer for visual feedback
+    cells: function(row, col) {
+      var props = {};
+      var rowData = hot ? hot.getSourceDataAtRow(row) : null;
+      if (!rowData) return props;
+
+      var nameCol  = isMobile ? 3 : 2;
+      var limitCol = isMobile ? 2 : 4;
+      if (col === nameCol && rowData.name && rowData.name.length > 30) {
+        props.className = 'cell-warn';
+      }
+      if (col === limitCol) {
+        props.className = rowData.limit === 1 ? 'cell-limit-default' : 'cell-limit';
+      }
+      return props;
+    },
+
+    // 0 / empty → 1 rule
+    afterChange: function(changes, source) {
+      if (!changes || source === '_auto0to1') return;
+      var self = this;
+      changes.forEach(function(change) {
+        if (change[1] !== 'limit') return;
+        var val = change[3];
+        var num = parseFloat(val);
+        if (val === null || val === '' || val === undefined || num === 0 || isNaN(num)) {
+          self.setDataAtRowProp(change[0], 'limit', 1, '_auto0to1');
+        }
+      });
+      updateStats();
+    },
+
+    afterInit: function() {
+      updateStats();
+      checkNameWarnings();
+      document.getElementById('export-btn').disabled = false;
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// Stats
+// ─────────────────────────────────────────────
+function updateStats() {
+  if (!hot) return;
+  var data   = hot.getSourceData();
+  var total   = data.length;
+  var def     = data.filter(function(r) { return r.limit <= 1; }).length;
+  var filled  = total - def;
+  document.getElementById('s-total').textContent   = total;
+  document.getElementById('s-filled').textContent  = filled;
+  document.getElementById('s-default').textContent = def;
+}
+
+// ─────────────────────────────────────────────
+// Name length warning
+// ─────────────────────────────────────────────
+function checkNameWarnings() {
+  if (!hot) return;
+  var data = hot.getSourceData();
+  var long = data.filter(function(r) { return r.name && r.name.length > 30; });
+  var bar  = document.getElementById('warning-bar');
+  if (long.length > 0) {
+    bar.style.display = 'block';
+    bar.textContent = '⚠ ชื่อผู้ถือบัตรเกิน 30 ตัวอักษร ' + long.length + ' รายการ (บัตร: ' +
+      long.map(function(r) { return r.cardNumber; }).join(', ') + ') — ธนาคารจะปฏิเสธแถวเหล่านี้';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+// ─────────────────────────────────────────────
+// Status message
+// ─────────────────────────────────────────────
+function setStatus(msg, type) {
+  var el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className   = type || '';
+}
+
+// ─────────────────────────────────────────────
+// Export
+// ─────────────────────────────────────────────
+function exportToExcel() {
+  var btn = document.getElementById('export-btn');
+  btn.disabled = true;
+  setStatus('กำลังสร้างไฟล์...');
+
+  function doExport(b64) {
+    try {
+      // Decode base64 → ArrayBuffer
+      var bStr  = atob(b64);
+      var bytes = new Uint8Array(bStr.length);
+      for (var i = 0; i < bStr.length; i++) bytes[i] = bStr.charCodeAt(i);
+
+      var wb = XLSX.read(bytes, { type: 'array', cellStyles: true });
+      var ws = wb.Sheets['FleetCard'];
+      if (!ws) throw new Error('ไม่พบ Sheet "FleetCard" ใน Template');
+
+      var data     = hot.getSourceData();
+      var ROW_START = 7;   // Bank requirement: data begins at row 7
+
+      // ── Column letter map (Excel 1-indexed columns → letter) ──
+      // A=1 B=2 C=3 D=4 I=9 AB=28 AH=34
+      function col2ltr(n) {
+        var s = '';
+        while (n > 0) {
+          var r = (n - 1) % 26;
+          s = String.fromCharCode(65 + r) + s;
+          n = Math.floor((n - 1) / 26);
+        }
+        return s;
+      }
+
+      function setCell(colIdx, rowNum, val, type) {
+        var addr = col2ltr(colIdx) + rowNum;
+        ws[addr] = { v: val, t: type || (typeof val === 'number' ? 'n' : 's') };
+      }
+
+      data.forEach(function(row, i) {
+        if (!row.cardNumber) return;
+        var r   = ROW_START + i;
+        var lim = Number(row.limit) || 1;
+
+        setCell(1,  r, row.no);                   // A  — ลำดับ
+        setCell(2,  r, String(row.cardNumber));    // B  — หมายเลขบัตร
+        setCell(3,  r, String(row.name));          // C  — ชื่อผู้ถือบัตร
+        if (row.department) setCell(4, r, String(row.department)); // D — แผนก
+        setCell(9,  r, 'X');                       // I  — Product Type: All Fuel
+        setCell(28, r, 'X');                       // AB — Unit: บาท/THB
+        setCell(30, r, 'X');                       // AD — Baht unit (activate THB limit section)
+        setCell(34, r, lim);                       // AH — Per Month (THB)
+        setCell(50, r, 'N');                       // AX — Odometer (N = ไม่ระบุ)
+      });
+
+      // Update worksheet ref to cover all added rows
+      var rng = XLSX.utils.decode_range(ws['!ref'] || 'A1:AX10');
+      var lastRowIdx = ROW_START + data.length - 1; // 1-indexed Excel row
+      if (lastRowIdx > rng.e.r + 1) rng.e.r = lastRowIdx - 1; // decode_range is 0-indexed
+      ws['!ref'] = XLSX.utils.encode_range(rng);
+
+      // Download
+      var d    = new Date();
+      var pad  = function(n) { return String(n).padStart(2, '0'); };
+      var date = d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate());
+      var name = 'FleetCard_' + date + '.xlsx';
+      XLSX.writeFile(wb, name, { bookSST: true });
+
+      setStatus('✓ ดาวน์โหลดแล้ว: ' + name, 'ok');
+    } catch (e) {
+      setStatus('Export ไม่สำเร็จ: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  if (templateBase64) {
+    doExport(templateBase64);
+  } else {
+    google.script.run
+      .withSuccessHandler(function(b64) {
+        templateBase64 = b64;
+        doExport(b64);
+      })
+      .withFailureHandler(function(err) {
+        setStatus('โหลด Template ไม่สำเร็จ: ' + err.message, 'error');
+        btn.disabled = false;
+      })
+      .getTemplateBase64();
+  }
+}
+
+// ─────────────────────────────────────────────
+// Mock google.script.run for local preview
+// ─────────────────────────────────────────────
+if (typeof google === 'undefined') {
+  var MOCK_DATA = [
+    { no:1, cardNumber:'6000111122223333', name:'SOMCHAI JAIDEE',      department:'LOGISTICS', limit:1 },
+    { no:2, cardNumber:'6000444455556666', name:'MALEE SUKSOMBAT',     department:'WAREHOUSE',  limit:1 },
+    { no:3, cardNumber:'6000777788889999', name:'PRASERT THONGTAVEE',  department:'DRIVER',     limit:1 },
+    { no:4, cardNumber:'6000000011112222', name:'NIPA RATTANAKOSIN',   department:'ADMIN',      limit:1 },
+    { no:5, cardNumber:'6000333344445555', name:'WICHAI PORNPRASERT',  department:'DRIVER',     limit:1 }
+  ];
+  window.google = {
+    script: {
+      run: {
+        withSuccessHandler: function(fn) { this._ok = fn; return this; },
+        withFailureHandler: function(fn) { this._err = fn; return this; },
+        getEmployeeData:  function() { var self = this; setTimeout(function() { self._ok(MOCK_DATA); }, 400); },
+        getTemplateBase64: function() { var self = this; setTimeout(function() { self._ok(null); }, 100); }
+      }
+    }
+  };
+}
+
+// ─────────────────────────────────────────────
+// Paste modal (mobile-friendly bulk paste)
+// ─────────────────────────────────────────────
+function openPasteModal() {
+  document.getElementById('paste-modal').classList.remove('hidden');
+  setTimeout(function() { document.getElementById('paste-area').focus(); }, 100);
+}
+
+function clearPasteArea() {
+  document.getElementById('paste-area').value = '';
+  document.getElementById('paste-area').focus();
+}
+
+function closePasteModal() {
+  document.getElementById('paste-modal').classList.add('hidden');
+}
+
+function applyPastedLimits() {
+  var raw = document.getElementById('paste-area').value;
+  var lines = raw.split(/[\r\n]+/).map(function(l) { return l.trim(); }).filter(function(l) { return l !== ''; });
+
+  if (lines.length === 0) {
+    alert('ไม่พบตัวเลขในช่องวาง');
+    return;
+  }
+
+  var applied = 0;
+  lines.forEach(function(line, i) {
+    if (i >= hot.countRows()) return;
+    var num = parseFloat(line.replace(/,/g, ''));
+    var val = (isNaN(num) || num <= 0) ? 1 : num;
+    hot.setDataAtRowProp(i, 'limit', val, 'pasteModal');
+    applied++;
+  });
+
+  closePasteModal();
+  updateStats();
+  setStatus('วางวงเงินแล้ว ' + applied + ' แถว', 'ok');
+}
+
+// ─────────────────────────────────────────────
+// Bootstrap
+// ─────────────────────────────────────────────
+document.getElementById('export-btn').addEventListener('click', exportToExcel);
+
+google.script.run
+  .withSuccessHandler(function(data) {
+    document.getElementById('loading').classList.add('hidden');
+
+    if (!Array.isArray(data) || data.length === 0) {
+      setStatus('ไม่พบข้อมูลพนักงานใน Sheet "MasterData"', 'error');
+      return;
+    }
+
+    initTable(data);
+
+    // Pre-load template in background so Export is instant
+    google.script.run
+      .withSuccessHandler(function(b64) { templateBase64 = b64; })
+      .withFailureHandler(function() { /* will retry on Export click */ })
+      .getTemplateBase64();
+  })
+  .withFailureHandler(function(err) {
+    document.getElementById('loading').innerHTML =
+      '<p style="color:#c62828;padding:24px;text-align:center">โหลดข้อมูลไม่สำเร็จ:<br>' + err.message + '</p>';
+  })
+  .getEmployeeData();
+</script>
+</body>
+</html>
