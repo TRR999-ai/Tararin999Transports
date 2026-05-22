@@ -34,6 +34,7 @@ function doGet(e) {
   const action = (e.parameter.action || 'trips').toLowerCase();
   if (action === 'trips') return getTrips(e.parameter.month || '');
   if (action === 'info')  return json({ ok:true, tabs: TABS.map(t=>t.name) });
+  if (action === 'debug') return debugCols(e.parameter.tab || TABS[0].name);
   return json({ ok:false, msg:'unknown action' });
 }
 
@@ -76,6 +77,10 @@ function getTrips(filterMonth) {
         const dist = parseN(row[C.dist]);
         if (cost <= 0 && dist <= 0) return; // empty row
 
+        // ── Sanity check: cost per trip ไม่ควรเกิน 300,000 บาท ────────────
+        // ถ้าเกิน = อ่าน column ผิด (เช่น card number 16 หลัก)
+        if (cost > 300000) return;
+
         // Normalize card number (digits only)
         const cardNo = String(row[C.cardNo] || '').replace(/[^0-9]/g, '');
 
@@ -97,6 +102,42 @@ function getTrips(filterMonth) {
     });
 
     return json({ ok:true, count:trips.length, data:trips });
+  } catch (err) {
+    return json({ ok:false, msg:err.message });
+  }
+}
+
+// ── Debug: แสดง raw column values เพื่อตรวจ mapping ────────────────────────
+function debugCols(tabName) {
+  try {
+    const ss  = SpreadsheetApp.openById(SHEET_ID);
+    const sh  = ss.getSheetByName(tabName);
+    if (!sh)  return json({ ok:false, msg: 'tab not found: ' + tabName });
+
+    const vals = sh.getDataRange().getValues();
+    const rows = [];
+    let count  = 0;
+
+    for (let i = 0; i < vals.length && count < 5; i++) {
+      const row     = vals[i];
+      const rawDate = row[0];
+      if (!rawDate || rawDate === 'วันที่') continue;
+      const plate   = String(row[2] || '').trim();
+      if (!plate || plate === 'ไม่มี' || plate === '-') continue;
+
+      // Show raw values at each index
+      const rowData = {};
+      for (let j = 0; j < row.length; j++) {
+        const v = row[j];
+        rowData['col' + j] = (v instanceof Date)
+          ? 'DATE:' + Utilities.formatDate(v, 'Asia/Bangkok', 'dd/MM/yyyy')
+          : String(v).substring(0, 40);
+      }
+      rows.push(rowData);
+      count++;
+    }
+
+    return json({ ok:true, tab:tabName, cols:vals[0]?.length || 0, sample:rows });
   } catch (err) {
     return json({ ok:false, msg:err.message });
   }
