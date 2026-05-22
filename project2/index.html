@@ -529,19 +529,46 @@ function exportToExcel() {
 // Mock google.script.run for local preview
 // ─────────────────────────────────────────────
 if (typeof google === 'undefined') {
-  var MOCK_DATA = [
-    { no:1, cardNumber:'6000111122223333', name:'SOMCHAI JAIDEE',      department:'LOGISTICS', limit:1 },
-    { no:2, cardNumber:'6000444455556666', name:'MALEE SUKSOMBAT',     department:'WAREHOUSE',  limit:1 },
-    { no:3, cardNumber:'6000777788889999', name:'PRASERT THONGTAVEE',  department:'DRIVER',     limit:1 },
-    { no:4, cardNumber:'6000000011112222', name:'NIPA RATTANAKOSIN',   department:'ADMIN',      limit:1 },
-    { no:5, cardNumber:'6000333344445555', name:'WICHAI PORNPRASERT',  department:'DRIVER',     limit:1 }
-  ];
+  // ── ดึงข้อมูลจาก Google Sheet โดยตรง (Sheet ต้องแชร์ "Anyone with the link") ──
+  // คอลัมน์ใน Sheet: A=ลำดับ  B=หมายเลขบัตร  C=ชื่อ  D=แผนก  E=วงเงิน
+  var FLEET_SHEET_ID  = '12o1drcocyTl51GnW6z5_nHvwQPtw3aoln67YHnWGcLI';
+  var FLEET_SHEET_GID = '0';
+  var FLEET_URL = 'https://docs.google.com/spreadsheets/d/' + FLEET_SHEET_ID +
+                  '/gviz/tq?tqx=out:json&gid=' + FLEET_SHEET_GID;
+
   window.google = {
     script: {
       run: {
         withSuccessHandler: function(fn) { this._ok = fn; return this; },
         withFailureHandler: function(fn) { this._err = fn; return this; },
-        getEmployeeData:  function() { var self = this; setTimeout(function() { self._ok(MOCK_DATA); }, 400); },
+        getEmployeeData: function() {
+          var self = this;
+          fetch(FLEET_URL + '&t=' + Date.now())
+            .then(function(r) { return r.text(); })
+            .then(function(text) {
+              // Strip JSONP wrapper: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
+              var json = JSON.parse(text.replace(/^[^\(]+\(/, '').replace(/\);\s*$/, ''));
+              var rows = (json.table && json.table.rows) ? json.table.rows : [];
+              var data = [];
+              rows.forEach(function(row, i) {
+                var c   = row.c || [];
+                var get = function(idx) { return (c[idx] && c[idx].v != null) ? c[idx].v : ''; };
+                var cardNum = String(get(1)).trim();
+                if (!cardNum) return;
+                data.push({
+                  no:         Number(get(0)) || (i + 1),
+                  cardNumber: cardNum,
+                  name:       String(get(2)).trim(),
+                  department: String(get(3)).trim(),
+                  limit:      Number(get(4)) || 1
+                });
+              });
+              self._ok(data);
+            })
+            .catch(function(err) {
+              if (self._err) self._err({ message: 'โหลด Sheet ไม่สำเร็จ: ' + err.message });
+            });
+        },
         getTemplateBase64: function() { var self = this; setTimeout(function() { self._ok(null); }, 100); }
       }
     }
