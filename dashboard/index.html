@@ -94,6 +94,24 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
 .drop-btn{background:var(--navy);color:#fff;border:none;padding:10px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px}
 .drop-btn:hover{background:var(--navy2)}
 
+/* GAS settings bar */
+#gas-bar{background:#fff;border-bottom:1px solid #e2e8f0;padding:8px 24px;display:none;align-items:center;gap:10px;flex-shrink:0}
+#gas-bar.open{display:flex}
+#gas-url-input{flex:1;max-width:520px;border:1.5px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:13px;font-family:inherit;color:var(--text)}
+#gas-url-input:focus{outline:none;border-color:var(--navy)}
+.btn-gas-save{background:var(--navy);color:#fff;border:none;padding:6px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-gas-save:hover{background:var(--navy2)}
+.gas-status{font-size:12px;color:var(--muted);white-space:nowrap}
+.gas-status.ok{color:var(--success);font-weight:600}
+.gas-status.err{color:var(--danger);font-weight:600}
+
+/* Trip KPI row */
+.kpi-row-2{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;flex-shrink:0}
+.kpi-card.purple{border-left-color:#7c3aed}
+.kpi-card.teal{border-left-color:#0891b2}
+.variance-pos{color:var(--danger);font-weight:700}
+.variance-neg{color:var(--success);font-weight:700}
+
 /* Loading overlay */
 #loading{display:none;position:fixed;inset:0;background:rgba(20,29,92,.6);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#fff;font-size:15px}
 .spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
@@ -140,8 +158,18 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
       <a class="btn-back" href="../index.html">← หน้าแรก</a>
       <button class="btn-import" onclick="document.getElementById('file-input').click()">📂 นำเข้า Statement</button>
       <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none" onchange="handleFile(this.files[0])">
+      <button class="btn-import" style="background:var(--navy2);color:#fff" id="btn-sheet" onclick="toggleGasBar()" title="เชื่อม Google Sheet">⚙ Sheet</button>
     </div>
   </header>
+
+  <!-- GAS settings bar -->
+  <div id="gas-bar">
+    <span style="font-size:13px;font-weight:600;color:var(--navy);white-space:nowrap">🔗 GAS URL:</span>
+    <input id="gas-url-input" type="text" placeholder="https://script.google.com/macros/s/.../exec">
+    <button class="btn-gas-save" onclick="saveGasUrl()">บันทึก + โหลด</button>
+    <button class="btn-gas-save" style="background:#64748b" onclick="loadTrips()">🔄 Refresh</button>
+    <span class="gas-status" id="gas-status">ยังไม่ได้เชื่อม</span>
+  </div>
 
   <div id="content">
     <!-- Empty state (shown when no data) -->
@@ -196,6 +224,42 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
         </div>
       </div>
 
+      <!-- Trip KPIs (shown when Sheet data loaded) -->
+      <div class="kpi-row-2" id="trip-kpi-row" style="display:none">
+        <div class="kpi-card purple">
+          <div class="kpi-label">จำนวนเที่ยวรวม</div>
+          <div class="kpi-value" id="kv-trips">—</div>
+          <div class="kpi-unit">เที่ยว (เดือนนี้)</div>
+          <div class="kpi-icon">🗺️</div>
+        </div>
+        <div class="kpi-card teal">
+          <div class="kpi-label">ระยะทางรวม</div>
+          <div class="kpi-value" id="kv-dist">—</div>
+          <div class="kpi-unit">กิโลเมตร</div>
+          <div class="kpi-icon">📍</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">ต้นทุนน้ำมันคำนวณ</div>
+          <div class="kpi-value" id="kv-calc">—</div>
+          <div class="kpi-unit">บาท (จาก trip data)</div>
+          <div class="kpi-icon">🧮</div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-label">ส่วนต่าง (จ่ายจริง−คำนวณ)</div>
+          <div class="kpi-value" id="kv-variance">—</div>
+          <div class="kpi-unit">บาท (+ = จ่ายเกิน)</div>
+          <div class="kpi-icon">⚠️</div>
+        </div>
+      </div>
+
+      <!-- Variance chart (shown when both data loaded) -->
+      <div class="chart-row" id="variance-row" style="display:none">
+        <div class="chart-card full">
+          <div class="chart-title">Variance: ต้นทุนคำนวณ vs จ่ายจริง <span>แยกรถ (Top 20 by จ่ายจริง)</span></div>
+          <div class="chart-wrap"><canvas id="chart-variance" height="220"></canvas></div>
+        </div>
+      </div>
+
       <!-- Charts row 1 -->
       <div class="chart-row">
         <div class="chart-card">
@@ -231,6 +295,8 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
                 <th>หมายเลขบัตร</th>
                 <th class="num">ลิตร</th>
                 <th class="num">ยอดจ่าย (บาท)</th>
+                <th class="num">ต้นทุนคำนวณ</th>
+                <th class="num" id="th-variance" style="display:none">Variance (บาท)</th>
                 <th class="num">บาท/ลิตร</th>
                 <th class="num">% ของทั้งหมด</th>
               </tr>
@@ -255,8 +321,14 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
 
 <script>
 // ─── State ────────────────────────────────────────────────────────────────
-let ST = { summary:[], transactions:[], meta:{} };
+let ST = {
+  excel: { summary:[], transactions:[], meta:{} },  // from Excel
+  trips: [],                                         // from GAS Sheet
+  gasUrl: localStorage.getItem('dash_gas_url') || '',
+};
 let CHARTS = {};
+// Backwards-compat alias
+const getExcel = () => ST.excel;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 const fmt  = n => Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -280,6 +352,59 @@ dz.addEventListener('drop', e => {
   if (f) handleFile(f);
 });
 
+// ─── GAS settings ─────────────────────────────────────────────────────────
+function toggleGasBar() {
+  document.getElementById('gas-bar').classList.toggle('open');
+  document.getElementById('gas-url-input').value = ST.gasUrl;
+}
+function saveGasUrl() {
+  const url = document.getElementById('gas-url-input').value.trim();
+  ST.gasUrl = url;
+  localStorage.setItem('dash_gas_url', url);
+  if (url) loadTrips();
+  else setGasStatus('ลบ URL แล้ว', '');
+}
+function setGasStatus(msg, cls) {
+  const el = document.getElementById('gas-status');
+  el.textContent = msg; el.className = 'gas-status ' + (cls||'');
+}
+function setSheetBtn(ok) {
+  const btn = document.getElementById('btn-sheet');
+  btn.textContent = ok ? '✅ Sheet' : '⚙ Sheet';
+  btn.style.background = ok ? 'var(--success)' : 'var(--navy2)';
+}
+
+// ─── Load trip data from GAS ──────────────────────────────────────────────
+function loadTrips() {
+  if (!ST.gasUrl) { setGasStatus('ยังไม่ได้ใส่ URL', 'err'); return; }
+  setGasStatus('กำลังโหลด...', '');
+  // Filter by statement month if available
+  const month = getStatementMonth();
+  const url = ST.gasUrl + '?action=trips' + (month ? '&month=' + encodeURIComponent(month) : '');
+  fetch(url + '&t=' + Date.now())
+    .then(r => r.json())
+    .then(res => {
+      if (!res.ok) { setGasStatus('❌ ' + res.msg, 'err'); setSheetBtn(false); return; }
+      ST.trips = res.data || [];
+      try { localStorage.setItem('dash_trips', JSON.stringify(ST.trips)); } catch(_) {}
+      setGasStatus('✅ ' + ST.trips.length + ' เที่ยว (เดือน ' + (month||'ทั้งหมด') + ')', 'ok');
+      setSheetBtn(true);
+      renderTripKPIs();
+      if (ST.excel.summary.length > 0) renderVariance();
+      renderTable();
+      toast('✅ โหลดข้อมูลเที่ยวรถ ' + ST.trips.length + ' เที่ยว');
+    })
+    .catch(err => { setGasStatus('❌ ' + err.message, 'err'); setSheetBtn(false); });
+}
+
+// Extract month from statement date → '04/2026'
+function getStatementMonth() {
+  const d = ST.excel.meta.statementDate;
+  if (!d) return '';
+  const p = d.split('/');
+  return p.length === 3 ? p[1] + '/' + p[2] : '';
+}
+
 // ─── File handler ─────────────────────────────────────────────────────────
 function handleFile(file) {
   if (!file) return;
@@ -289,12 +414,13 @@ function handleFile(file) {
     try {
       const wb = XLSX.read(e.target.result, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null, raw: true });
-      ST = parseStatement(data);
-      // Persist to localStorage
-      try { localStorage.setItem('trr_dashboard', JSON.stringify(ST)); } catch(_) {}
+      const data = XLSX.utils.sheet_to_json(ws, { header:1, defval:null, raw:true });
+      ST.excel = parseStatement(data);
+      try { localStorage.setItem('trr_dashboard_excel', JSON.stringify(ST.excel)); } catch(_) {}
       renderAll();
-      toast('✅ โหลด ' + ST.summary.length + ' รถ, ' + ST.transactions.length + ' รายการ');
+      // Re-render variance if trip data already loaded
+      if (ST.trips.length > 0) renderVariance();
+      toast('✅ โหลด ' + ST.excel.summary.length + ' รถ, ' + ST.excel.transactions.length + ' รายการ');
     } catch(err) {
       toast('❌ อ่านไฟล์ไม่สำเร็จ: ' + err.message);
       console.error(err);
@@ -388,7 +514,7 @@ function renderAll() {
   const dc = document.getElementById('dashboard-content');
   dc.style.display = 'flex';
 
-  document.getElementById('period-label').textContent = ST.meta.period || 'Statement';
+  document.getElementById('period-label').textContent = ST.excel.meta.period || 'Statement';
   renderKPIs();
   renderVehicleChart();
   renderDailyChart();
@@ -398,14 +524,34 @@ function renderAll() {
 
 // ─── KPIs ──────────────────────────────────────────────────────────────
 function renderKPIs() {
-  const totalAmt  = ST.summary.reduce((s, r) => s + r.amount, 0);
-  const totalLit  = ST.summary.reduce((s, r) => s + r.litres, 0);
-  const avgPrice  = totalLit > 0 ? totalAmt / totalLit : 0;
+  const ex = ST.excel;
+  const totalAmt = ex.summary.reduce((s,r) => s+r.amount, 0);
+  const totalLit = ex.summary.reduce((s,r) => s+r.litres, 0);
+  const avgPrice = totalLit > 0 ? totalAmt/totalLit : 0;
   document.getElementById('kv-amount').textContent   = fmt(totalAmt);
-  document.getElementById('kv-vehicles').textContent = ST.summary.length;
+  document.getElementById('kv-vehicles').textContent = ex.summary.length;
   document.getElementById('kv-litres').textContent   = fmtN(totalLit, 2);
   document.getElementById('kv-price').textContent    = fmtN(avgPrice, 2);
-  document.getElementById('kv-txns').textContent     = fmtN(ST.transactions.length);
+  document.getElementById('kv-txns').textContent     = fmtN(ex.transactions.length);
+}
+
+// ─── Trip KPIs (from GAS) ────────────────────────────────────────────
+function renderTripKPIs() {
+  if (!ST.trips.length) return;
+  const totalTrips = ST.trips.length;
+  const totalDist  = ST.trips.reduce((s,t) => s+t.dist, 0);
+  const totalCalc  = ST.trips.reduce((s,t) => s+t.cost, 0);
+  const totalAct   = ST.excel.summary.reduce((s,r) => s+r.amount, 0);
+  const variance   = totalAct - totalCalc;
+
+  document.getElementById('kv-trips').textContent   = fmtN(totalTrips);
+  document.getElementById('kv-dist').textContent    = fmtN(totalDist, 0);
+  document.getElementById('kv-calc').textContent    = fmt(totalCalc);
+  const vEl = document.getElementById('kv-variance');
+  vEl.textContent = (variance >= 0 ? '+' : '') + fmt(variance);
+  vEl.className   = 'kpi-value ' + (variance > 0 ? 'variance-pos' : 'variance-neg');
+
+  document.getElementById('trip-kpi-row').style.display = 'grid';
 }
 
 // ─── Destroy old chart ────────────────────────────────────────────────
@@ -416,7 +562,7 @@ function destroyChart(id) {
 // ─── Vehicle Bar Chart ───────────────────────────────────────────────
 function renderVehicleChart() {
   destroyChart('vehicles');
-  const sorted = [...ST.summary].sort((a, b) => b.litres - a.litres).slice(0, 15);
+  const sorted = [...ST.excel.summary].sort((a, b) => b.litres - a.litres).slice(0, 15);
   const ctx = document.getElementById('chart-vehicles').getContext('2d');
   CHARTS.vehicles = new Chart(ctx, {
     type: 'bar',
@@ -461,7 +607,7 @@ function renderVehicleChart() {
 function renderDailyChart() {
   destroyChart('daily');
   const byDate = {};
-  ST.transactions.forEach(t => {
+  ST.excel.transactions.forEach(t => {
     if (!byDate[t.date]) byDate[t.date] = { litres:0, amount:0, count:0 };
     byDate[t.date].litres += t.litres;
     byDate[t.date].amount += t.amount;
@@ -515,11 +661,61 @@ function renderDailyChart() {
   });
 }
 
+// ─── Variance Chart (calculated vs actual per vehicle) ───────────────
+function renderVariance() {
+  if (!ST.trips.length || !ST.excel.summary.length) return;
+  destroyChart('variance');
+
+  // Aggregate trips by cardNo
+  const tripByCard = {};
+  ST.trips.forEach(t => {
+    if (!t.cardNo) return;
+    if (!tripByCard[t.cardNo]) tripByCard[t.cardNo] = { calc:0, trips:0, km:0 };
+    tripByCard[t.cardNo].calc  += t.cost;
+    tripByCard[t.cardNo].trips++;
+    tripByCard[t.cardNo].km   += t.dist;
+  });
+
+  // Join with Excel summary (only rows that have trip data)
+  const joined = ST.excel.summary
+    .map(s => ({ ...s, calc: tripByCard[s.cardNo]?.calc || 0 }))
+    .filter(s => s.calc > 0 || s.amount > 0)
+    .sort((a,b) => b.amount - a.amount)
+    .slice(0, 20);
+
+  const ctx = document.getElementById('chart-variance').getContext('2d');
+  CHARTS.variance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: joined.map(r => r.plate),
+      datasets: [
+        { label:'ต้นทุนคำนวณ (Sheet)', data: joined.map(r=>r.calc),
+          backgroundColor:'rgba(27,39,112,.75)', borderColor:'#1B2770', borderWidth:1, borderRadius:4 },
+        { label:'จ่ายจริง (Statement)', data: joined.map(r=>r.amount),
+          backgroundColor:'rgba(245,166,35,.8)', borderColor:'#d4831a', borderWidth:1, borderRadius:4 }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: {
+        legend: { position:'top', labels:{font:{size:12}} },
+        tooltip: { callbacks: { label: ctx => ' ' + fmt(ctx.raw) + ' บาท' } }
+      },
+      scales: {
+        x: { ticks:{font:{size:11.5},color:'#2D3748'}, grid:{color:'#f0f2f5'} },
+        y: { ticks:{font:{size:11},callback:v=>fmtN(v/1000,0)+'K'}, grid:{color:'#f0f2f5'},
+             title:{display:true,text:'บาท',font:{size:11}} }
+      }
+    }
+  });
+  document.getElementById('variance-row').style.display = 'grid';
+}
+
 // ─── Station Bar Chart ───────────────────────────────────────────────
 function renderStationChart() {
   destroyChart('stations');
   const byStation = {};
-  ST.transactions.forEach(t => {
+  ST.excel.transactions.forEach(t => {
     const k = t.station.length > 28 ? t.station.substring(0,28)+'…' : t.station;
     if (!byStation[k]) byStation[k] = { litres:0, amount:0, count:0 };
     byStation[k].litres  += t.litres;
@@ -563,45 +759,94 @@ function renderStationChart() {
 
 // ─── Vehicle Table ───────────────────────────────────────────────────
 function renderTable() {
-  const totalAmt = ST.summary.reduce((s,r)=>s+r.amount, 0);
-  const avgPrice = totalAmt / ST.summary.reduce((s,r)=>s+r.litres, 0);
-  const sorted   = [...ST.summary].sort((a,b)=>b.amount-a.amount);
+  const ex       = ST.excel;
+  const totalAmt = ex.summary.reduce((s,r)=>s+r.amount, 0);
+  const avgPrice = ex.summary.reduce((s,r)=>s+r.litres, 0) > 0
+    ? totalAmt / ex.summary.reduce((s,r)=>s+r.litres, 0) : 0;
+  const sorted   = [...ex.summary].sort((a,b)=>b.amount-a.amount);
   const maxAmt   = sorted[0]?.amount || 1;
+
+  // Build trip map by cardNo
+  const hasTrips = ST.trips.length > 0;
+  const tripByCard = {};
+  if (hasTrips) {
+    ST.trips.forEach(t => {
+      if (!t.cardNo) return;
+      if (!tripByCard[t.cardNo]) tripByCard[t.cardNo] = 0;
+      tripByCard[t.cardNo] += t.cost;
+    });
+    document.getElementById('th-variance').style.display = '';
+  }
 
   const tbody = document.getElementById('vehicle-tbody');
   tbody.innerHTML = sorted.map((r, i) => {
     const pricePerL = r.litres > 0 ? r.amount / r.litres : 0;
     const diff = pricePerL - avgPrice;
     const priceCls = diff > 1 ? 'badge-hi' : diff < -1 ? 'badge-lo' : '';
-    const pct = totalAmt > 0 ? (r.amount / totalAmt * 100) : 0;
-    const barW = Math.round(pct / (sorted[0]?r.amount/maxAmt*100:100) * 60);
+    const pct  = totalAmt > 0 ? (r.amount / totalAmt * 100) : 0;
+    const barW = Math.round(pct / (totalAmt > 0 ? (maxAmt/totalAmt*100) : 1) * 60);
     const cardFmt = r.cardNo.length===16
       ? r.cardNo.replace(/(\d{4})(\d{4})(\d{4})(\d{4})/, '$1-$2-$3-$4')
       : r.cardNo;
+    const calc = tripByCard[r.cardNo] || 0;
+    const vari = calc > 0 ? r.amount - calc : null;
+    const varCell = hasTrips
+      ? (calc > 0
+          ? `<td class="num ${vari>0?'variance-pos':'variance-neg'}">${vari>=0?'+':''}${fmt(vari)}</td>`
+          : `<td class="num" style="color:var(--muted);font-size:11px">—</td>`)
+      : '';
     return `<tr>
       <td style="color:var(--muted);font-size:12px">${i+1}</td>
       <td><strong>${r.plate}</strong></td>
       <td style="font-size:11px;color:var(--muted)">${cardFmt}</td>
       <td class="num">${fmtN(r.litres,2)}</td>
       <td class="num"><strong>${fmt(r.amount)}</strong></td>
+      <td class="num" style="color:var(--muted)">${calc>0?fmt(calc):'—'}</td>
+      ${varCell}
       <td class="num ${priceCls}">${fmtN(pricePerL,2)}${diff>1?' ▲':diff<-1?' ▼':''}</td>
       <td class="num">${fmtN(pct,1)}%<span class="pct-bar" style="width:${Math.max(4,barW)}px"></span></td>
     </tr>`;
   }).join('');
 }
 
-// ─── Restore from localStorage ────────────────────────────────────────
+// ─── Init: restore from localStorage ────────────────────────────────
 (function init() {
+  // Restore GAS URL
+  if (ST.gasUrl) {
+    document.getElementById('gas-url-input').value = ST.gasUrl;
+  }
+
+  // Restore Excel data
   try {
-    const saved = localStorage.getItem('trr_dashboard');
-    if (saved) {
-      ST = JSON.parse(saved);
-      if (ST.summary && ST.summary.length > 0) {
+    const exSaved = localStorage.getItem('trr_dashboard_excel');
+    if (exSaved) {
+      ST.excel = JSON.parse(exSaved);
+      if (ST.excel.summary && ST.excel.summary.length > 0) {
         renderAll();
-        toast('📂 โหลดข้อมูลล่าสุดจาก cache');
       }
     }
   } catch(_) {}
+
+  // Restore trip data
+  try {
+    const trSaved = localStorage.getItem('dash_trips');
+    if (trSaved) {
+      ST.trips = JSON.parse(trSaved);
+      if (ST.trips.length > 0) {
+        setSheetBtn(true);
+        setGasStatus('✅ ' + ST.trips.length + ' เที่ยว (cache)', 'ok');
+        renderTripKPIs();
+        if (ST.excel.summary.length > 0) renderVariance();
+        renderTable();
+        toast('📂 โหลด cache: Statement + ' + ST.trips.length + ' เที่ยว');
+        return;
+      }
+    }
+  } catch(_) {}
+
+  if (ST.excel.summary && ST.excel.summary.length > 0) {
+    toast('📂 โหลด Statement จาก cache');
+  }
 })();
 </script>
 </body>
