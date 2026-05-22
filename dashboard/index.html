@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — ธรารินทร์ 999</title>
+<link rel="icon" type="image/png" href="../TRR999logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1B2770;--navy-dark:#141D5C;--navy2:#2233A0;
+  --gold:#F5A623;--gold2:#FBBF24;
+  --cream:#FFF8EC;--white:#fff;
+  --bg:#E9EDF5;--card-bg:#fff;
+  --text:#2D3748;--muted:#64748B;
+  --success:#16a34a;--danger:#dc2626;--warn:#d97706;
+  --sidebar-w:200px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color:var(--text);display:flex;background:var(--bg)}
+
+/* ─── Sidebar ─── */
+#sidebar{width:var(--sidebar-w);flex-shrink:0;height:100vh;background:var(--navy-dark);display:flex;flex-direction:column}
+.sb-logo{padding:18px 14px 14px;border-bottom:1px solid rgba(245,166,35,.2);display:flex;flex-direction:column;align-items:center;gap:6px}
+.sb-icon{width:52px;height:52px;border-radius:50%;border:2px solid var(--gold);background:rgba(255,255,255,.12);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.sb-icon img{width:100%;height:100%;object-fit:cover}
+.sb-name{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:1px;text-align:center}
+.sb-sub{font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.5px;text-align:center;line-height:1.4}
+.sb-nav{flex:1;padding:8px 0;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;border-left:3px solid transparent;transition:.15s;text-decoration:none}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.8)}
+.nav-item.active{background:rgba(245,166,35,.1);color:var(--gold);border-left-color:var(--gold);font-weight:600}
+.nav-icon{font-size:15px;flex-shrink:0}
+.sb-footer{padding:10px 14px;border-top:1px solid rgba(255,255,255,.07);font-size:10px;color:rgba(255,255,255,.2);text-align:center}
+
+/* ─── Main ─── */
+#main{flex:1;height:100vh;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#topbar{background:var(--navy);border-bottom:3px solid var(--gold);height:54px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px}
+.tb-left{display:flex;align-items:center;gap:10px}
+.tb-title{font-size:15px;font-weight:700;color:#fff;letter-spacing:.5px}
+.tb-period{font-size:11px;color:rgba(255,255,255,.5);background:rgba(255,255,255,.08);padding:3px 10px;border-radius:20px}
+.tb-right{display:flex;align-items:center;gap:10px}
+.btn-import{background:var(--gold);color:var(--navy-dark);border:none;padding:7px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.15s}
+.btn-import:hover{background:var(--gold2);transform:scale(1.02)}
+.btn-back{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.btn-back:hover{background:rgba(255,255,255,.2)}
+
+/* ─── Content ─── */
+#content{flex:1;overflow-y:auto;padding:20px 24px 28px;display:flex;flex-direction:column;gap:18px}
+
+/* KPI row */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;flex-shrink:0}
+.kpi-card{background:var(--card-bg);border-radius:14px;padding:16px 18px;box-shadow:0 2px 10px rgba(0,0,0,.07);border-left:4px solid var(--navy);position:relative;overflow:hidden}
+.kpi-card.gold{border-left-color:var(--gold)}
+.kpi-card.green{border-left-color:var(--success)}
+.kpi-card.red{border-left-color:var(--danger)}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.3px;text-transform:uppercase;margin-bottom:6px}
+.kpi-value{font-size:22px;font-weight:700;color:var(--navy);line-height:1.1}
+.kpi-unit{font-size:11px;color:var(--muted);margin-top:3px}
+.kpi-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:28px;opacity:.12}
+
+/* Chart row */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-card{background:var(--card-bg);border-radius:14px;padding:18px 18px 14px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;letter-spacing:.3px}
+.chart-title span{font-size:11px;color:var(--muted);font-weight:400;margin-left:6px}
+.chart-wrap{position:relative}
+
+/* Table */
+.tbl-card{background:var(--card-bg);border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.tbl-card table{width:100%;border-collapse:collapse;font-size:13px}
+.tbl-card th{background:var(--navy);color:#fff;padding:9px 12px;text-align:left;font-weight:600;font-size:12px;letter-spacing:.3px}
+.tbl-card th:first-child{border-radius:8px 0 0 0}
+.tbl-card th:last-child{border-radius:0 8px 0 0}
+.tbl-card td{padding:8px 12px;border-bottom:1px solid #f0f2f5;color:var(--text)}
+.tbl-card tr:hover td{background:#f8f9fb}
+.tbl-card tr:last-child td{border-bottom:none}
+.badge-hi{color:var(--danger);font-weight:700}
+.badge-lo{color:var(--success);font-weight:600}
+.pct-bar{display:inline-block;height:6px;background:var(--navy);border-radius:3px;vertical-align:middle;margin-left:4px;opacity:.5}
+.num{text-align:right}
+
+/* Empty state */
+#empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px}
+.drop-zone{border:2px dashed rgba(27,39,112,.25);border-radius:20px;padding:52px 60px;display:flex;flex-direction:column;align-items:center;gap:14px;cursor:pointer;transition:.2s;max-width:500px;text-align:center}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--gold);background:rgba(245,166,35,.04)}
+.drop-icon{font-size:52px;opacity:.6}
+.drop-title{font-size:18px;font-weight:700;color:var(--navy)}
+.drop-sub{font-size:13px;color:var(--muted);line-height:1.6}
+.drop-btn{background:var(--navy);color:#fff;border:none;padding:10px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px}
+.drop-btn:hover{background:var(--navy2)}
+
+/* Loading overlay */
+#loading{display:none;position:fixed;inset:0;background:rgba(20,29,92,.6);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#fff;font-size:15px}
+.spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--navy-dark);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:.3s;transform:translateY(10px)}
+#toast.show{opacity:1;transform:none}
+
+@media(max-width:1100px){
+  .kpi-row{grid-template-columns:repeat(3,1fr)}
+  .chart-row{grid-template-columns:1fr}
+  .chart-card.full{grid-column:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── Sidebar ─── -->
+<aside id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-icon"><img src="../TRR999logo.png" alt="TRR999"></div>
+    <div class="sb-name">TARARIN 999</div>
+    <div class="sb-sub">TRANSPORT CO.,LTD.<br>ธรารินทร์ 999 ขนส่ง จำกัด</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-item active"><span class="nav-icon">📊</span><span>Dashboard</span></div>
+    <a class="nav-item" href="../project1/transport.html"><span class="nav-icon">🚚</span><span>งานขนส่ง</span></a>
+    <a class="nav-item" href="../project2/index.html"><span class="nav-icon">💳</span><span>Fleet Card</span></a>
+    <a class="nav-item" href="../trr.html"><span class="nav-icon">⛽</span><span>ต้นทุนน้ำมัน</span></a>
+  </nav>
+  <div class="sb-footer">© 2026 TARARIN 999</div>
+</aside>
+
+<!-- ─── Main ─── -->
+<div id="main">
+  <header id="topbar">
+    <div class="tb-left">
+      <span style="font-size:20px">📊</span>
+      <span class="tb-title">Executive Dashboard</span>
+      <span class="tb-period" id="period-label">— ยังไม่มีข้อมูล —</span>
+    </div>
+    <div class="tb-right">
+      <a class="btn-back" href="../index.html">← หน้าแรก</a>
+      <button class="btn-import" onclick="document.getElementById('file-input').click()">📂 นำเข้า Statement</button>
+      <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none" onchange="handleFile(this.files[0])">
+    </div>
+  </header>
+
+  <div id="content">
+    <!-- Empty state (shown when no data) -->
+    <div id="empty-state">
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <div class="drop-icon">📋</div>
+        <div class="drop-title">นำเข้า Fleet Card Statement</div>
+        <div class="drop-sub">
+          ลากไฟล์ Excel (.xlsx) มาวางที่นี่<br>
+          หรือคลิกเพื่อเลือกไฟล์<br><br>
+          <strong>ไฟล์: statement_XXXXXXXXXX_YYYYMMDD.xlsx</strong><br>
+          (ใบแจ้งยอดบัตรน้ำมัน TTB Fleet Card)
+        </div>
+        <button class="drop-btn">เลือกไฟล์</button>
+      </div>
+    </div>
+
+    <!-- Dashboard content (hidden until data loaded) -->
+    <div id="dashboard-content" style="display:none;flex-direction:column;gap:18px">
+
+      <!-- KPIs -->
+      <div class="kpi-row">
+        <div class="kpi-card gold">
+          <div class="kpi-label">ยอดรวมจ่ายจริง</div>
+          <div class="kpi-value" id="kv-amount">—</div>
+          <div class="kpi-unit">บาท</div>
+          <div class="kpi-icon">💰</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">จำนวนรถ</div>
+          <div class="kpi-value" id="kv-vehicles">—</div>
+          <div class="kpi-unit">คัน (มีการเติมน้ำมัน)</div>
+          <div class="kpi-icon">🚛</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">รวมลิตรที่เติม</div>
+          <div class="kpi-value" id="kv-litres">—</div>
+          <div class="kpi-unit">ลิตร</div>
+          <div class="kpi-icon">⛽</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">ราคาเฉลี่ย</div>
+          <div class="kpi-value" id="kv-price">—</div>
+          <div class="kpi-unit">บาท / ลิตร</div>
+          <div class="kpi-icon">📈</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">รายการเติมน้ำมัน</div>
+          <div class="kpi-value" id="kv-txns">—</div>
+          <div class="kpi-unit">ครั้ง (ทั้งเดือน)</div>
+          <div class="kpi-icon">🔢</div>
+        </div>
+      </div>
+
+      <!-- Charts row 1 -->
+      <div class="chart-row">
+        <div class="chart-card">
+          <div class="chart-title">รถที่ใช้น้ำมันมากสุด <span>Top 15 (ลิตร)</span></div>
+          <div class="chart-wrap"><canvas id="chart-vehicles" height="320"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">การเติมน้ำมันรายวัน <span>ลิตร/วัน</span></div>
+          <div class="chart-wrap"><canvas id="chart-daily" height="320"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Charts row 2 -->
+      <div class="chart-row">
+        <div class="chart-card full">
+          <div class="chart-title">ปั๊มน้ำมันที่ใช้บ่อย <span>Top 15 สถานี (ลิตรรวม)</span></div>
+          <div class="chart-wrap"><canvas id="chart-stations" height="200"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Vehicle table -->
+      <div class="tbl-card">
+        <div class="chart-title" style="margin-bottom:14px">
+          รายละเอียดแต่ละรถ
+          <span id="tbl-sort-note">เรียงตามยอดมากสุด</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="vehicle-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>ทะเบียนรถ</th>
+                <th>หมายเลขบัตร</th>
+                <th class="num">ลิตร</th>
+                <th class="num">ยอดจ่าย (บาท)</th>
+                <th class="num">บาท/ลิตร</th>
+                <th class="num">% ของทั้งหมด</th>
+              </tr>
+            </thead>
+            <tbody id="vehicle-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /dashboard-content -->
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Loading -->
+<div id="loading" style="display:none;position:fixed;inset:0;background:rgba(20,29,92,.6);z-index:999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#fff;font-size:15px">
+  <div class="spinner"></div>
+  <div>กำลังอ่านไฟล์...</div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────
+let ST = { summary:[], transactions:[], meta:{} };
+let CHARTS = {};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────
+const fmt  = n => Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtN = (n, d=0) => Number(n).toLocaleString('th-TH', {minimumFractionDigits:d, maximumFractionDigits:d});
+function toast(msg, dur=2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+function loading(on) {
+  document.getElementById('loading').style.display = on ? 'flex' : 'none';
+}
+
+// ─── Drag & drop ─────────────────────────────────────────────────────────
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f);
+});
+
+// ─── File handler ─────────────────────────────────────────────────────────
+function handleFile(file) {
+  if (!file) return;
+  loading(true);
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null, raw: true });
+      ST = parseStatement(data);
+      // Persist to localStorage
+      try { localStorage.setItem('trr_dashboard', JSON.stringify(ST)); } catch(_) {}
+      renderAll();
+      toast('✅ โหลด ' + ST.summary.length + ' รถ, ' + ST.transactions.length + ' รายการ');
+    } catch(err) {
+      toast('❌ อ่านไฟล์ไม่สำเร็จ: ' + err.message);
+      console.error(err);
+    }
+    loading(false);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ─── Parse Statement Excel ────────────────────────────────────────────────
+function parseStatement(data) {
+  const result = { summary: [], transactions: [], meta: { totalDue:0, statementDate:'', period:'' } };
+  let mode = 'header';
+  let currentCard = null;
+
+  const c = (row, idx) => (row[idx] != null) ? String(row[idx]).trim() : '';
+  const n = (row, idx) => parseFloat(c(row, idx).replace(/,/g, '')) || 0;
+
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    if (!row) continue;
+
+    const a = c(row,0), b = c(row,1), cc = c(row,2), d = c(row,3), e = c(row,4), f = c(row,5);
+
+    // ── Meta ──
+    if (d.includes('จำนวนเงินที่ต้องชำระ') || d.includes('Total Amount Due')) result.meta.totalDue = n(row,4);
+    if (d.includes('วันตัดยอด') || d.includes('Statement Date')) result.meta.statementDate = e;
+
+    // ── Mode transitions ──
+    if (a.includes('หมายเลขบัตร') || a.includes('Card No.')) { mode = 'summary'; continue; }
+    if (a.includes('วันที่ใช้บัตร') || a.includes('Transaction Date')) { mode = 'transaction'; continue; }
+
+    // ── Summary section ──
+    if (mode === 'summary') {
+      if (a.includes('Other') || a === '') continue;
+      const cardNo = a.replace(/[^0-9]/g, '');
+      const plate  = b;
+      const litres = n(row, 2);
+      const amount = n(row, 3);
+      if (cardNo.length >= 10 && litres > 0 && amount > 0) {
+        result.summary.push({ cardNo, plate, litres, amount });
+      }
+      continue;
+    }
+
+    // ── Transaction section ──
+    if (mode === 'transaction') {
+      // Card group header: [null, null, '6000-XXXX-XXXX-XXXX PLATE']
+      if (!row[0] && !row[1] && cc.match(/^6000/)) {
+        const parts = cc.split(/\s+/);
+        currentCard = parts[0].replace(/[^0-9]/g, '');
+        continue;
+      }
+      // Sub Total
+      if (d.includes('Sub Total')) continue;
+      // Skip non-fuel: DIRECT DEBIT, PAYMENT (0 litres)
+      const litresT = n(row, 4);
+      if (litresT <= 0) continue;
+      // Skip if description is a debit/payment entry
+      if (cc.includes('DIRECT DEBIT') || cc.includes('PAYMENT') || cc.includes('REFUND')) continue;
+      // Transaction row: a = date DD/MM/YYYY
+      if (currentCard && a.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        // Normalize station name (strip prefix BSRC-, BC-, BSR-)
+        const station = cc.replace(/^(BSRC|BSR|BC|KTB)-/, '').trim();
+        result.transactions.push({
+          cardNo: currentCard,
+          date:   a,
+          time:   b,
+          station,
+          litres: litresT,
+          amount: n(row, 5)
+        });
+      }
+    }
+  }
+
+  // Build period label from statement date
+  if (result.meta.statementDate) {
+    const parts = result.meta.statementDate.split('/');
+    if (parts.length === 3) {
+      const months = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+      result.meta.period = 'ประจำเดือน ' + months[+parts[1]] + ' ' + parts[2];
+    }
+  }
+  return result;
+}
+
+// ─── Render all ──────────────────────────────────────────────────────────
+function renderAll() {
+  document.getElementById('empty-state').style.display = 'none';
+  const dc = document.getElementById('dashboard-content');
+  dc.style.display = 'flex';
+
+  document.getElementById('period-label').textContent = ST.meta.period || 'Statement';
+  renderKPIs();
+  renderVehicleChart();
+  renderDailyChart();
+  renderStationChart();
+  renderTable();
+}
+
+// ─── KPIs ──────────────────────────────────────────────────────────────
+function renderKPIs() {
+  const totalAmt  = ST.summary.reduce((s, r) => s + r.amount, 0);
+  const totalLit  = ST.summary.reduce((s, r) => s + r.litres, 0);
+  const avgPrice  = totalLit > 0 ? totalAmt / totalLit : 0;
+  document.getElementById('kv-amount').textContent   = fmt(totalAmt);
+  document.getElementById('kv-vehicles').textContent = ST.summary.length;
+  document.getElementById('kv-litres').textContent   = fmtN(totalLit, 2);
+  document.getElementById('kv-price').textContent    = fmtN(avgPrice, 2);
+  document.getElementById('kv-txns').textContent     = fmtN(ST.transactions.length);
+}
+
+// ─── Destroy old chart ────────────────────────────────────────────────
+function destroyChart(id) {
+  if (CHARTS[id]) { CHARTS[id].destroy(); delete CHARTS[id]; }
+}
+
+// ─── Vehicle Bar Chart ───────────────────────────────────────────────
+function renderVehicleChart() {
+  destroyChart('vehicles');
+  const sorted = [...ST.summary].sort((a, b) => b.litres - a.litres).slice(0, 15);
+  const ctx = document.getElementById('chart-vehicles').getContext('2d');
+  CHARTS.vehicles = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(r => r.plate),
+      datasets: [{
+        label: 'ลิตร',
+        data: sorted.map(r => r.litres),
+        backgroundColor: '#1B2770cc',
+        borderColor: '#1B2770',
+        borderWidth: 1,
+        borderRadius: 4,
+      },{
+        label: 'บาท (หน่วยร้อย)',
+        data: sorted.map(r => r.amount / 100),
+        backgroundColor: '#F5A623aa',
+        borderColor: '#F5A623',
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { font:{ size:11 } } }, tooltip: {
+        callbacks: {
+          label: ctx => ctx.datasetIndex===0
+            ? ' ' + fmtN(ctx.raw, 2) + ' ลิตร'
+            : ' ' + fmt(ctx.raw * 100) + ' บาท'
+        }
+      }},
+      scales: {
+        x: { grid: { color:'#f0f2f5' }, ticks: { font:{size:11} } },
+        y: { ticks: { font:{size:12}, color:'#2D3748' } }
+      }
+    }
+  });
+}
+
+// ─── Daily Line Chart ────────────────────────────────────────────────
+function renderDailyChart() {
+  destroyChart('daily');
+  const byDate = {};
+  ST.transactions.forEach(t => {
+    if (!byDate[t.date]) byDate[t.date] = { litres:0, amount:0, count:0 };
+    byDate[t.date].litres += t.litres;
+    byDate[t.date].amount += t.amount;
+    byDate[t.date].count++;
+  });
+  const dates = Object.keys(byDate).sort((a, b) => {
+    const [da,ma,ya] = a.split('/').map(Number);
+    const [db,mb,yb] = b.split('/').map(Number);
+    return new Date(ya,ma-1,da) - new Date(yb,mb-1,db);
+  });
+  const ctx = document.getElementById('chart-daily').getContext('2d');
+  CHARTS.daily = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: dates.map(d => d.substring(0,5)), // DD/MM
+      datasets: [{
+        label: 'ลิตร/วัน',
+        data: dates.map(d => byDate[d].litres),
+        borderColor: '#1B2770',
+        backgroundColor: 'rgba(27,39,112,.08)',
+        fill: true,
+        tension: .35,
+        pointRadius: 3,
+        pointBackgroundColor: '#1B2770',
+      },{
+        label: 'บาท/วัน (÷100)',
+        data: dates.map(d => byDate[d].amount / 100),
+        borderColor: '#F5A623',
+        backgroundColor: 'rgba(245,166,35,.08)',
+        fill: false,
+        tension: .35,
+        pointRadius: 3,
+        pointBackgroundColor: '#F5A623',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position:'top', labels:{ font:{size:11} } }, tooltip: {
+        callbacks: {
+          label: ctx => ctx.datasetIndex===0
+            ? ' ' + fmtN(ctx.raw, 1) + ' ลิตร'
+            : ' ' + fmt(ctx.raw * 100) + ' บาท'
+        }
+      }},
+      scales: {
+        x: { ticks:{ font:{size:10}, maxRotation:45 }, grid:{color:'#f0f2f5'} },
+        y: { ticks:{ font:{size:11} }, grid:{color:'#f0f2f5'} }
+      }
+    }
+  });
+}
+
+// ─── Station Bar Chart ───────────────────────────────────────────────
+function renderStationChart() {
+  destroyChart('stations');
+  const byStation = {};
+  ST.transactions.forEach(t => {
+    const k = t.station.length > 28 ? t.station.substring(0,28)+'…' : t.station;
+    if (!byStation[k]) byStation[k] = { litres:0, amount:0, count:0 };
+    byStation[k].litres  += t.litres;
+    byStation[k].amount  += t.amount;
+    byStation[k].count++;
+  });
+  const sorted = Object.entries(byStation).sort((a,b)=>b[1].litres-a[1].litres).slice(0,15);
+  const ctx = document.getElementById('chart-stations').getContext('2d');
+  CHARTS.stations = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(([k]) => k),
+      datasets: [{
+        label: 'ลิตรรวม',
+        data: sorted.map(([,v]) => v.litres),
+        backgroundColor: sorted.map((_,i) => i===0?'#F5A623':'#1B2770aa'),
+        borderColor: sorted.map((_,i) => i===0?'#d4831a':'#1B2770'),
+        borderWidth: 1,
+        borderRadius: 5,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend:{display:false}, tooltip:{
+        callbacks:{
+          label: ctx => {
+            const v = sorted[ctx.dataIndex][1];
+            return [' ' + fmtN(v.litres,1) + ' ลิตร', ' ' + fmt(v.amount) + ' บาท', ' ' + v.count + ' ครั้ง'];
+          }
+        }
+      }},
+      scales: {
+        x: { grid:{color:'#f0f2f5'}, ticks:{font:{size:11}} },
+        y: { ticks:{font:{size:11.5}, color:'#2D3748'} }
+      }
+    }
+  });
+}
+
+// ─── Vehicle Table ───────────────────────────────────────────────────
+function renderTable() {
+  const totalAmt = ST.summary.reduce((s,r)=>s+r.amount, 0);
+  const avgPrice = totalAmt / ST.summary.reduce((s,r)=>s+r.litres, 0);
+  const sorted   = [...ST.summary].sort((a,b)=>b.amount-a.amount);
+  const maxAmt   = sorted[0]?.amount || 1;
+
+  const tbody = document.getElementById('vehicle-tbody');
+  tbody.innerHTML = sorted.map((r, i) => {
+    const pricePerL = r.litres > 0 ? r.amount / r.litres : 0;
+    const diff = pricePerL - avgPrice;
+    const priceCls = diff > 1 ? 'badge-hi' : diff < -1 ? 'badge-lo' : '';
+    const pct = totalAmt > 0 ? (r.amount / totalAmt * 100) : 0;
+    const barW = Math.round(pct / (sorted[0]?r.amount/maxAmt*100:100) * 60);
+    const cardFmt = r.cardNo.length===16
+      ? r.cardNo.replace(/(\d{4})(\d{4})(\d{4})(\d{4})/, '$1-$2-$3-$4')
+      : r.cardNo;
+    return `<tr>
+      <td style="color:var(--muted);font-size:12px">${i+1}</td>
+      <td><strong>${r.plate}</strong></td>
+      <td style="font-size:11px;color:var(--muted)">${cardFmt}</td>
+      <td class="num">${fmtN(r.litres,2)}</td>
+      <td class="num"><strong>${fmt(r.amount)}</strong></td>
+      <td class="num ${priceCls}">${fmtN(pricePerL,2)}${diff>1?' ▲':diff<-1?' ▼':''}</td>
+      <td class="num">${fmtN(pct,1)}%<span class="pct-bar" style="width:${Math.max(4,barW)}px"></span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── Restore from localStorage ────────────────────────────────────────
+(function init() {
+  try {
+    const saved = localStorage.getItem('trr_dashboard');
+    if (saved) {
+      ST = JSON.parse(saved);
+      if (ST.summary && ST.summary.length > 0) {
+        renderAll();
+        toast('📂 โหลดข้อมูลล่าสุดจาก cache');
+      }
+    }
+  } catch(_) {}
+})();
+</script>
+</body>
+</html>
