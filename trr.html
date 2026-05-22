@@ -1,0 +1,2443 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRR Transport — ระบบต้นทุนน้ำมันขนส่ง</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══ Base ══════════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:      #1B2770;
+  --navy2:     #2233A0;
+  --navy-dark: #141D5C;
+  --gold:      #F5A623;
+  --gold2:     #FBBF24;
+  --bg:        #F0F2F5;
+  --white:     #FFFFFF;
+  --border:    #E2E8F0;
+  --text:      #2D3748;
+  --muted:     #64748B;
+  --surface:   #F8FAFF;
+  --green:     #22C55E;
+  --green2:    #16A34A;
+  --red:       #EF4444;
+  --red2:      #DC2626;
+  --orange:    #F97316;
+  --sidebar-w: 220px;
+}
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Sarabun', 'Leelawadee UI', 'Tahoma', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  display: flex;
+}
+
+/* ══ Layout ════════════════════════════════════════════════════════════════ */
+#sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  height: 100vh;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#main {
+  flex: 1;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ══ Sidebar top (navy header) ═════════════════════════════════════════════ */
+#sidebar-top {
+  background: var(--navy);
+  border-bottom: 3px solid var(--gold);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+#logo-wrap {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  border: 3px solid var(--gold);
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(245,166,35,0.12);
+  font-size: 32px;
+}
+#logo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+#logo-wrap .logo-fallback { display: none; }
+#app-company {
+  color: var(--gold);
+  font-size: 13pt;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+}
+#app-sub {
+  color: rgba(255,255,255,0.65);
+  font-size: 8pt;
+  letter-spacing: 1px;
+  text-align: center;
+}
+#sidebar-divider {
+  width: 80%; height: 1px;
+  background: rgba(245,166,35,0.4);
+}
+#app-system {
+  color: rgba(255,255,255,0.5);
+  font-size: 8pt;
+  text-align: center;
+}
+
+/* ══ Nav buttons ════════════════════════════════════════════════════════════ */
+#nav { flex-shrink: 0; padding: 10px 0; }
+.nav-btn {
+  display: block; width: 100%;
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  border-left: 3px solid transparent;
+  padding: 11px 16px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 10pt;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.nav-btn:hover {
+  background: #F8FAFF;
+  color: var(--navy);
+  border-left-color: var(--border);
+}
+.nav-btn.active {
+  background: #EEF2FF;
+  color: var(--navy);
+  font-weight: 700;
+  border-left-color: var(--gold);
+}
+
+/* ══ Fuel box (sidebar bottom) ══════════════════════════════════════════════ */
+#nav-spacer { flex: 1; }
+#fuel-box {
+  margin: 8px;
+  background: rgba(245,166,35,0.18);
+  border: 1px solid rgba(245,166,35,0.5);
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+  flex-shrink: 0;
+}
+#fuel-box .fuel-title {
+  font-size: 9pt; font-weight: 700; color: #B45309; margin-bottom: 4px;
+}
+#fuel-price-display {
+  font-size: 22pt; font-weight: 700; color: var(--navy); line-height: 1.1;
+}
+#fuel-box .fuel-unit { font-size: 9pt; color: #92400E; margin-top: 2px; }
+#sidebar-ver {
+  text-align: center;
+  font-size: 8pt;
+  color: rgba(160,174,207,0.5);
+  padding: 6px;
+  flex-shrink: 0;
+}
+
+/* ══ Page layout ════════════════════════════════════════════════════════════ */
+.page { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+.page.active { display: flex; }
+.page-bar {
+  height: 60px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.page-title {
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--navy);
+  flex: 1;
+}
+.page-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 28px;
+  background: var(--bg);
+}
+
+/* ══ Cards ══════════════════════════════════════════════════════════════════ */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.card-navy {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--navy);
+  border-radius: 10px;
+}
+.card-gold {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--gold);
+  border-radius: 10px;
+}
+
+/* ══ Stat cards (dashboard) ═════════════════════════════════════════════════ */
+.stat-row { display: flex; gap: 14px; margin-bottom: 20px; }
+.stat-card {
+  flex: 1;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.stat-card .stat-icon { font-size: 20pt; margin-bottom: 4px; }
+.stat-card .stat-val {
+  font-size: 26pt; font-weight: 700; color: var(--navy); line-height: 1;
+}
+.stat-card .stat-label {
+  font-size: 9pt; color: var(--muted); margin-top: 4px; line-height: 1.3;
+}
+
+/* ══ Fuel hero (dashboard) ══════════════════════════════════════════════════ */
+#fuel-hero {
+  background: var(--navy);
+  border-radius: 12px;
+  padding: 20px 28px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 20px;
+}
+#fuel-hero .hero-left { flex: 1; }
+#fuel-hero .hero-title { font-size: 14pt; font-weight: 700; color: var(--gold); }
+#fuel-hero .hero-hint  { font-size: 9pt; color: rgba(255,255,255,0.65); margin-top: 3px; }
+#fuel-input {
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(245,166,35,0.7);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 16pt; font-weight: 700;
+  color: var(--white);
+  font-family: 'Sarabun', sans-serif;
+  width: 180px;
+  text-align: right;
+}
+#fuel-input:focus { outline: none; border-color: var(--gold); }
+
+/* ══ Tables ═════════════════════════════════════════════════════════════════ */
+.tbl-wrap {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px;
+}
+thead th {
+  background: #F8FAFC;
+  color: #374151;
+  font-weight: 700;
+  font-size: 9pt;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+thead th.center { text-align: center; }
+tbody tr { border-bottom: 1px solid #F1F5F9; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:nth-child(even) { background: #F8FAFC; }
+tbody tr:hover { background: #F1F5FF; }
+tbody td { padding: 9px 12px; color: var(--text); }
+tbody td.center { text-align: center; }
+tbody td.bold { font-weight: 700; }
+tbody td.green { color: #1E8449; font-weight: 700; }
+tbody td.muted { color: var(--muted); }
+tbody td.missing { background: #FFF7E6; color: #92400E; }
+
+/* Distance cell - editable */
+.dist-cell {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 6px;
+  transition: background 0.1s;
+  text-align: center;
+  display: inline-block;
+  min-width: 60px;
+}
+.dist-cell:hover { background: #EEF2FF; }
+.dist-cell.editing { background: transparent; padding: 0; }
+.dist-cell input {
+  width: 80px;
+  background: var(--white);
+  color: #0B0F2C;
+  border: 2px solid var(--navy);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 11pt; font-weight: 700;
+  font-family: 'Sarabun', sans-serif;
+  text-align: center;
+}
+.dist-cell input:focus { outline: none; }
+.dist-cell.has-val { color: #1E8449; font-weight: 700; }
+.dist-cell.no-val  { color: #92400E; font-style: italic; }
+
+/* ══ Filters row ════════════════════════════════════════════════════════════ */
+.filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; align-items: center; }
+.filter-group { display: flex; align-items: center; gap: 6px; }
+.filter-group label { font-weight: 700; white-space: nowrap; font-size: 13px; }
+
+/* ══ Stats bar ══════════════════════════════════════════════════════════════ */
+.stats-bar {
+  background: #EEF2FF;
+  color: var(--navy);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.stats-bar.warn {
+  background: #FFEDD5;
+  color: #7C2D12;
+  border: 1px solid #FB923C;
+}
+
+/* ══ Step labels (calc page) ════════════════════════════════════════════════ */
+.step-label {
+  display: inline-block;
+  background: var(--navy);
+  color: var(--white);
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-weight: 700;
+  font-size: 10pt;
+  margin: 12px 0 8px;
+}
+
+/* ══ Mode buttons ═══════════════════════════════════════════════════════════ */
+.mode-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.mode-btn {
+  background: var(--white);
+  color: #546E7A;
+  border: 2px solid #D5DCF0;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 10pt;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.mode-btn:hover   { background: #E8EDFF; color: var(--navy); border-color: var(--navy); }
+.mode-btn.active  { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+/* ══ Form sections ══════════════════════════════════════════════════════════ */
+.form-section {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 14px;
+}
+.form-section h3 {
+  font-size: 11pt; font-weight: 700; color: var(--navy);
+  margin-bottom: 14px;
+}
+.form-grid { display: grid; grid-template-columns: 140px 1fr; gap: 10px; align-items: center; }
+.form-grid label { font-weight: 700; }
+
+/* ══ Result cards (calc page) ═══════════════════════════════════════════════ */
+.result-cards { display: flex; gap: 16px; margin: 14px 0; }
+.result-card {
+  flex: 1;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+.result-card .rc-head {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 9pt; font-weight: 700; color: var(--muted); margin-bottom: 8px;
+}
+.result-card .rc-val {
+  font-size: 28pt; font-weight: 700; color: var(--navy);
+  text-align: center; line-height: 1;
+}
+.result-card .rc-unit {
+  font-size: 10pt; color: var(--muted); text-align: center; margin-top: 4px;
+}
+
+/* ══ Formula / legs boxes ═══════════════════════════════════════════════════ */
+.formula-box {
+  background: #EDF2FF;
+  border: 1px solid #C5D0F0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 10pt;
+  color: var(--navy);
+  margin-bottom: 10px;
+  word-break: break-all;
+}
+.legs-box {
+  background: #EAFAF1;
+  border: 1px solid #A9DFBF;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 10pt;
+  color: #1E8449;
+  margin-bottom: 10px;
+}
+
+/* ══ Distance status (backhaul) ═════════════════════════════════════════════ */
+.dist-status-box {
+  background: #F8FAFF;
+  border: 1px solid #D5DCF0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 9pt;
+}
+.dist-status-box .dst-title {
+  font-weight: 700; color: var(--navy); margin-bottom: 6px;
+}
+.dst-ok   { color: #1E8449; }
+.dst-warn { color: #C0392B; }
+
+/* ══ Tabs (master data) ═════════════════════════════════════════════════════ */
+.tab-bar { display: flex; gap: 2px; margin-bottom: 0; }
+.tab-btn {
+  background: #F8FAFC;
+  color: #4B5563;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  padding: 9px 20px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 9pt; font-weight: 700;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.tab-btn.active { background: var(--white); color: var(--navy); border-top: 2px solid var(--gold); }
+.tab-btn:not(.active):hover { background: #F1F5F9; color: var(--navy); }
+.tab-content { background: var(--white); border: 1px solid var(--border); border-radius: 0 8px 8px 8px; padding: 16px; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ══ Inputs / Selects ═══════════════════════════════════════════════════════ */
+input[type="text"], input[type="number"], select, textarea {
+  border: 1.5px solid #CBD5E1;
+  border-radius: 6px;
+  padding: 7px 12px;
+  background: var(--white);
+  color: var(--text);
+  font-family: 'Sarabun', sans-serif;
+  font-size: 13px;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: var(--navy); outline: none; }
+select { appearance: auto; cursor: pointer; }
+
+/* Checkbox */
+input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--navy); cursor: pointer; }
+.check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.check-row label { cursor: pointer; }
+
+/* ══ Buttons ════════════════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 20px;
+  border: none; border-radius: 6px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 10pt; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+.btn:disabled { background: #CBD5E1; color: #94A3B8; cursor: not-allowed; }
+.btn-navy    { background: var(--navy);  color: #fff; }
+.btn-navy:hover:not(:disabled)    { background: var(--navy2); }
+.btn-gold    { background: var(--gold);  color: var(--navy); }
+.btn-gold:hover:not(:disabled)    { background: var(--gold2); }
+.btn-green   { background: var(--green); color: #fff; }
+.btn-green:hover:not(:disabled)   { background: var(--green2); }
+.btn-red     { background: var(--red);   color: #fff; }
+.btn-red:hover:not(:disabled)     { background: var(--red2); }
+.btn-outline { background: transparent; color: var(--navy); border: 1.5px solid var(--navy); }
+.btn-outline:hover:not(:disabled) { background: #EEF2FF; }
+.btn-orange  { background: var(--orange); color: #fff; }
+.btn-orange:hover:not(:disabled)  { background: #EA580C; }
+.btn-gray    { background: #64748B; color: #fff; }
+.btn-gray:hover:not(:disabled)    { background: #475569; }
+.btn-sm { padding: 5px 12px; font-size: 9pt; }
+.btn-lg { padding: 12px 48px; font-size: 12pt; }
+
+/* ══ Rate info badge ════════════════════════════════════════════════════════ */
+.rate-badge {
+  background: #E8EDFF;
+  color: var(--navy);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 10pt;
+}
+.fuel-badge {
+  background: #FFF8E7;
+  color: var(--navy);
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  padding: 4px 14px;
+  font-size: 11pt;
+  font-weight: 700;
+}
+.dist-info {
+  background: #EAFAF1;
+  color: #1E8449;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 10pt;
+}
+
+/* ══ Modal ══════════════════════════════════════════════════════════════════ */
+#modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+#modal-overlay.open { display: flex; }
+#modal-box {
+  background: var(--white);
+  border-radius: 14px;
+  width: 560px;
+  max-width: 95vw;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+#modal-header {
+  background: var(--navy);
+  color: var(--white);
+  padding: 16px 20px;
+  font-size: 12pt;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+#modal-close {
+  background: transparent; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.7); font-size: 18px; line-height: 1;
+}
+#modal-close:hover { color: var(--white); }
+#modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+#modal-footer {
+  border-top: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ══ Toast / notification ════════════════════════════════════════════════════ */
+#toast {
+  position: fixed;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--navy);
+  color: var(--white);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  z-index: 2000;
+  opacity: 0;
+  transition: transform 0.25s, opacity 0.25s;
+  pointer-events: none;
+}
+#toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+#toast.success { background: var(--green2); }
+#toast.error   { background: var(--red2); }
+#toast.warn    { background: var(--orange); }
+
+/* ══ Multi-stop stop rows ════════════════════════════════════════════════════ */
+.ms-stop-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.ms-stop-row label { font-weight: 700; min-width: 90px; }
+.ms-total-box {
+  background: #F8FAFF;
+  border: 1px solid #D5DCF0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 8px;
+}
+.ms-total-box .ms-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+
+/* ══ Section title ══════════════════════════════════════════════════════════ */
+.section-title {
+  font-size: 11pt; font-weight: 700; color: var(--navy);
+  margin: 0 0 12px;
+}
+
+/* ══ Empty state ════════════════════════════════════════════════════════════ */
+.empty-state {
+  text-align: center; padding: 40px 20px; color: var(--muted);
+}
+.empty-state .e-icon { font-size: 36pt; margin-bottom: 10px; }
+.empty-state p { font-size: 11pt; }
+
+/* ══ Scrollbar ══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+/* ══ Settings page ══════════════════════════════════════════════════════════ */
+.settings-block {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.settings-block h3 { font-size: 11pt; font-weight: 700; color: var(--navy); margin-bottom: 12px; }
+.settings-block p  { color: var(--muted); font-size: 13px; margin-bottom: 10px; line-height: 1.6; }
+
+/* ══ Misc ════════════════════════════════════════════════════════════════════ */
+.row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.sep { height: 1px; background: var(--border); margin: 12px 0; }
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+.mt-8  { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mb-8  { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.hidden { display: none !important; }
+.flex-row { display: flex; gap: 10px; align-items: center; }
+.flex-1 { flex: 1; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════════════════════════════════════════════ -->
+<aside id="sidebar">
+  <div id="sidebar-top">
+    <div id="logo-wrap">
+      <img src="../project3/assets/logo.png" alt="logo"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span class="logo-fallback">⛽</span>
+    </div>
+    <div id="app-company">TARARIN 999</div>
+    <div id="app-sub">TRANSPORT CO.,LTD.</div>
+    <div id="sidebar-divider"></div>
+    <div id="app-system">ระบบต้นทุนน้ำมันขนส่ง</div>
+  </div>
+
+  <nav id="nav">
+    <button class="nav-btn active" onclick="navigate(0)">📊&nbsp;&nbsp;ตารางระยะทาง</button>
+    <button class="nav-btn"        onclick="navigate(1)">🏠&nbsp;&nbsp;แดชบอร์ด</button>
+    <button class="nav-btn"        onclick="navigate(2)">📍&nbsp;&nbsp;จัดการข้อมูล</button>
+    <button class="nav-btn"        onclick="navigate(3)">🧮&nbsp;&nbsp;คำนวณต้นทุน</button>
+    <button class="nav-btn"        onclick="navigate(4)">⚙️&nbsp;&nbsp;ตั้งค่า / Admin</button>
+  </nav>
+  <div style="padding:10px 10px 0;">
+    <a href="./index.html" style="display:flex;align-items:center;gap:8px;padding:9px 14px;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.3);border-radius:8px;color:var(--gold);font-size:12px;font-weight:700;text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='rgba(245,166,35,0.2)'" onmouseout="this.style.background='rgba(245,166,35,0.1)'">
+      ⬅️&nbsp; กลับหน้าแรก
+    </a>
+  </div>
+
+  <div id="nav-spacer"></div>
+
+  <div id="fuel-box">
+    <div class="fuel-title">⛽&nbsp;&nbsp;ราคาน้ำมันวันนี้</div>
+    <div id="fuel-price-display">40.00</div>
+    <div class="fuel-unit">บาท / ลิตร</div>
+  </div>
+  <div id="sidebar-ver">v1.0 web</div>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════════════════════════════════════ -->
+<main id="main">
+
+  <!-- ── Page 0: ตารางระยะทาง ─────────────────────────────────────────── -->
+  <div class="page active" id="page-0">
+    <div class="page-bar">
+      <span class="page-title">📊&nbsp;&nbsp;ตารางระยะทาง</span>
+    </div>
+    <div class="page-body">
+      <!-- Row 1: origin + truck -->
+      <div class="filters">
+        <div class="filter-group">
+          <label>ต้นทาง:</label>
+          <select id="dd-origin" style="min-width:260px;" onchange="ddReloadTable()"></select>
+        </div>
+        <div class="filter-group">
+          <label>ประเภทรถ:</label>
+          <select id="dd-truck" style="min-width:200px;" onchange="ddReloadTable()"></select>
+        </div>
+      </div>
+      <!-- Row 2: region + province + search -->
+      <div class="filters">
+        <div class="filter-group">
+          <label>ภูมิภาค:</label>
+          <select id="dd-region" style="min-width:180px;" onchange="ddOnRegionChange()"></select>
+        </div>
+        <div class="filter-group">
+          <label>จังหวัด:</label>
+          <select id="dd-province" style="min-width:150px;" onchange="ddApplyFilters()"></select>
+        </div>
+        <div class="filter-group" style="flex:1;">
+          <label>ค้นหา:</label>
+          <input type="text" id="dd-search" placeholder="พิมพ์ชื่อสถานที่..." oninput="ddApplyFilters()">
+        </div>
+      </div>
+      <!-- Row 3: toggle + add-missing -->
+      <div class="filters" style="justify-content:space-between;">
+        <label class="check-row">
+          <input type="checkbox" id="dd-show-missing" onchange="ddApplyFilters()">
+          <span id="dd-missing-label">แสดงปลายทางที่ยังไม่มีระยะทางด้วย</span>
+        </label>
+        <button class="btn btn-green btn-sm" id="dd-add-missing-btn" onclick="ddOpenAddMissingDialog()" disabled>
+          ➕ เพิ่มระยะทางที่ขาด
+        </button>
+      </div>
+      <!-- Stats bar -->
+      <div class="stats-bar" id="dd-stats">เลือกต้นทางเพื่อดูปลายทางและระยะทาง</div>
+      <!-- Table -->
+      <div class="tbl-wrap">
+        <table id="dd-table">
+          <thead>
+            <tr>
+              <th>ปลายทาง</th>
+              <th class="center">จังหวัด</th>
+              <th class="center">ภูมิภาค</th>
+              <th class="center">ระยะทาง (กม.)</th>
+            </tr>
+          </thead>
+          <tbody id="dd-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Page 1: แดชบอร์ด ──────────────────────────────────────────────── -->
+  <div class="page" id="page-1">
+    <div class="page-bar">
+      <span class="page-title">🏠&nbsp;&nbsp;แดชบอร์ด</span>
+    </div>
+    <div class="page-body">
+      <!-- Fuel hero -->
+      <div id="fuel-hero">
+        <div class="hero-left">
+          <div class="hero-title">⛽&nbsp;&nbsp;ราคาน้ำมันวันนี้</div>
+          <div class="hero-hint">ปรับราคาแล้วกด 'บันทึก' เพื่ออัปเดตทุกการคำนวณ</div>
+        </div>
+        <input type="number" id="fuel-input" step="0.01" min="1" max="999" value="40">
+        <button class="btn btn-gold" style="min-height:46px;font-size:12pt;" onclick="dashSaveFuel()">
+          💾&nbsp;&nbsp;บันทึก
+        </button>
+      </div>
+      <!-- Stat cards -->
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-icon">🏢</div><div class="stat-val" id="s-origins">0</div><div class="stat-label">ต้นทาง</div></div>
+        <div class="stat-card"><div class="stat-icon">🏭</div><div class="stat-val" id="s-dests">0</div><div class="stat-label">ปลายทาง</div></div>
+        <div class="stat-card"><div class="stat-icon">🏠</div><div class="stat-val" id="s-depots">0</div><div class="stat-label">ที่พักรถ</div></div>
+        <div class="stat-card"><div class="stat-icon">📏</div><div class="stat-val" id="s-dists">0</div><div class="stat-label">คู่ระยะทาง</div></div>
+        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-val" id="s-calcs-today">0</div><div class="stat-label">คำนวณวันนี้</div></div>
+      </div>
+      <!-- Recent calcs -->
+      <div class="flex-row mb-8" style="justify-content:space-between;">
+        <h3 class="section-title" style="margin:0;">📋&nbsp;&nbsp;การคำนวณล่าสุด</h3>
+        <div class="flex-row" style="gap:8px;">
+          <button class="btn btn-gold btn-sm" onclick="navigate(3)">🧮&nbsp;&nbsp;ไปคำนวณ</button>
+          <button class="btn btn-red  btn-sm" onclick="dashClearHistory()">🗑&nbsp;&nbsp;ล้างประวัติ</button>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>วันที่/เวลา</th><th>ต้นทาง</th><th>ปลายทาง</th>
+              <th>ประเภทรถ</th><th>โหมด</th>
+              <th class="center">ระยะทาง (กม.)</th><th class="center">ค่าน้ำมัน (บาท)</th>
+            </tr>
+          </thead>
+          <tbody id="dash-calc-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Page 2: จัดการข้อมูล ─────────────────────────────────────────── -->
+  <div class="page" id="page-2">
+    <div class="page-bar">
+      <span class="page-title">📍&nbsp;&nbsp;จัดการข้อมูล</span>
+    </div>
+    <div class="page-body">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('loc')">🏢 สถานที่</button>
+        <button class="tab-btn"        onclick="switchTab('dist')">📏 ระยะทาง</button>
+        <button class="tab-btn"        onclick="switchTab('bh')">↩️ Backhaul</button>
+      </div>
+      <div class="tab-content">
+        <!-- Tab: สถานที่ -->
+        <div class="tab-pane active" id="tab-loc">
+          <div class="flex-row mb-12" style="justify-content:space-between;">
+            <h3 class="section-title" style="margin:0;">สถานที่ทั้งหมด</h3>
+            <button class="btn btn-navy btn-sm" onclick="openAddLocation()">➕ เพิ่มสถานที่</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ชื่อสถานที่</th>
+                  <th class="center">ประเภท</th>
+                  <th class="center">จังหวัด</th>
+                  <th class="center">ภูมิภาค</th>
+                  <th class="center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="loc-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Tab: ระยะทาง -->
+        <div class="tab-pane" id="tab-dist">
+          <div class="flex-row mb-12" style="justify-content:space-between;">
+            <h3 class="section-title" style="margin:0;">ระยะทางทั้งหมด</h3>
+            <button class="btn btn-navy btn-sm" onclick="openAddDistance()">➕ เพิ่มระยะทาง</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ต้นทาง / สถานที่ A</th>
+                  <th>ปลายทาง / สถานที่ B</th>
+                  <th class="center">ระยะทาง (กม.)</th>
+                  <th class="center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="dist-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Tab: Backhaul -->
+        <div class="tab-pane" id="tab-bh">
+          <div class="flex-row mb-12" style="justify-content:space-between;">
+            <h3 class="section-title" style="margin:0;">ระยะทาง Backhaul</h3>
+            <button class="btn btn-navy btn-sm" onclick="openAddBackhaul()">➕ เพิ่ม Backhaul</button>
+          </div>
+          <div style="background:#FFFBEB;border:1px solid rgba(245,166,35,0.4);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#B45309;">
+            ⚠️ ระยะทาง Backhaul = ปลายทาง → จุดสิ้นสุด (รวมระยะทางแวะรับแป้งที่จุดขึ้นแป้งแล้ว)
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ปลายทาง</th>
+                  <th>จุดขึ้นแป้ง (Waypoint)</th>
+                  <th>จุดสิ้นสุด</th>
+                  <th class="center">ระยะทาง (กม.)</th>
+                  <th class="center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="bh-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Page 3: คำนวณต้นทุน ───────────────────────────────────────────── -->
+  <div class="page" id="page-3">
+    <div class="page-bar">
+      <span class="page-title">🧮&nbsp;&nbsp;คำนวณต้นทุนน้ำมัน</span>
+      <span class="fuel-badge" id="calc-fuel-badge">⛽ 40.00 บาท/ลิตร</span>
+    </div>
+    <div class="page-body" id="calc-body">
+      <!-- Built by JS -->
+    </div>
+  </div>
+
+  <!-- ── Page 4: ตั้งค่า ──────────────────────────────────────────────── -->
+  <div class="page" id="page-4">
+    <div class="page-bar">
+      <span class="page-title">⚙️&nbsp;&nbsp;ตั้งค่า / Admin</span>
+    </div>
+    <div class="page-body">
+
+      <div class="settings-block">
+        <h3>💾 Export / Import ข้อมูล</h3>
+        <p>Export ข้อมูลทั้งหมด (สถานที่ + ระยะทาง + การตั้งค่า) เป็น JSON สำหรับสำรองหรือย้ายไปเครื่องอื่น</p>
+        <div class="flex-row">
+          <button class="btn btn-navy" onclick="exportData()">📥 Export JSON</button>
+          <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">📤 Import JSON</button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+      </div>
+
+      <div class="settings-block">
+        <h3>🗑 ล้างประวัติการคำนวณ</h3>
+        <p>ลบประวัติการคำนวณทั้งหมด (ไม่กระทบข้อมูลสถานที่และระยะทาง)</p>
+        <button class="btn btn-red" onclick="settingsClearHistory()">🗑 ล้างประวัติ</button>
+      </div>
+
+      <div class="settings-block">
+        <h3>🔄 Reset ข้อมูลทั้งหมด</h3>
+        <p>ลบข้อมูลทั้งหมดใน localStorage และกลับสู่สถานะเริ่มต้น (ไม่สามารถกู้คืนได้)</p>
+        <button class="btn btn-red" onclick="settingsReset()">⚠️ Reset ทั้งหมด</button>
+      </div>
+
+      <div class="settings-block">
+        <h3>ℹ️ ข้อมูลระบบ</h3>
+        <div id="settings-info" style="font-size:13px;color:var(--muted);line-height:2;"></div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     MODAL
+═══════════════════════════════════════════════════════════════════════════ -->
+<div id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div id="modal-box">
+    <div id="modal-header">
+      <span id="modal-title">ชื่อ Modal</span>
+      <button id="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+    <div id="modal-footer">
+      <button class="btn btn-gray" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-navy" id="modal-save-btn" onclick="modalSave()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════════
+   CONFIG — ใส่ GAS URL หลัง deploy Code.gs แล้ว
+   ถ้าเว้นว่าง ('') จะใช้ localStorage (offline mode)
+════════════════════════════════════════════════════════════════════════════ */
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyeGakSanGKfI1i73uUdZ0gTJzRPlwu_bcqh0sW7mZadiBN2VDGhqRJwyfL0tvWY0xPRA/exec';   // ← ใส่ URL ตรงนี้  เช่น 'https://script.google.com/macros/s/ABC.../exec'
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CONSTANTS
+════════════════════════════════════════════════════════════════════════════ */
+const TRUCKS = [
+  { id:1, name:'รถ 4 ล้อ',              wheels:4,  base_rate:11,  special:false, thresh:null, rate_below:null, rate_above:null, empty_run:false, backhaul:false },
+  { id:2, name:'รถ 6 ล้อ (5.5-6.5 ม.)', wheels:6,  base_rate:7,   special:false, thresh:null, rate_below:null, rate_above:null, empty_run:true,  backhaul:true  },
+  { id:3, name:'รถ 6 ล้อ (7 ม.)',        wheels:6,  base_rate:6,   special:false, thresh:null, rate_below:null, rate_above:null, empty_run:true,  backhaul:true  },
+  { id:4, name:'รถ 10 ล้อ',             wheels:10, base_rate:5,   special:false, thresh:null, rate_below:null, rate_above:null, empty_run:false, backhaul:false },
+  { id:5, name:'รถเทรลเลอร์ 22 ล้อ',   wheels:22, base_rate:3.4, special:true,  thresh:100,  rate_below:3.4,  rate_above:3.3,  empty_run:false, backhaul:false },
+];
+
+const REGION_ORDER  = ['north','east','west','south','other'];
+const REGION_LABEL  = { north:'ภาคเหนือ', east:'ภาคตะวันออก / อีสาน', west:'ภาคกลาง / ตะวันตก', south:'ภาคใต้', other:'ไม่ระบุ' };
+
+const NORTH_SET = new Set(['เชียงใหม่','เชียงราย','ลำปาง','ลำพูน','แม่ฮ่องสอน','น่าน','พะเยา','แพร่','อุตรดิตถ์','สุโขทัย','ตาก','เพชรบูรณ์','พิจิตร','พิษณุโลก','กำแพงเพชร','นครสวรรค์','อุทัยธานี']);
+const EAST_SET  = new Set(['ฉะเชิงเทรา','ปราจีนบุรี','สระแก้ว','นครนายก','ชลบุรี','ระยอง','จันทบุรี','ตราด','นครราชสีมา','บุรีรัมย์','สุรินทร์','ศรีสะเกษ','อุบลราชธานี','ยโสธร','ชัยภูมิ','อำนาจเจริญ','หนองบัวลำภู','ขอนแก่น','อุดรธานี','เลย','หนองคาย','มหาสารคาม','ร้อยเอ็ด','กาฬสินธุ์','สกลนคร','นครพนม','มุกดาหาร','บึงกาฬ']);
+const WEST_SET  = new Set(['กรุงเทพมหานคร','กรุงเทพ','นนทบุรี','ปทุมธานี','สมุทรปราการ','สมุทรสาคร','สมุทรสงคราม','นครปฐม','พระนครศรีอยุธยา','อยุธยา','อ่างทอง','สิงห์บุรี','ลพบุรี','ชัยนาท','สระบุรี','สุพรรณบุรี','กาญจนบุรี','ราชบุรี','เพชรบุรี','ประจวบคีรีขันธ์']);
+const SOUTH_SET = new Set(['ชุมพร','ระนอง','สุราษฎร์ธานี','พังงา','ภูเก็ต','กระบี่','นครศรีธรรมราช','ตรัง','พัทลุง','สตูล','สงขลา','ปัตตานี','ยะลา','นราธิวาส']);
+
+function provToRegion(prov) {
+  if (!prov) return 'other';
+  let p = prov.trim().replace(/^จังหวัด|^จ\./, '').trim();
+  if (NORTH_SET.has(p)) return 'north';
+  if (EAST_SET.has(p))  return 'east';
+  if (WEST_SET.has(p))  return 'west';
+  if (SOUTH_SET.has(p)) return 'south';
+  return 'other';
+}
+
+function locSortKey(loc) {
+  const r = REGION_ORDER.indexOf(provToRegion(loc.province || ''));
+  return [r, loc.province || '', loc.name];
+}
+
+const TYPE_LABEL = { origin:'ต้นทาง', destination:'ปลายทาง', depot:'ที่พักรถ', waypoint:'จุดขึ้นแป้ง' };
+const MODE_LABEL = { normal:'ปกติ', empty_run:'ตีเปล่า', backhaul:'รับงานเพิ่ม', multistop:'หลายจุดส่ง' };
+
+/* ════════════════════════════════════════════════════════════════════════════
+   DB  (localStorage)
+════════════════════════════════════════════════════════════════════════════ */
+const DB = {
+  d: null,   // loaded data
+
+  _blank() {
+    return {
+      locations:  [],
+      distances:  [],
+      backhaul:   [],
+      multistop:  [],
+      settings:   { fuel_price: 40 },
+      calcs:      [],
+      _ids:       { locations:0, distances:0, backhaul:0, multistop:0, calcs:0 },
+    };
+  },
+
+  load() {
+    if (GAS_URL) {
+      // ── Online mode: load from GAS ───────────────────────────────────────
+      showLoading('กำลังโหลดข้อมูลจาก server...');
+      fetch(GAS_URL + '?action=load')
+        .then(r => r.json())
+        .then(res => {
+          const raw = res.data;
+          if (raw) { try { this.d = JSON.parse(raw); } catch(e) { this.d = this._blank(); } }
+          else { this.d = this._blank(); }
+          if (!this.d._ids) this.d._ids = { locations:0, distances:0, backhaul:0, multistop:0, calcs:0 };
+          hideLoading(); refreshFuelDisplay(); navigate(0);
+        })
+        .catch(err => {
+          console.error('GAS load failed:', err);
+          // Fallback: localStorage
+          const raw = localStorage.getItem('trr_db');
+          if (raw) { try { this.d = JSON.parse(raw); } catch(e) { this.d = this._blank(); } }
+          else { this.d = this._blank(); }
+          if (!this.d._ids) this.d._ids = { locations:0, distances:0, backhaul:0, multistop:0, calcs:0 };
+          hideLoading(); refreshFuelDisplay(); navigate(0);
+          toast('โหลดจาก server ไม่ได้ — ใช้ข้อมูล local แทน', 'warn');
+        });
+    } else {
+      // ── Offline mode: localStorage ───────────────────────────────────────
+      const raw = localStorage.getItem('trr_db');
+      if (raw) { try { this.d = JSON.parse(raw); } catch(e) { this.d = this._blank(); } }
+      else { this.d = this._blank(); }
+      if (!this.d._ids) this.d._ids = { locations:0, distances:0, backhaul:0, multistop:0, calcs:0 };
+    }
+  },
+
+  save() {
+    // Always save localStorage as backup
+    localStorage.setItem('trr_db', JSON.stringify(this.d));
+    if (GAS_URL) {
+      // Fire-and-forget → POST to GAS (no-cors → opaque response)
+      fetch(GAS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(this.d),
+      }).catch(err => console.error('GAS save failed:', err));
+    }
+  },
+
+  nextId(t) { this.d._ids[t] = (this.d._ids[t] || 0) + 1; return this.d._ids[t]; },
+
+  /* ── Locations ─────────────────────────────────────────────────────────── */
+  getLocs(type)    { return type ? this.d.locations.filter(l => l.type === type) : [...this.d.locations]; },
+  getLoc(id)       { return this.d.locations.find(l => l.id === id) || null; },
+
+  addLoc(name, type, province) {
+    const id = this.nextId('locations');
+    this.d.locations.push({ id, name: name.trim(), type, province: (province||'').trim() });
+    this.save(); return id;
+  },
+
+  updateLoc(id, name, type, province) {
+    const l = this.d.locations.find(l => l.id === id);
+    if (l) { l.name = name.trim(); l.type = type; l.province = (province||'').trim(); this.save(); }
+  },
+
+  deleteLoc(id) {
+    this.d.locations  = this.d.locations.filter(l => l.id !== id);
+    this.d.distances  = this.d.distances.filter(d => d.fid !== id && d.tid !== id);
+    this.d.backhaul   = this.d.backhaul.filter(b => b.did !== id && b.wid !== id && b.eid !== id);
+    this.d.multistop  = this.d.multistop.filter(m => {
+      if (m.oid === id) return false;
+      return !m.dids.split(',').map(Number).includes(id);
+    });
+    this.save();
+  },
+
+  /* ── Distances ─────────────────────────────────────────────────────────── */
+  getDist(a, b) {
+    const fid = Math.min(a,b), tid = Math.max(a,b);
+    const d = this.d.distances.find(d => d.fid === fid && d.tid === tid);
+    return d ? d.km : null;
+  },
+
+  getDistsFrom(oid) {  // {otherId: km}
+    const map = {};
+    for (const d of this.d.distances) {
+      if (d.fid === oid) map[d.tid] = d.km;
+      else if (d.tid === oid) map[d.fid] = d.km;
+    }
+    return map;
+  },
+
+  setDist(a, b, km) {
+    const fid = Math.min(a,b), tid = Math.max(a,b);
+    const ex = this.d.distances.find(d => d.fid === fid && d.tid === tid);
+    if (ex) { ex.km = km; }
+    else { this.d.distances.push({ id: this.nextId('distances'), fid, tid, km }); }
+    this.save();
+  },
+
+  deleteDist(id) {
+    this.d.distances = this.d.distances.filter(d => d.id !== id);
+    this.save();
+  },
+
+  getAllDists() {
+    return this.d.distances.map(d => ({
+      ...d,
+      from_name: this.getLoc(d.fid)?.name || '?',
+      to_name:   this.getLoc(d.tid)?.name || '?',
+    }));
+  },
+
+  /* ── Backhaul ──────────────────────────────────────────────────────────── */
+  getBH(did, wid, eid) {
+    const b = this.d.backhaul.find(b => b.did === did && b.wid === wid && b.eid === eid);
+    return b ? b.km : null;
+  },
+
+  setBH(did, wid, eid, km) {
+    const ex = this.d.backhaul.find(b => b.did === did && b.wid === wid && b.eid === eid);
+    if (ex) { ex.km = km; }
+    else { this.d.backhaul.push({ id: this.nextId('backhaul'), did, wid, eid, km }); }
+    this.save();
+  },
+
+  deleteBH(id) { this.d.backhaul = this.d.backhaul.filter(b => b.id !== id); this.save(); },
+
+  getAllBH() {
+    return this.d.backhaul.map(b => ({
+      ...b,
+      dest_name:     this.getLoc(b.did)?.name || '?',
+      waypoint_name: this.getLoc(b.wid)?.name || '?',
+      endpoint_name: this.getLoc(b.eid)?.name || '?',
+    }));
+  },
+
+  /* ── Multi-stop ────────────────────────────────────────────────────────── */
+  _msKey(ids) { return [...ids].map(Number).sort((a,b)=>a-b).join(','); },
+
+  getMS(oid, dids) {
+    const key = this._msKey(dids);
+    const m = this.d.multistop.find(m => m.oid === oid && m.dids === key);
+    return m ? m.km : null;
+  },
+
+  setMS(oid, dids, km) {
+    const key = this._msKey(dids);
+    const ex = this.d.multistop.find(m => m.oid === oid && m.dids === key);
+    if (ex) { ex.km = km; }
+    else { this.d.multistop.push({ id: this.nextId('multistop'), oid, dids: key, km }); }
+    this.save();
+  },
+
+  /* ── Settings ──────────────────────────────────────────────────────────── */
+  get(k)    { return this.d.settings[k]; },
+  set(k, v) { this.d.settings[k] = v; this.save(); },
+
+  fuelPrice() { return parseFloat(this.d.settings.fuel_price || 40); },
+
+  /* ── Calculations ──────────────────────────────────────────────────────── */
+  saveCalc(data) {
+    data.id = this.nextId('calcs');
+    data.calculated_at = new Date().toISOString().replace('T',' ').slice(0,16);
+    this.d.calcs.unshift(data);
+    if (this.d.calcs.length > 200) this.d.calcs = this.d.calcs.slice(0, 200);
+    this.save();
+  },
+
+  recentCalcs(n=20) { return this.d.calcs.slice(0, n); },
+  clearCalcs()      { this.d.calcs = []; this.save(); },
+
+  /* ── Stats ─────────────────────────────────────────────────────────────── */
+  stats() {
+    const today = new Date().toISOString().slice(0,10);
+    return {
+      origins:   this.d.locations.filter(l => l.type==='origin').length,
+      dests:     this.d.locations.filter(l => l.type==='destination').length,
+      depots:    this.d.locations.filter(l => l.type==='depot').length,
+      dists:     this.d.distances.length,
+      todayCalcs: this.d.calcs.filter(c => (c.calculated_at||'').startsWith(today)).length,
+    };
+  },
+};
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CALCULATOR
+════════════════════════════════════════════════════════════════════════════ */
+function getFuelRate(truck, dist) {
+  if (truck.special) return dist < truck.thresh ? truck.rate_below : truck.rate_above;
+  return truck.base_rate;
+}
+
+function calcNormal(oid, did, truck, fp) {
+  const dist = DB.getDist(oid, did);
+  if (dist === null) throw new Error('ไม่พบระยะทาง: ต้นทาง → ปลายทาง');
+  const rate = getFuelRate(truck, dist);
+  const cost = (dist * 2) / rate * fp;
+  return {
+    mode:'normal', legs:{'ต้นทาง → ปลายทาง': dist},
+    total_distance: dist, fuel_rate: rate, fuel_price: fp, total_cost: cost,
+    formula: `(${dist.toFixed(1)} × 2) ÷ ${rate} × ${fp.toFixed(2)}`,
+  };
+}
+
+function calcEmptyRun(depotId, pickupId, truck, fp) {
+  const dist = DB.getDist(depotId, pickupId);
+  if (dist === null) throw new Error('ไม่พบระยะทาง: ที่พัก → จุดขึ้นงาน');
+  const rate = truck.base_rate;
+  const cost = dist / rate * fp;
+  return {
+    mode:'empty_run', legs:{'ที่พัก → จุดขึ้นงาน': dist},
+    total_distance: dist, fuel_rate: rate, fuel_price: fp, total_cost: cost,
+    formula: `${dist.toFixed(1)} ÷ ${rate} × ${fp.toFixed(2)} (ขาเดียว)`,
+  };
+}
+
+function calcBackhaul(oid, did, wid, truck, fp, depotId, nextId) {
+  const dOD = DB.getDist(oid, did);
+  if (dOD === null) throw new Error('ไม่พบระยะทาง: ต้นทาง → ปลายทาง');
+  const results = {};
+
+  if (depotId !== null) {
+    const dDD = DB.getBH(did, wid, depotId);
+    if (dDD === null) throw new Error('ไม่พบระยะทาง Backhaul: ปลายทาง → ที่พัก\nกรุณาเพิ่มระยะทาง Backhaul ในหน้า "จัดการข้อมูล" ก่อน');
+    const total = dOD + dDD; const rate = getFuelRate(truck, total); const cost = (total*2)/rate*fp;
+    results.case1 = { description:'รับงานเพิ่ม → กลับที่พัก',
+      legs:{'ต้นทาง → ปลายทาง':dOD,'ปลายทาง → ที่พัก (รวมแวะรับแป้ง)':dDD},
+      total_distance:total, fuel_rate:rate, fuel_price:fp, total_cost:cost,
+      formula:`(${total.toFixed(1)} × 2) ÷ ${rate} × ${fp.toFixed(2)}` };
+  }
+
+  if (nextId !== null) {
+    const dDN = DB.getBH(did, wid, nextId);
+    if (dDN === null) throw new Error('ไม่พบระยะทาง Backhaul: ปลายทาง → ต้นทางถัดไป\nกรุณาเพิ่มระยะทาง Backhaul ในหน้า "จัดการข้อมูล" ก่อน');
+    const total = dOD + dDN; const rate = getFuelRate(truck, total); const cost = (total*2)/rate*fp;
+    results.case2 = { description:'รับงานเพิ่ม → ไปขึ้นงานต่อ',
+      legs:{'ต้นทาง → ปลายทาง':dOD,'ปลายทาง → ต้นทางถัดไป (รวมแวะรับแป้ง)':dDN},
+      total_distance:total, fuel_rate:rate, fuel_price:fp, total_cost:cost,
+      formula:`(${total.toFixed(1)} × 2) ÷ ${rate} × ${fp.toFixed(2)}` };
+  }
+
+  if (!Object.keys(results).length) throw new Error('กรุณาติ๊กอย่างน้อย 1 กรณี (กรณี 1 หรือ กรณี 2)');
+  return results;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════════════════════════════ */
+
+/* Build <option> and <optgroup> list for a <select>, grouped by region */
+function buildLocSelect(sel, locs, placeholder, selectedId) {
+  sel.innerHTML = '';
+  const ph = new Option(placeholder, ''); ph.disabled = true; ph.selected = !selectedId;
+  sel.appendChild(ph);
+
+  const groups = {};
+  for (const r of REGION_ORDER) groups[r] = {};
+  for (const loc of locs) {
+    const r = provToRegion(loc.province || '');
+    const p = loc.province || '';
+    if (!groups[r][p]) groups[r][p] = [];
+    groups[r][p].push(loc);
+  }
+
+  for (const r of REGION_ORDER) {
+    const provMap = groups[r];
+    if (!Object.keys(provMap).length) continue;
+    const og = document.createElement('optgroup');
+    og.label = `── ${REGION_LABEL[r]} ──`;
+    for (const prov of Object.keys(provMap).sort()) {
+      for (const loc of provMap[prov].sort((a,b) => a.name.localeCompare(b.name, 'th'))) {
+        const txt = prov ? `${loc.name}  ·  ${prov}` : loc.name;
+        const opt = new Option(txt, loc.id);
+        if (loc.id === selectedId) opt.selected = true;
+        og.appendChild(opt);
+      }
+    }
+    sel.appendChild(og);
+  }
+}
+
+/* Build a simple <select> from array of {value, label} */
+function buildSimpleSelect(sel, items, placeholder, selectedVal) {
+  sel.innerHTML = '';
+  if (placeholder) {
+    const ph = new Option(placeholder, ''); ph.disabled = true;
+    if (selectedVal == null) ph.selected = true;
+    sel.appendChild(ph);
+  }
+  for (const it of items) {
+    const opt = new Option(it.label, it.value);
+    if (String(it.value) === String(selectedVal)) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+/* Toast notification */
+let _toastTimer = null;
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.className = ''; }, 2800);
+}
+
+/* Confirm dialog (native) */
+function confirm2(msg) { return window.confirm(msg); }
+
+/* Number formatting */
+function fmt(n, dec=1) { return n == null ? '—' : Number(n).toFixed(dec); }
+function fmtCost(n)    { return n == null ? '—' : Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+/* Refresh sidebar fuel price display */
+function refreshFuelDisplay() {
+  const p = DB.fuelPrice();
+  document.getElementById('fuel-price-display').textContent = p.toFixed(2);
+  const badge = document.getElementById('calc-fuel-badge');
+  if (badge) badge.textContent = `⛽ ${p.toFixed(2)} บาท/ลิตร`;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   MODAL SYSTEM
+════════════════════════════════════════════════════════════════════════════ */
+let _modalSaveFn = null;
+
+function openModal(title, bodyHTML, saveFn, saveLabel='💾 บันทึก', hideSave=false) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  const saveBtn = document.getElementById('modal-save-btn');
+  saveBtn.textContent = saveLabel;
+  saveBtn.style.display = hideSave ? 'none' : '';
+  _modalSaveFn = saveFn;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  _modalSaveFn = null;
+}
+
+function modalSave() { if (_modalSaveFn) _modalSaveFn(); }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════════════════════════════════ */
+let _currentPage = 0;
+
+function navigate(idx) {
+  _currentPage = idx;
+  document.querySelectorAll('.page').forEach((p,i) => p.classList.toggle('active', i === idx));
+  document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', i === idx));
+  refreshPage(idx);
+}
+
+function refreshPage(idx) {
+  if (idx === 0) refreshDistanceDash();
+  if (idx === 1) refreshDashboard();
+  if (idx === 2) refreshMasterData();
+  if (idx === 3) refreshCalcPage();
+  if (idx === 4) refreshSettings();
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PAGE 0 — ตารางระยะทาง
+════════════════════════════════════════════════════════════════════════════ */
+let _ddRows = [];  // [{loc, dist}] for current origin
+
+function refreshDistanceDash() {
+  // Rebuild origin select
+  const origins = DB.getLocs('origin').sort((a,b) => locSortKey(a) > locSortKey(b) ? 1 : -1);
+  const selO = document.getElementById('dd-origin');
+  const curO = parseInt(selO.value) || null;
+  buildLocSelect(selO, origins, '-- เลือกต้นทาง --', curO);
+
+  // Rebuild truck select
+  const selT = document.getElementById('dd-truck');
+  const curT = selT.value;
+  buildSimpleSelect(selT, [{value:'', label:'ทุกประเภท'}, ...TRUCKS.map(t => ({value:t.id, label:t.name}))], null, curT || '');
+
+  // Rebuild region select
+  const selR = document.getElementById('dd-region');
+  const curR = selR.value;
+  buildSimpleSelect(selR, [{value:'', label:'ทุกภูมิภาค'}, ...REGION_ORDER.map(r => ({value:r, label:REGION_LABEL[r]}))], null, curR || '');
+
+  ddReloadTable();
+}
+
+function ddReloadTable() {
+  const oid = parseInt(document.getElementById('dd-origin').value) || null;
+  if (!oid) {
+    _ddRows = [];
+    document.getElementById('dd-stats').textContent = 'เลือกต้นทางเพื่อดูปลายทางและระยะทาง';
+    document.getElementById('dd-stats').className = 'stats-bar';
+    document.getElementById('dd-tbody').innerHTML = '';
+    document.getElementById('dd-add-missing-btn').disabled = true;
+    ddBuildProvinceSelect([]);
+    return;
+  }
+
+  // Get all destinations (and depots/waypoints)
+  const destTypes = new Set(['destination','depot','waypoint']);
+  let dests = DB.getLocs().filter(l => destTypes.has(l.type) && l.id !== oid);
+
+  // Truck filter
+  // (web version: no per-location truck filtering, just show all)
+
+  const distMap = DB.getDistsFrom(oid);
+  _ddRows = dests.map(loc => ({ loc, dist: distMap[loc.id] ?? null }))
+    .sort((a,b) => {
+      const am = a.dist === null, bm = b.dist === null;
+      if (am !== bm) return am ? 1 : -1;
+      if (!am) return a.dist - b.dist;
+      const ak = locSortKey(a.loc), bk = locSortKey(b.loc);
+      return ak > bk ? 1 : -1;
+    });
+
+  ddBuildProvinceSelect(_ddRows.map(r => r.loc));
+  ddApplyFilters();
+}
+
+function ddBuildProvinceSelect(locs) {
+  const regionF = document.getElementById('dd-region').value;
+  const provinces = new Set();
+  for (const loc of locs) {
+    const p = (loc.province || '').trim();
+    if (!p) continue;
+    if (regionF && provToRegion(p) !== regionF) continue;
+    provinces.add(p);
+  }
+  const selP = document.getElementById('dd-province');
+  const curP = selP.value;
+  buildSimpleSelect(selP,
+    [{value:'', label:'ทุกจังหวัด'}, ...[...provinces].sort().map(p => ({value:p, label:p}))],
+    null, provinces.has(curP) ? curP : '');
+}
+
+function ddOnRegionChange() {
+  ddBuildProvinceSelect(_ddRows.map(r => r.loc));
+  ddApplyFilters();
+}
+
+function ddApplyFilters() {
+  const regionF  = document.getElementById('dd-region').value;
+  const provF    = document.getElementById('dd-province').value;
+  const searchF  = document.getElementById('dd-search').value.trim().toLowerCase();
+  const showMiss = document.getElementById('dd-show-missing').checked;
+
+  const filtered = _ddRows.filter(({loc, dist}) => {
+    if (!showMiss && dist === null) return false;
+    const prov = (loc.province || '').trim();
+    if (regionF && provToRegion(prov) !== regionF) return false;
+    if (provF   && prov !== provF) return false;
+    if (searchF && !loc.name.toLowerCase().includes(searchF)) return false;
+    return true;
+  });
+
+  const totalMissing  = _ddRows.filter(r => r.dist === null).length;
+  const withDist      = filtered.filter(r => r.dist !== null).length;
+  const missingShown  = filtered.filter(r => r.dist === null).length;
+
+  // Stats bar
+  const statsEl = document.getElementById('dd-stats');
+  let msg = `แสดง ${filtered.length} แถว  •  มีระยะทาง ${withDist} จุด`;
+  if (missingShown) msg += `  •  ไม่มีข้อมูล ${missingShown} จุด`;
+  if (totalMissing && !showMiss) msg += `  •  ⚠️ ซ่อน ${totalMissing} ปลายทางที่ขาดระยะทาง`;
+  msg += '   —  ดับเบิ้ลคลิกช่อง "ระยะทาง" เพื่อแก้ไข';
+  statsEl.textContent = msg;
+  statsEl.className = (totalMissing && !showMiss) ? 'stats-bar warn' : 'stats-bar';
+
+  // Missing label + button
+  document.getElementById('dd-missing-label').textContent =
+    `แสดงปลายทางที่ยังไม่มีระยะทางด้วย${totalMissing ? `  (${totalMissing} จุด)` : ''}`;
+  const addBtn = document.getElementById('dd-add-missing-btn');
+  addBtn.disabled = totalMissing === 0;
+  addBtn.textContent = totalMissing ? `➕ เพิ่มระยะทางที่ขาด  (${totalMissing})` : '➕ เพิ่มระยะทางที่ขาด';
+  addBtn.className = `btn btn-sm ${totalMissing ? 'btn-orange' : 'btn-green'}`;
+
+  // Render table
+  const oid = parseInt(document.getElementById('dd-origin').value);
+  const tbody = document.getElementById('dd-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="e-icon">📭</div><p>ไม่มีข้อมูลที่ตรงกับตัวกรอง</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(({loc, dist}) => {
+    const prov   = (loc.province || '').trim();
+    const region = REGION_LABEL[provToRegion(prov)] || '';
+    const hasVal = dist !== null;
+    const distHTML = hasVal
+      ? `<div class="dist-cell has-val" ondblclick="ddEditCell(this, ${oid}, ${loc.id}, ${dist})">${dist.toFixed(1)}</div>`
+      : `<div class="dist-cell no-val"  ondblclick="ddEditCell(this, ${oid}, ${loc.id}, null)">—</div>`;
+    return `<tr>
+      <td class="bold">${loc.name}</td>
+      <td class="center">${prov}</td>
+      <td class="center muted">${region}</td>
+      <td class="center">${distHTML}</td>
+    </tr>`;
+  }).join('');
+}
+
+function ddEditCell(cell, oid, did, currentKm) {
+  if (cell.classList.contains('editing')) return;
+  cell.classList.add('editing');
+  const prev = currentKm !== null ? currentKm.toFixed(1) : '';
+  cell.innerHTML = `<input type="number" step="0.1" min="0.1" value="${prev}" placeholder="กม.">`;
+  const inp = cell.querySelector('input');
+  inp.focus(); inp.select();
+
+  function save() {
+    const val = inp.value.trim().replace(',', '.');
+    if (val === '' && currentKm === null) { cell.classList.remove('editing'); ddApplyFilters(); return; }
+    if (val === '') {
+      if (confirm2('ต้องการลบระยะทางคู่นี้?')) {
+        // delete: remove from distances
+        const fid = Math.min(oid,did), tid = Math.max(oid,did);
+        const d = DB.d.distances.find(d => d.fid===fid && d.tid===tid);
+        if (d) DB.deleteDist(d.id);
+        const r = _ddRows.find(r => r.loc.id === did);
+        if (r) r.dist = null;
+        toast('ลบระยะทางแล้ว', 'warn');
+      }
+      cell.classList.remove('editing'); ddApplyFilters(); return;
+    }
+    const km = parseFloat(val);
+    if (isNaN(km) || km <= 0) { alert(`"${val}" ไม่ใช่ตัวเลขที่ถูกต้อง`); inp.focus(); return; }
+    DB.setDist(oid, did, km);
+    const r = _ddRows.find(r => r.loc.id === did);
+    if (r) r.dist = km;
+    cell.classList.remove('editing');
+    ddApplyFilters();
+    toast(`บันทึก ${km.toFixed(1)} กม. แล้ว`);
+  }
+
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); save(); }
+    if (e.key === 'Escape') { cell.classList.remove('editing'); ddApplyFilters(); }
+  });
+  inp.addEventListener('blur', save);
+}
+
+function ddOpenAddMissingDialog() {
+  const oid = parseInt(document.getElementById('dd-origin').value);
+  if (!oid) return;
+  const distMap = DB.getDistsFrom(oid);
+  const missing = _ddRows.filter(r => r.dist === null)
+    .map(r => r.loc)
+    .sort((a,b) => locSortKey(a) > locSortKey(b) ? 1 : -1);
+  if (!missing.length) { toast('ทุกปลายทางมีระยะทางครบแล้ว'); return; }
+
+  const originName = document.getElementById('dd-origin').options[document.getElementById('dd-origin').selectedIndex]?.text || '';
+
+  const rows = missing.map(loc => {
+    const prov = loc.province || '';
+    const rLabel = REGION_LABEL[provToRegion(prov)] || '';
+    return `<div class="am-row" data-id="${loc.id}" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="flex:1;">
+        <div style="font-weight:700;color:#1A1A2E;">${loc.name}</div>
+        <div style="font-size:11px;color:var(--muted);">${rLabel}${prov ? ' / '+prov : ''}</div>
+      </div>
+      <input type="number" step="0.1" min="0" placeholder="กม." style="width:120px;"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();this.closest('.am-row').nextElementSibling?.querySelector('input')?.focus();}">
+    </div>`;
+  }).join('');
+
+  openModal(`เพิ่มระยะทางที่ขาด — ${missing.length} ปลายทาง`,
+    `<p style="color:var(--muted);font-size:12px;margin-bottom:12px;">ต้นทาง: <b>${originName}</b> — กรอกเฉพาะที่ต้องการ ช่องว่าง = ข้าม</p>
+     <input type="text" placeholder="🔍 กรองชื่อ / จังหวัด" oninput="amFilter(this.value)" style="margin-bottom:12px;">
+     <div id="am-list">${rows}</div>`,
+    () => {
+      let saved = 0;
+      document.querySelectorAll('.am-row').forEach(row => {
+        const id = parseInt(row.dataset.id);
+        const km = parseFloat(row.querySelector('input')?.value);
+        if (km > 0) { DB.setDist(oid, id, km); saved++; const r = _ddRows.find(r=>r.loc.id===id); if(r) r.dist=km; }
+      });
+      if (saved) { toast(`บันทึก ${saved} ระยะทางแล้ว`); ddApplyFilters(); }
+      closeModal();
+    }, '💾 บันทึกทั้งหมด');
+}
+
+function amFilter(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.am-row').forEach(row => {
+    const txt = row.textContent.toLowerCase();
+    row.style.display = (!q || txt.includes(q)) ? 'flex' : 'none';
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PAGE 1 — แดชบอร์ด
+════════════════════════════════════════════════════════════════════════════ */
+function refreshDashboard() {
+  const fp = DB.fuelPrice();
+  document.getElementById('fuel-input').value = fp.toFixed(2);
+
+  const s = DB.stats();
+  document.getElementById('s-origins').textContent     = s.origins;
+  document.getElementById('s-dests').textContent       = s.dests;
+  document.getElementById('s-depots').textContent      = s.depots;
+  document.getElementById('s-dists').textContent       = s.dists;
+  document.getElementById('s-calcs-today').textContent = s.todayCalcs;
+
+  const modeMap = { normal:'ปกติ', empty_run:'ตีเปล่า', backhaul:'รับงานเพิ่ม', multistop:'หลายจุดส่ง' };
+  const calcs   = DB.recentCalcs(20);
+  const tbody   = document.getElementById('dash-calc-tbody');
+
+  if (!calcs.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="e-icon">📊</div><p>ยังไม่มีประวัติการคำนวณ</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = calcs.map(c => `<tr>
+    <td>${c.calculated_at||''}</td>
+    <td>${c.origin_name||'-'}</td>
+    <td>${c.destination_name||'-'}</td>
+    <td>${c.truck_name||'-'}</td>
+    <td class="center">${modeMap[c.mode]||c.mode}</td>
+    <td class="center green">${c.total_distance!=null ? c.total_distance.toFixed(1) : '-'}</td>
+    <td class="center" style="color:#EA580C;font-weight:700;">${c.total_cost!=null ? fmtCost(c.total_cost) : '-'}</td>
+  </tr>`).join('');
+}
+
+function dashSaveFuel() {
+  const v = parseFloat(document.getElementById('fuel-input').value);
+  if (isNaN(v) || v <= 0) { toast('ค่าไม่ถูกต้อง', 'error'); return; }
+  DB.set('fuel_price', v.toFixed(2));
+  refreshFuelDisplay();
+  toast(`บันทึกราคาน้ำมัน ${v.toFixed(2)} บาท/ลิตร แล้ว`);
+}
+
+function dashClearHistory() {
+  if (!confirm2('ลบประวัติการคำนวณทั้งหมดใช่ไหม?')) return;
+  DB.clearCalcs(); refreshDashboard(); toast('ล้างประวัติแล้ว', 'warn');
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PAGE 2 — จัดการข้อมูล
+════════════════════════════════════════════════════════════════════════════ */
+let _activeTab = 'loc';
+
+function switchTab(name) {
+  _activeTab = name;
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    const tabs = ['loc','dist','bh'];
+    b.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  renderActiveTab();
+}
+
+function refreshMasterData() { renderActiveTab(); }
+
+function renderActiveTab() {
+  if (_activeTab === 'loc')  renderLocTab();
+  if (_activeTab === 'dist') renderDistTab();
+  if (_activeTab === 'bh')   renderBHTab();
+}
+
+/* ── Locations tab ── */
+function renderLocTab() {
+  const locs = DB.getLocs().sort((a,b) => {
+    const to = {origin:0,destination:1,depot:2,waypoint:3};
+    return (to[a.type]||9) - (to[b.type]||9) || a.name.localeCompare(b.name,'th');
+  });
+  const tbody = document.getElementById('loc-tbody');
+  if (!locs.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="e-icon">📍</div><p>ยังไม่มีสถานที่ กดปุ่ม "เพิ่มสถานที่" ด้านบน</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = locs.map(l => {
+    const prov = l.province || '';
+    const reg  = prov ? REGION_LABEL[provToRegion(prov)] : '—';
+    return `<tr>
+      <td class="bold">${l.name}</td>
+      <td class="center"><span style="background:#EEF2FF;color:var(--navy);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;">${TYPE_LABEL[l.type]||l.type}</span></td>
+      <td class="center">${prov||'—'}</td>
+      <td class="center muted">${reg}</td>
+      <td><div class="row-actions">
+        <button class="btn btn-outline btn-sm" onclick="openEditLocation(${l.id})">✏️ แก้ไข</button>
+        <button class="btn btn-red btn-sm"     onclick="deleteLocation(${l.id})">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function openAddLocation() {
+  openModal('เพิ่มสถานที่', locForm(null), () => {
+    const name = document.getElementById('f-loc-name').value.trim();
+    const type = document.getElementById('f-loc-type').value;
+    const prov = document.getElementById('f-loc-prov').value.trim();
+    if (!name) { alert('กรุณากรอกชื่อสถานที่'); return; }
+    if (!type) { alert('กรุณาเลือกประเภท'); return; }
+    DB.addLoc(name, type, prov);
+    renderLocTab(); closeModal(); toast('เพิ่มสถานที่แล้ว');
+  });
+}
+
+function openEditLocation(id) {
+  const l = DB.getLoc(id);
+  openModal('แก้ไขสถานที่', locForm(l), () => {
+    const name = document.getElementById('f-loc-name').value.trim();
+    const type = document.getElementById('f-loc-type').value;
+    const prov = document.getElementById('f-loc-prov').value.trim();
+    if (!name) { alert('กรุณากรอกชื่อสถานที่'); return; }
+    DB.updateLoc(id, name, type, prov);
+    renderLocTab(); closeModal(); toast('แก้ไขแล้ว');
+  });
+}
+
+function locForm(l) {
+  const types = Object.entries(TYPE_LABEL).map(([v,t]) =>
+    `<option value="${v}" ${l?.type===v?'selected':''}>${t}</option>`).join('');
+  return `<div class="form-grid" style="gap:14px;">
+    <label>ชื่อสถานที่:</label>
+    <input id="f-loc-name" type="text" value="${l?.name||''}" placeholder="เช่น โรงงาน A">
+    <label>ประเภท:</label>
+    <select id="f-loc-type"><option value="">-- เลือกประเภท --</option>${types}</select>
+    <label>จังหวัด:</label>
+    <input id="f-loc-prov" type="text" value="${l?.province||''}" placeholder="เช่น ชลบุรี (ไม่บังคับ)">
+  </div>`;
+}
+
+function deleteLocation(id) {
+  const l = DB.getLoc(id);
+  if (!confirm2(`ลบ "${l?.name}" ?\n(ระยะทางที่เกี่ยวข้องจะถูกลบด้วย)`)) return;
+  DB.deleteLoc(id); renderLocTab(); toast('ลบสถานที่แล้ว', 'warn');
+}
+
+/* ── Distances tab ── */
+function renderDistTab() {
+  const dists = DB.getAllDists();
+  const tbody = document.getElementById('dist-tbody');
+  if (!dists.length) {
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="e-icon">📏</div><p>ยังไม่มีระยะทาง</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = dists.sort((a,b)=>a.from_name.localeCompare(b.from_name,'th')).map(d => `<tr>
+    <td class="bold">${d.from_name}</td>
+    <td class="bold">${d.to_name}</td>
+    <td class="center green">${d.km.toFixed(1)}</td>
+    <td><div class="row-actions">
+      <button class="btn btn-outline btn-sm" onclick="openEditDistance(${d.id})">✏️</button>
+      <button class="btn btn-red btn-sm"     onclick="deleteDistance(${d.id})">🗑</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function openAddDistance() {
+  const allLocs = DB.getLocs().sort((a,b) => a.name.localeCompare(b.name,'th'));
+  if (allLocs.length < 2) { toast('ต้องมีสถานที่อย่างน้อย 2 แห่งก่อน','warn'); return; }
+  openModal('เพิ่มระยะทาง', distForm(null, allLocs), () => {
+    const a  = parseInt(document.getElementById('f-dist-a').value);
+    const b  = parseInt(document.getElementById('f-dist-b').value);
+    const km = parseFloat(document.getElementById('f-dist-km').value);
+    if (!a || !b) { alert('กรุณาเลือกสถานที่ทั้งสองจุด'); return; }
+    if (a === b)  { alert('ต้นทางและปลายทางต้องไม่ใช่ที่เดียวกัน'); return; }
+    if (!km || km <= 0) { alert('กรุณากรอกระยะทางที่ถูกต้อง'); return; }
+    DB.setDist(a, b, km); renderDistTab(); closeModal(); toast('บันทึกระยะทางแล้ว');
+  });
+}
+
+function openEditDistance(id) {
+  const d = DB.d.distances.find(d => d.id === id);
+  const allLocs = DB.getLocs().sort((a,b) => a.name.localeCompare(b.name,'th'));
+  openModal('แก้ไขระยะทาง', distForm(d, allLocs), () => {
+    const km = parseFloat(document.getElementById('f-dist-km').value);
+    if (!km || km <= 0) { alert('กรุณากรอกระยะทางที่ถูกต้อง'); return; }
+    if (d) { d.km = km; DB.save(); }
+    renderDistTab(); closeModal(); toast('แก้ไขแล้ว');
+  });
+}
+
+function distForm(d, allLocs) {
+  const optA = allLocs.map(l => `<option value="${l.id}" ${d?.fid===l.id?'selected':''}>${l.name}${l.province?' ('+l.province+')':''}</option>`).join('');
+  const optB = allLocs.map(l => `<option value="${l.id}" ${d?.tid===l.id?'selected':''}>${l.name}${l.province?' ('+l.province+')':''}</option>`).join('');
+  return `<div class="form-grid" style="gap:14px;">
+    <label>สถานที่ A:</label>
+    <select id="f-dist-a" ${d?'disabled':''}><option value="">-- เลือก --</option>${optA}</select>
+    <label>สถานที่ B:</label>
+    <select id="f-dist-b" ${d?'disabled':''}><option value="">-- เลือก --</option>${optB}</select>
+    <label>ระยะทาง (กม.):</label>
+    <input id="f-dist-km" type="number" step="0.1" min="0.1" value="${d?.km||''}" placeholder="เช่น 120.5">
+  </div>`;
+}
+
+function deleteDistance(id) {
+  if (!confirm2('ลบระยะทางคู่นี้?')) return;
+  DB.deleteDist(id); renderDistTab(); toast('ลบแล้ว','warn');
+}
+
+/* ── Backhaul tab ── */
+function renderBHTab() {
+  const rows  = DB.getAllBH();
+  const tbody = document.getElementById('bh-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="e-icon">↩️</div><p>ยังไม่มีระยะทาง Backhaul</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(b => `<tr>
+    <td class="bold">${b.dest_name}</td>
+    <td>${b.waypoint_name}</td>
+    <td>${b.endpoint_name}</td>
+    <td class="center green">${b.km.toFixed(1)}</td>
+    <td><div class="row-actions">
+      <button class="btn btn-outline btn-sm" onclick="openEditBH(${b.id})">✏️</button>
+      <button class="btn btn-red btn-sm"     onclick="deleteBH(${b.id})">🗑</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function openAddBackhaul() {
+  const dests    = DB.getLocs('destination');
+  const waypts   = DB.getLocs('waypoint');
+  const endpoints= DB.getLocs().filter(l => l.type==='depot' || l.type==='origin');
+  if (!dests.length || !waypts.length || !endpoints.length) {
+    toast('ต้องมีปลายทาง + จุดขึ้นแป้ง + ที่พัก/ต้นทาง ก่อน','warn'); return;
+  }
+  openModal('เพิ่มระยะทาง Backhaul', bhForm(null, dests, waypts, endpoints), () => {
+    const did = parseInt(document.getElementById('f-bh-dest').value);
+    const wid = parseInt(document.getElementById('f-bh-wp').value);
+    const eid = parseInt(document.getElementById('f-bh-ep').value);
+    const km  = parseFloat(document.getElementById('f-bh-km').value);
+    if (!did||!wid||!eid) { alert('กรุณาเลือกสถานที่ให้ครบ'); return; }
+    if (!km||km<=0)       { alert('กรุณากรอกระยะทางที่ถูกต้อง'); return; }
+    DB.setBH(did,wid,eid,km); renderBHTab(); closeModal(); toast('บันทึก Backhaul แล้ว');
+  });
+}
+
+function openEditBH(id) {
+  const b = DB.d.backhaul.find(b => b.id === id);
+  const dests    = DB.getLocs('destination');
+  const waypts   = DB.getLocs('waypoint');
+  const endpoints= DB.getLocs().filter(l => l.type==='depot' || l.type==='origin');
+  openModal('แก้ไขระยะทาง Backhaul', bhForm(b, dests, waypts, endpoints), () => {
+    const km = parseFloat(document.getElementById('f-bh-km').value);
+    if (!km||km<=0) { alert('กรุณากรอกระยะทางที่ถูกต้อง'); return; }
+    if (b) { b.km = km; DB.save(); }
+    renderBHTab(); closeModal(); toast('แก้ไขแล้ว');
+  });
+}
+
+function bhForm(b, dests, waypts, endpoints) {
+  const optD  = dests.map(l    => `<option value="${l.id}" ${b?.did===l.id?'selected':''}>${l.name}</option>`).join('');
+  const optW  = waypts.map(l   => `<option value="${l.id}" ${b?.wid===l.id?'selected':''}>${l.name}</option>`).join('');
+  const optEP = endpoints.map(l=> `<option value="${l.id}" ${b?.eid===l.id?'selected':''}>${l.name} (${TYPE_LABEL[l.type]})</option>`).join('');
+  return `<div class="form-grid" style="gap:14px;">
+    <label>ปลายทาง:</label>
+    <select id="f-bh-dest" ${b?'disabled':''}><option value="">-- เลือก --</option>${optD}</select>
+    <label>จุดขึ้นแป้ง:</label>
+    <select id="f-bh-wp"   ${b?'disabled':''}><option value="">-- เลือก --</option>${optW}</select>
+    <label>จุดสิ้นสุด:</label>
+    <select id="f-bh-ep"   ${b?'disabled':''}><option value="">-- เลือก --</option>${optEP}</select>
+    <label>ระยะทาง (กม.):</label>
+    <input id="f-bh-km" type="number" step="0.1" min="0.1" value="${b?.km||''}" placeholder="รวมแวะรับแป้งแล้ว">
+  </div>`;
+}
+
+function deleteBH(id) {
+  if (!confirm2('ลบระยะทาง Backhaul นี้?')) return;
+  DB.deleteBH(id); renderBHTab(); toast('ลบแล้ว','warn');
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PAGE 3 — คำนวณต้นทุน
+════════════════════════════════════════════════════════════════════════════ */
+const CS = { truckIdx:1, mode:'normal', lastResult:null };  // calc state
+
+function refreshCalcPage() {
+  refreshFuelDisplay();
+  buildCalcPage();
+}
+
+function buildCalcPage() {
+  const body = document.getElementById('calc-body');
+  const truck = TRUCKS[CS.truckIdx];
+  const showModes = truck.empty_run || truck.backhaul;
+
+  const rateText = truck.special
+    ? `อัตราสิ้นเปลือง A = ${truck.rate_below} (< ${truck.thresh} กม.) / ${truck.rate_above} (≥ ${truck.thresh} กม.)`
+    : `อัตราสิ้นเปลือง A = ${truck.base_rate}`;
+
+  const truckOpts = TRUCKS.map((t,i) =>
+    `<option value="${i}" ${i===CS.truckIdx?'selected':''}>${t.name}</option>`).join('');
+
+  const modeSection = showModes ? `
+    <div class="step-label">ขั้นที่ 2  —  เลือกโหมดการคำนวณ</div>
+    <div class="mode-btns">
+      <button class="mode-btn ${CS.mode==='normal'    ?'active':''}" onclick="setCalcMode('normal')">🔄 คำนวณปกติ (ไป-กลับ)</button>
+      ${truck.empty_run ? `<button class="mode-btn ${CS.mode==='empty_run'?'active':''}" onclick="setCalcMode('empty_run')">➡️ งานตีเปล่า (ขาเดียว)</button>` : ''}
+      ${truck.backhaul  ? `<button class="mode-btn ${CS.mode==='backhaul' ?'active':''}" onclick="setCalcMode('backhaul')">↩️ รับงานเพิ่ม (Backhaul)</button>` : ''}
+      <button class="mode-btn ${CS.mode==='multistop'?'active':''}" onclick="setCalcMode('multistop')">🚚 หลายจุดส่ง</button>
+    </div>` : '';
+
+  body.innerHTML = `
+    <div class="step-label">ขั้นที่ 1  —  เลือกประเภทรถ</div>
+    <div class="form-section" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <select id="c-truck" style="min-width:220px;" onchange="onCalcTruckChange(this.value)">${truckOpts}</select>
+      <span class="rate-badge" id="c-rate">${rateText}</span>
+    </div>
+    ${modeSection}
+    <div class="step-label">ขั้นที่ ${showModes?3:2}  —  ระบุเส้นทาง</div>
+    <div id="c-form"></div>
+    <div style="text-align:center;margin:16px 0;">
+      <button class="btn btn-navy btn-lg" onclick="doCalculate()">⚡ คำนวณต้นทุนน้ำมัน</button>
+    </div>
+    <div id="c-result" class="hidden"></div>`;
+
+  buildCalcForm();
+  if (CS.mode === 'multistop') msInitStops();
+}
+
+function onCalcTruckChange(idxStr) {
+  CS.truckIdx = parseInt(idxStr);
+  const truck = TRUCKS[CS.truckIdx];
+  if (!truck.empty_run && CS.mode === 'empty_run') CS.mode = 'normal';
+  if (!truck.backhaul  && CS.mode === 'backhaul')  CS.mode = 'normal';
+  CS.lastResult = null;
+  buildCalcPage();
+}
+
+function setCalcMode(mode) {
+  CS.mode = mode;
+  CS.lastResult = null;
+  buildCalcPage();
+}
+
+function buildCalcForm() {
+  const form = document.getElementById('c-form');
+  if (CS.mode === 'normal')    form.innerHTML = buildNormalForm();
+  if (CS.mode === 'empty_run') form.innerHTML = buildEmptyForm();
+  if (CS.mode === 'backhaul')  form.innerHTML = buildBackhaulForm();
+  if (CS.mode === 'multistop') form.innerHTML = buildMultistopForm();
+}
+
+function locOpts(locs, placeholder, selId) {
+  let html = `<option value="">-- ${placeholder} --</option>`;
+  for (const r of REGION_ORDER) {
+    const group = locs.filter(l => provToRegion(l.province||'') === r)
+                      .sort((a,b) => a.name.localeCompare(b.name,'th'));
+    if (!group.length) continue;
+    html += `<optgroup label="── ${REGION_LABEL[r]} ──">`;
+    for (const l of group) {
+      const p = l.province ? ` · ${l.province}` : '';
+      html += `<option value="${l.id}" ${l.id===selId?'selected':''}>${l.name}${p}</option>`;
+    }
+    html += `</optgroup>`;
+  }
+  return html;
+}
+
+function buildNormalForm() {
+  const origins = DB.getLocs('origin');
+  const dests   = DB.getLocs('destination');
+  return `<div class="form-section">
+    <h3>เส้นทาง — ปกติ (คำนวณแบบไป-กลับ)</h3>
+    <div class="form-grid" style="gap:12px;">
+      <label>ต้นทาง:</label>
+      <select id="cn-origin" onchange="cnAutoDistance()">${locOpts(origins,'เลือกต้นทาง',null)}</select>
+      <label>ปลายทาง:</label>
+      <select id="cn-dest"   onchange="cnAutoDistance()">${locOpts(dests,'เลือกปลายทาง',null)}</select>
+    </div>
+    <div id="cn-dist-info" class="dist-info mt-12" style="display:none;"></div>
+  </div>`;
+}
+
+function cnAutoDistance() {
+  const o = parseInt(document.getElementById('cn-origin')?.value);
+  const d = parseInt(document.getElementById('cn-dest')?.value);
+  const el = document.getElementById('cn-dist-info');
+  if (!el) return;
+  if (o && d) {
+    const km = DB.getDist(o, d);
+    el.style.display = '';
+    el.textContent = km != null
+      ? `✅ ระยะทาง: ${km.toFixed(1)} กม.  |  ไป-กลับ: ${(km*2).toFixed(1)} กม.`
+      : `⚠️ ยังไม่มีข้อมูลระยะทางคู่นี้ — กรุณาเพิ่มในหน้า "จัดการข้อมูล"`;
+    el.style.background = km != null ? '#EAFAF1' : '#FFF7E6';
+    el.style.color = km != null ? '#1E8449' : '#92400E';
+  } else { el.style.display = 'none'; }
+}
+
+function buildEmptyForm() {
+  const depots  = DB.getLocs('depot');
+  const origins = DB.getLocs('origin');
+  const allPick = [...DB.getLocs('origin'), ...DB.getLocs('destination'), ...DB.getLocs('depot')];
+  return `<div class="form-section">
+    <h3>งานขึ้นแป้งตีเปล่า — คำนวณระยะทางขาเดียว (ไม่คูณ 2)</h3>
+    <div class="form-grid" style="gap:12px;">
+      <label>ที่พัก / หอพัก:</label>
+      <select id="ce-depot"  onchange="ceAutoDistance()">${locOpts([...depots,...origins],'เลือกที่พัก',null)}</select>
+      <label>จุดขึ้นงาน:</label>
+      <select id="ce-pickup" onchange="ceAutoDistance()">${locOpts(allPick,'เลือกจุดขึ้นงาน',null)}</select>
+    </div>
+    <div id="ce-dist-info" class="dist-info mt-12" style="display:none;"></div>
+  </div>`;
+}
+
+function ceAutoDistance() {
+  const d = parseInt(document.getElementById('ce-depot')?.value);
+  const p = parseInt(document.getElementById('ce-pickup')?.value);
+  const el = document.getElementById('ce-dist-info');
+  if (!el) return;
+  if (d && p) {
+    const km = DB.getDist(d, p);
+    el.style.display = '';
+    el.textContent = km != null ? `✅ ระยะทาง: ${km.toFixed(1)} กม. (ขาเดียว)` : `⚠️ ยังไม่มีข้อมูลระยะทางคู่นี้`;
+    el.style.background = km != null ? '#EAFAF1' : '#FFF7E6';
+    el.style.color = km != null ? '#1E8449' : '#92400E';
+  } else { el.style.display = 'none'; }
+}
+
+function buildBackhaulForm() {
+  const origins  = DB.getLocs('origin');
+  const dests    = DB.getLocs('destination');
+  const waypts   = DB.getLocs('waypoint');
+  const depots   = DB.getLocs('depot');
+  return `<div class="form-section">
+    <h3>รับงานเพิ่ม (Backhaul) — เลือกได้ 1 หรือ 2 กรณี</h3>
+    <div class="form-grid" style="gap:12px;">
+      <label>ต้นทาง:</label>
+      <select id="cb-origin"  onchange="cbCheckDist()">${locOpts(origins,'เลือกต้นทาง',null)}</select>
+      <label>ปลายทาง:</label>
+      <select id="cb-dest"    onchange="cbCheckDist()">${locOpts(dests,'เลือกปลายทาง',null)}</select>
+      <label>จุดขึ้นแป้ง:</label>
+      <select id="cb-waypoint" onchange="cbCheckDist()">${locOpts(waypts,'เลือกจุดขึ้นแป้ง',null)}</select>
+    </div>
+    <div id="cb-status" class="dist-status-box mt-12" style="display:none;"></div>
+    <div class="sep"></div>
+    <label class="check-row mb-8">
+      <input type="checkbox" id="cb-c1" onchange="cbToggleCases()">
+      <span style="font-weight:700;color:var(--navy);">✅ กรณี 1 — กลับที่พักหลังรับงาน</span>
+    </label>
+    <div id="cb-c1-row" style="display:none;" class="form-grid" style="gap:12px;">
+      <label style="padding-left:20px;">ที่พัก:</label>
+      <select id="cb-depot" onchange="cbCheckDist()">${locOpts(depots,'เลือกที่พัก',null)}</select>
+    </div>
+    <label class="check-row mt-8 mb-8">
+      <input type="checkbox" id="cb-c2" onchange="cbToggleCases()">
+      <span style="font-weight:700;color:var(--navy);">✅ กรณี 2 — ไปขึ้นงานต่อที่จุดถัดไป</span>
+    </label>
+    <div id="cb-c2-row" style="display:none;" class="form-grid">
+      <label style="padding-left:20px;">ต้นทางถัดไป:</label>
+      <select id="cb-next" onchange="cbCheckDist()">${locOpts(origins,'เลือกต้นทางถัดไป',null)}</select>
+    </div>
+  </div>`;
+}
+
+function cbToggleCases() {
+  const c1 = document.getElementById('cb-c1')?.checked;
+  const c2 = document.getElementById('cb-c2')?.checked;
+  const r1 = document.getElementById('cb-c1-row');
+  const r2 = document.getElementById('cb-c2-row');
+  if (r1) r1.style.display = c1 ? 'grid' : 'none';
+  if (r2) r2.style.display = c2 ? 'grid' : 'none';
+  cbCheckDist();
+}
+
+function cbCheckDist() {
+  const o = parseInt(document.getElementById('cb-origin')?.value)||null;
+  const d = parseInt(document.getElementById('cb-dest')?.value)||null;
+  const w = parseInt(document.getElementById('cb-waypoint')?.value)||null;
+  const el = document.getElementById('cb-status');
+  if (!el) return;
+  if (!o||!d||!w) { el.style.display='none'; return; }
+  el.style.display='';
+
+  function row(ok, txt) {
+    return `<div class="${ok?'dst-ok':'dst-warn'}">${ok?'✅':'⚠️'} ${txt}</div>`;
+  }
+  const oName = DB.getLoc(o)?.name||'?', dName = DB.getLoc(d)?.name||'?';
+  const od = DB.getDist(o,d);
+  let html = `<div class="dst-title">📋 ระยะทางที่ต้องมีในระบบ:</div>`;
+  html += row(od!=null, `ต้นทาง (${oName}) → ปลายทาง (${dName})${od!=null?' ('+od.toFixed(1)+' กม.)':' — ยังไม่มี'}`);
+
+  const c1 = document.getElementById('cb-c1')?.checked;
+  const c2 = document.getElementById('cb-c2')?.checked;
+  const dep = c1 ? (parseInt(document.getElementById('cb-depot')?.value)||null) : null;
+  const nxt = c2 ? (parseInt(document.getElementById('cb-next')?.value)||null)  : null;
+  if (c1 && dep) {
+    const km = DB.getBH(d,w,dep);
+    html += row(km!=null, `Backhaul กรณี 1: ปลายทาง → ที่พัก (${DB.getLoc(dep)?.name||'?'})${km!=null?' ('+km.toFixed(1)+' กม.)':' — ยังไม่มี'}`);
+  }
+  if (c2 && nxt) {
+    const km = DB.getBH(d,w,nxt);
+    html += row(km!=null, `Backhaul กรณี 2: ปลายทาง → ต้นทางถัดไป (${DB.getLoc(nxt)?.name||'?'})${km!=null?' ('+km.toFixed(1)+' กม.)':' — ยังไม่มี'}`);
+  }
+  el.innerHTML = html;
+}
+
+function buildMultistopForm() {
+  return `<div class="form-section" id="ms-section">
+    <h3>หลายจุดส่ง — เส้นทางหลายจุด (กลับต้นทางอัตโนมัติ)</h3>
+    <div id="ms-stops"></div>
+    <button class="btn btn-outline btn-sm mt-8" onclick="msAddStop()">＋ เพิ่มจุดส่ง</button>
+    <div class="ms-total-box mt-12" id="ms-total-box" style="display:none;">
+      <div style="font-size:12px;color:var(--muted);">ระยะทางรวม (ต้นทาง → จุดส่งทุกจุด → กลับต้นทาง) — สลับลำดับปลายทางได้ ค่าเดียวกัน</div>
+      <div class="ms-row">
+        <label style="font-weight:700;flex:1;">ระยะทางรวม (กม.):</label>
+        <span id="ms-saved-status" style="font-size:12px;color:var(--muted);"></span>
+        <input type="number" id="ms-total-km" step="0.1" min="0" style="width:140px;" oninput="msOnTotalChange()">
+        <button class="btn btn-green btn-sm" onclick="msSaveRoute()">💾 บันทึกเส้นทาง</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// MS stop rows state
+let _msStops = [];
+
+function msInitStops() {
+  _msStops = [];
+  const container = document.getElementById('ms-stops');
+  if (!container) return;
+  container.innerHTML = '';
+  msAddStop(); msAddStop();  // origin + 1 dest
+}
+
+function msAddStop() {
+  const container = document.getElementById('ms-stops');
+  if (!container) return;
+  const idx = _msStops.length;
+  const isOrigin = idx === 0;
+  const locs = isOrigin ? DB.getLocs('origin') : DB.getLocs('destination');
+  const ph   = isOrigin ? 'เลือกต้นทาง' : 'เลือกปลายทาง';
+
+  const div = document.createElement('div');
+  div.className = 'ms-stop-row';
+  div.dataset.idx = idx;
+  const lbl = isOrigin ? 'ต้นทาง:' : `จุดส่งที่ ${idx}:`;
+  const delBtn = idx >= 2 ? `<button class="btn btn-red btn-sm" style="padding:5px 10px;" onclick="msRemoveStop(this)">✕</button>` : '';
+  div.innerHTML = `<label>${lbl}</label>
+    <select class="flex-1" onchange="msOnChange()">${locOpts(locs, ph, null)}</select>
+    ${delBtn}`;
+  container.appendChild(div);
+  _msStops.push(div);
+  msOnChange();
+}
+
+function msRemoveStop(btn) {
+  const row = btn.closest('.ms-stop-row');
+  _msStops = _msStops.filter(s => s !== row);
+  row.remove();
+  // Renumber
+  _msStops.forEach((s, i) => {
+    const lbl = s.querySelector('label');
+    if (lbl) lbl.textContent = i===0 ? 'ต้นทาง:' : `จุดส่งที่ ${i}:`;
+    s.dataset.idx = i;
+  });
+  msOnChange();
+}
+
+function msOnChange() {
+  const ids = _msStops.map(s => parseInt(s.querySelector('select')?.value)||null);
+  const oid  = ids[0];
+  const dids = ids.slice(1).filter(Boolean);
+  const box  = document.getElementById('ms-total-box');
+  if (!box) return;
+  if (oid && dids.length >= 1) {
+    box.style.display = '';
+    const saved = DB.getMS(oid, dids);
+    const statusEl = document.getElementById('ms-saved-status');
+    const kmEl     = document.getElementById('ms-total-km');
+    if (saved != null) {
+      statusEl.textContent = `✅ ระบบ: ${saved.toFixed(1)} กม.`;
+      statusEl.style.color = '#1E8449';
+      kmEl.value = saved.toFixed(1);
+    } else {
+      statusEl.textContent = '⚠️ ไม่มีในระบบ — กรอกเอง:';
+      statusEl.style.color = '#E65100';
+    }
+  } else { box.style.display = 'none'; }
+}
+
+function msOnTotalChange() {}  // live update not needed
+
+function msSaveRoute() {
+  const ids  = _msStops.map(s => parseInt(s.querySelector('select')?.value)||null);
+  const oid  = ids[0];
+  const dids = ids.slice(1).filter(Boolean);
+  const km   = parseFloat(document.getElementById('ms-total-km')?.value);
+  if (!oid||!dids.length) { toast('กรุณาเลือกต้นทางและจุดส่งก่อน','warn'); return; }
+  if (!km||km<=0) { toast('กรุณากรอกระยะทางรวม','warn'); return; }
+  DB.setMS(oid, dids, km);
+  msOnChange();
+  toast(`บันทึกเส้นทาง (${dids.length} จุดส่ง, ${km.toFixed(1)} กม.) แล้ว`);
+}
+
+function doCalculate() {
+  const truck = TRUCKS[CS.truckIdx];
+  const fp    = DB.fuelPrice();
+  const res   = document.getElementById('c-result');
+  res.className = '';
+
+  try {
+    let result = null;
+
+    if (CS.mode === 'normal') {
+      const o = parseInt(document.getElementById('cn-origin')?.value)||null;
+      const d = parseInt(document.getElementById('cn-dest')?.value)||null;
+      if (!o||!d) throw new Error('กรุณาเลือกต้นทางและปลายทาง');
+      result = calcNormal(o, d, truck, fp);
+      result.origin_name      = DB.getLoc(o)?.name||'';
+      result.destination_name = DB.getLoc(d)?.name||'';
+      result.truck_name       = truck.name;
+      showSingleResult(result);
+
+    } else if (CS.mode === 'empty_run') {
+      const dep = parseInt(document.getElementById('ce-depot')?.value)||null;
+      const pck = parseInt(document.getElementById('ce-pickup')?.value)||null;
+      if (!dep||!pck) throw new Error('กรุณาเลือกที่พักและจุดขึ้นงาน');
+      result = calcEmptyRun(dep, pck, truck, fp);
+      result.origin_name      = DB.getLoc(dep)?.name||'';
+      result.destination_name = DB.getLoc(pck)?.name||'';
+      result.truck_name       = truck.name;
+      showSingleResult(result);
+
+    } else if (CS.mode === 'backhaul') {
+      const o = parseInt(document.getElementById('cb-origin')?.value)||null;
+      const d = parseInt(document.getElementById('cb-dest')?.value)||null;
+      const w = parseInt(document.getElementById('cb-waypoint')?.value)||null;
+      if (!o||!d||!w) throw new Error('กรุณาเลือก ต้นทาง / ปลายทาง / จุดขึ้นแป้ง');
+      const c1  = document.getElementById('cb-c1')?.checked;
+      const c2  = document.getElementById('cb-c2')?.checked;
+      const dep = c1 ? (parseInt(document.getElementById('cb-depot')?.value)||null) : null;
+      const nxt = c2 ? (parseInt(document.getElementById('cb-next')?.value)||null)  : null;
+      if (!c1&&!c2) throw new Error('กรุณาติ๊กอย่างน้อย 1 กรณี');
+      const results = calcBackhaul(o, d, w, truck, fp, dep, nxt);
+      result = { mode:'backhaul', origin_name: DB.getLoc(o)?.name||'', destination_name: DB.getLoc(d)?.name||'', truck_name: truck.name, bh_results: results };
+      showBackhaulResult(results, result);
+
+    } else if (CS.mode === 'multistop') {
+      const ids  = _msStops.map(s => parseInt(s.querySelector('select')?.value)||null);
+      const oid  = ids[0];
+      const dids = ids.slice(1).filter(Boolean);
+      if (!oid||!dids.length) throw new Error('กรุณาเลือกต้นทางและจุดส่งอย่างน้อย 1 จุด');
+      if (ids.some(i=>!i)) throw new Error('กรุณาเลือกสถานที่ทุกจุด');
+      const km = parseFloat(document.getElementById('ms-total-km')?.value);
+      if (!km||km<=0) throw new Error('กรุณากรอกระยะทางรวม');
+      DB.setMS(oid, dids, km);
+      const rate = getFuelRate(truck, km);
+      const cost = (km / rate) * fp;
+      const names = _msStops.map(s => { const sel=s.querySelector('select'); return sel?.options[sel.selectedIndex]?.text||'?'; });
+      const formula = `${km.toFixed(1)} ÷ ${rate} × ${fp.toFixed(2)}`;
+      const routeLbl = names.join(' → ') + ` → ${names[0]} (กลับ)`;
+      result = { mode:'multistop', total_distance:km, fuel_rate:rate, fuel_price:fp, total_cost:cost,
+        formula, legs:{[routeLbl]:km},
+        origin_name: names[0], destination_name: names.slice(1).join(' → '), truck_name: truck.name };
+      showSingleResult(result);
+    }
+
+    CS.lastResult = result;
+    DB.saveCalc({
+      origin_name:      result.origin_name,
+      destination_name: result.destination_name,
+      truck_name:       result.truck_name,
+      mode:             result.mode,
+      total_distance:   result.total_distance,
+      fuel_rate:        result.fuel_rate,
+      fuel_price:       result.fuel_price,
+      total_cost:       result.total_cost,
+    });
+
+  } catch(e) {
+    res.innerHTML = `<div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:16px;color:#991B1B;">❌ ${e.message}</div>`;
+  }
+}
+
+function showSingleResult(r) {
+  const legs = Object.entries(r.legs||{}).map(([k,v]) => `${k}: ${v.toFixed(1)} กม.`).join('   |   ');
+  document.getElementById('c-result').innerHTML = `
+    <div class="sep"></div>
+    <div class="step-label">ขั้นที่ 4  —  ผลการคำนวณ</div>
+    <div class="result-cards">
+      <div class="result-card" style="border-top:3px solid var(--navy);">
+        <div class="rc-head">📏 ระยะทางรวม</div>
+        <div class="rc-val">${r.total_distance.toFixed(1)}</div>
+        <div class="rc-unit">กิโลเมตร</div>
+      </div>
+      <div class="result-card" style="border-top:3px solid #EA580C;">
+        <div class="rc-head">💰 ราคาน้ำมันสุทธิ</div>
+        <div class="rc-val" style="color:#EA580C;">${fmtCost(r.total_cost)}</div>
+        <div class="rc-unit">บาท</div>
+      </div>
+    </div>
+    <div class="formula-box">🔢 สูตร:  ${r.formula}</div>
+    <div class="legs-box">📍 รายละเอียดเส้นทาง:   ${legs}</div>`;
+}
+
+function showBackhaulResult(results, meta) {
+  const c1 = results.case1, c2 = results.case2;
+  const vals = Object.values(results);
+  const avgD = vals.reduce((s,r)=>s+r.total_distance,0)/vals.length;
+  const avgC = vals.reduce((s,r)=>s+r.total_cost,0)/vals.length;
+  const allLegs = vals.flatMap(r => Object.entries(r.legs||{}));
+  const legs = [...new Map(allLegs)].map(([k,v]) => `${k}: ${v.toFixed(1)} กม.`).join('   |   ');
+  const formulas = vals.map(r => `• ${r.description}: ${r.formula}`).join('<br>');
+
+  let bhCards = '';
+  if (c1) bhCards += `<div class="result-card" style="border-top:3px solid #7C3AED;"><div class="rc-head">🔵 กรณี 1: กลับที่พัก</div><div class="rc-val" style="color:#7C3AED;">${fmtCost(c1.total_cost)}</div><div class="rc-unit">บาท  (${c1.total_distance.toFixed(1)} กม.)</div></div>`;
+  if (c2) bhCards += `<div class="result-card" style="border-top:3px solid #16A34A;"><div class="rc-head">🟢 กรณี 2: ไปขึ้นงานต่อ</div><div class="rc-val" style="color:#16A34A;">${fmtCost(c2.total_cost)}</div><div class="rc-unit">บาท  (${c2.total_distance.toFixed(1)} กม.)</div></div>`;
+
+  document.getElementById('c-result').innerHTML = `
+    <div class="sep"></div>
+    <div class="step-label">ขั้นที่ 4  —  ผลการคำนวณ</div>
+    <div class="result-cards">
+      <div class="result-card" style="border-top:3px solid var(--navy);">
+        <div class="rc-head">📏 ระยะทางเฉลี่ย</div>
+        <div class="rc-val">${avgD.toFixed(1)}</div><div class="rc-unit">กม. (เฉลี่ย)</div>
+      </div>
+      <div class="result-card" style="border-top:3px solid #EA580C;">
+        <div class="rc-head">💰 ค่าน้ำมันเฉลี่ย</div>
+        <div class="rc-val" style="color:#EA580C;">${fmtCost(avgC)}</div><div class="rc-unit">บาท (เฉลี่ย)</div>
+      </div>
+    </div>
+    <div class="result-cards">${bhCards}</div>
+    <div class="formula-box">🔢 สูตรคำนวณ:<br>${formulas}</div>
+    <div class="legs-box">📍 รายละเอียดเส้นทาง:   ${legs}</div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PAGE 4 — ตั้งค่า
+════════════════════════════════════════════════════════════════════════════ */
+function refreshSettings() {
+  const d = DB.d;
+  document.getElementById('settings-info').innerHTML = `
+    สถานที่ทั้งหมด: <b>${d.locations.length}</b> แห่ง<br>
+    ระยะทาง: <b>${d.distances.length}</b> คู่<br>
+    Backhaul: <b>${d.backhaul.length}</b> คู่<br>
+    Multi-stop: <b>${d.multistop.length}</b> เส้นทาง<br>
+    ประวัติการคำนวณ: <b>${d.calcs.length}</b> รายการ<br>
+    ราคาน้ำมัน: <b>${DB.fuelPrice().toFixed(2)}</b> บาท/ลิตร`;
+}
+
+function exportData() {
+  const json = JSON.stringify(DB.d, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `trr_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('Export สำเร็จ');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      if (!parsed.locations || !parsed.distances) throw new Error('ไฟล์ไม่ถูกต้อง');
+      if (!confirm2('Import จะแทนที่ข้อมูลทั้งหมด ดำเนินการต่อ?')) return;
+      DB.d = parsed;
+      if (!DB.d._ids) DB.d._ids = { locations:0, distances:0, backhaul:0, multistop:0, calcs:0 };
+      DB.save();
+      refreshFuelDisplay();
+      toast('Import สำเร็จ');
+      refreshSettings();
+    } catch(err) { toast(`Import ล้มเหลว: ${err.message}`, 'error'); }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function settingsClearHistory() {
+  if (!confirm2('ลบประวัติการคำนวณทั้งหมดใช่ไหม?')) return;
+  DB.clearCalcs(); refreshSettings(); toast('ล้างประวัติแล้ว','warn');
+}
+
+function settingsReset() {
+  if (!confirm2('⚠️ Reset ข้อมูลทั้งหมด?\n(ข้อมูลที่ลบจะไม่สามารถกู้คืนได้)')) return;
+  if (!confirm2('ยืนยันอีกครั้ง: ลบทุกอย่างใช่ไหม?')) return;
+  localStorage.removeItem('trr_db');
+  DB.d = DB._blank();
+  if (GAS_URL) {
+    fetch(GAS_URL + '?action=reset', { mode: 'no-cors' }).catch(() => {});
+  }
+  refreshFuelDisplay(); refreshSettings();
+  toast('Reset เรียบร้อย','warn');
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LOADING HELPERS
+════════════════════════════════════════════════════════════════════════════ */
+function showLoading(msg) {
+  let el = document.getElementById('gas-loading');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'gas-loading';
+    el.style.cssText = 'display:flex;position:fixed;inset:0;z-index:9999;background:rgba(27,39,112,0.82);backdrop-filter:blur(4px);flex-direction:column;align-items:center;justify-content:center;gap:18px;';
+    el.innerHTML = '<div style="width:48px;height:48px;border:5px solid rgba(245,166,35,0.3);border-top-color:#F5A623;border-radius:50%;animation:gaspin 0.75s linear infinite;"></div><p style="color:#fff;font-size:15px;font-weight:600;"></p><style>@keyframes gaspin{to{transform:rotate(360deg)}}</style>';
+    document.body.appendChild(el);
+  }
+  el.querySelector('p').textContent = msg || 'กำลังโหลด...';
+  el.style.display = 'flex';
+}
+function hideLoading() {
+  const el = document.getElementById('gas-loading');
+  if (el) el.style.display = 'none';
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════════════════════════ */
+if (GAS_URL) {
+  // Online: DB.load() is async — it calls navigate(0) when done
+  DB.load();
+} else {
+  // Offline: sync
+  DB.load();
+  refreshFuelDisplay();
+  navigate(0);
+}
+</script>
+</body>
+</html>
