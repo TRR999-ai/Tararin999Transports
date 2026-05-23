@@ -109,13 +109,11 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
 
 /* ══ Tab 3: Comparison ══════════════════════════════════════ */
 #cmp-bar{background:var(--white);border:1px solid var(--border);border-top:none;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
-#cmp-ref-label{font-size:13px;color:var(--navy);font-weight:700}
+#cmp-ref-label{font-size:13px;color:var(--muted);font-weight:600}
 .cmp-legend{display:flex;gap:14px;font-size:11.5px;flex-wrap:wrap}
 .cmp-legend span{display:flex;align-items:center;gap:4px}
-
 #cmp-summary-bar{background:#F8FAFC;border:1px solid var(--border);border-top:none;padding:8px 16px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;min-height:36px;border-bottom:2px solid var(--gold)}
-#cmp-summary{display:flex;gap:20px;align-items:center;flex-wrap:wrap;font-size:12.5px}
-
+#cmp-summary{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:12.5px;width:100%}
 #cmp-wrap{overflow-x:auto;background:var(--white);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px}
 #cmp-table{border-collapse:collapse;width:100%;font-size:13px}
 #cmp-table thead th{background:var(--navy);color:#fff;padding:9px 14px;font-weight:700;font-size:12px;white-space:nowrap}
@@ -263,19 +261,19 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
 <div class="tab-pane" id="tab-compare">
 
   <div id="cmp-bar" class="no-print">
-    <div style="font-size:13px;font-weight:700;color:var(--navy)">ราคาอ้างอิงของเรา:</div>
-    <div id="cmp-ref-label" style="font-size:13px;color:var(--muted)"></div>
+    <div id="cmp-ref-label"></div>
     <div style="flex:1"></div>
     <div class="cmp-legend">
       <span><b class="clr-g">+%</b> = ลูกค้าแพงกว่าเรา</span>
       <span><b class="clr-r">−%</b> = ลูกค้าถูกกว่าเรา</span>
     </div>
+    <button class="btn btn-gold" onclick="analyzeCompare()">🔍 วิเคราะห์</button>
     <button class="btn btn-soft" onclick="clearCustPrices()">🗑 ล้างค่า</button>
     <button class="btn btn-green" onclick="exportCompareExcel()">📥 ส่งออก Excel</button>
   </div>
 
   <div id="cmp-summary-bar">
-    <div id="cmp-summary" style="color:var(--muted);font-size:12px">กรอกราคาลูกค้าอย่างน้อย 1 แถวเพื่อดูสรุป</div>
+    <div id="cmp-summary" style="color:var(--muted);font-size:12px">กรอกราคาลูกค้าอย่างน้อย 1 แถวแล้วกดวิเคราะห์</div>
   </div>
 
   <div id="cmp-wrap">
@@ -285,7 +283,7 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
           <th style="width:40px;text-align:center">#</th>
           <th style="text-align:left;min-width:150px">ระยะทาง (กม.)</th>
           <th class="th-r" style="min-width:140px">ราคาของเรา (บาท)</th>
-          <th class="th-cust" style="min-width:150px">ราคาลูกค้า (บาท)</th>
+          <th class="th-cust" style="min-width:160px">ราคาลูกค้า (บาท)</th>
           <th class="th-r" style="min-width:120px">ต่าง (บาท)</th>
           <th class="th-r" style="min-width:100px">ต่าง (%)</th>
         </tr>
@@ -293,6 +291,7 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
       <tbody id="cmp-body"></tbody>
     </table>
   </div>
+
 </div>
 
 </div><!-- #content -->
@@ -343,6 +342,7 @@ const ROWS = [
   {km:[1191,1220], dest:'',                        base:17845},
 ];
 
+const LOGO_DATA_URL = "data:image/png;base64,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";
 const FUEL_COLS = Array.from({length:44}, (_, i) => ({
   label: `${15+i}.01–${16+i}.00`,
   delta: parseFloat((-0.28 + i * 0.02).toFixed(4)),
@@ -479,7 +479,149 @@ function renderNewBoard() {
   updateColCount();
 }
 
-/* ══ TAB 3: COMPARISON STATE ════════════════════════════════════════ */
+/* ══ EXPORT EXCEL (Tab 2) ═══════════════════════════════════════════ */
+function exportExcel() {
+  const {diesel, markup} = getState();
+  const fi = getFuelIdx(diesel);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+  const ds = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+
+  const selCols = checkedCols.map((v,i) => v ? i : -1).filter(i => i >= 0);
+  if (!selCols.length) { alert('กรุณาเลือกอย่างน้อย 1 คอลัมน์'); return; }
+
+  const title = 'บริษัท ธรารินทร์ 999 ขนส่ง จำกัด — กระดานราคาค่าขนส่ง';
+  const sub   = `วันที่: ${dateStr}  |  น้ำมันดีเซล: ${diesel.toFixed(2)} บาท/ลิตร  |  ประเภทรถ: 6 ล้อ  |  ราคายังไม่รวม VAT`;
+  const hdr   = ['#', 'ระยะทาง (กม.)', ...selCols.map(ci => FUEL_COLS[ci].label)];
+
+  const rows = ROWS.map((r, ri) => {
+    const base = [ri+1, `${r.km[0]}–${r.km[1]} กม.`];
+    selCols.forEach(ci => {
+      base.push(Math.round(r.base * (1 + FUEL_COLS[ci].delta) * (1 + markup/100)));
+    });
+    return base;
+  });
+
+  const aoa = [[title], [sub], [], hdr, ...rows];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:5},{wch:18},...selCols.map(()=>({wch:12}))];
+  ws['!merges'] = [
+    {s:{r:0,c:0},e:{r:0,c:hdr.length-1}},
+    {s:{r:1,c:0},e:{r:1,c:hdr.length-1}},
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'กระดานราคา');
+  XLSX.writeFile(wb, `กระดานราคา_TRR999_${ds}.xlsx`);
+}
+
+/* ══ EXPORT PDF (Tab 2) ═════════════════════════════════════════════ */
+async function exportPDF() {
+  if (typeof html2canvas === 'undefined') {
+    alert('html2canvas ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่'); return;
+  }
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert('jsPDF ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่'); return;
+  }
+
+  if (activeTabName() !== 'new-board') {
+    switchTab('new-board');
+    await new Promise(r => setTimeout(r, 100));
+  }
+
+  const {diesel} = getState();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+  const sel = checkedCols.filter(Boolean).length;
+  if (!sel) { alert('กรุณาเลือกอย่างน้อย 1 คอลัมน์'); return; }
+
+  document.getElementById('print-meta').textContent = `ราคาน้ำมันดีเซล: ${diesel.toFixed(2)} บาท/ลิตร`;
+  document.getElementById('print-date-meta').innerHTML = `วันที่: ${dateStr}<br>ประเภทรถ: 6 ล้อ<br>ราคายังไม่รวม VAT`;
+
+  const logoDataUrl = LOGO_DATA_URL;
+
+  const wrap   = document.getElementById('new-board-wrap');
+  const pHdr   = document.querySelector('#tab-new-board .print-header');
+  const tbar   = document.getElementById('new-board-toolbar');
+  const chks   = [...document.querySelectorAll('#new-board-table .col-chk')];
+  const phImgs = [...document.querySelectorAll('#tab-new-board .ph-logo img')];
+  const origWrap = wrap.style.cssText;
+  const origSrcs = phImgs.map(i => i.src);
+
+  wrap.style.cssText = 'overflow:visible;width:max-content;background:#fff';
+  pHdr.style.display = 'flex';
+  tbar.style.display = 'none';
+  chks.forEach(c => c.style.visibility = 'hidden');
+  phImgs.forEach(img => { img.src = logoDataUrl; });
+
+  await new Promise(r => setTimeout(r, 300));
+
+  const restore = () => {
+    wrap.style.cssText = origWrap;
+    pHdr.style.display = '';
+    tbar.style.display = '';
+    chks.forEach(c => c.style.visibility = '');
+    phImgs.forEach((img,i) => { img.src = origSrcs[i]; img.style.display = ''; });
+  };
+
+  let canvas;
+  try {
+    canvas = await html2canvas(document.getElementById('tab-new-board'), {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: false,
+      allowTaint: false,
+      onclone: (doc) => {
+        doc.querySelectorAll('.stk0,.stk1').forEach(el => {
+          el.style.position = 'static';
+          el.style.boxShadow = 'none';
+        });
+      }
+    });
+  } catch(e) {
+    restore();
+    alert('เกิดข้อผิดพลาด: ' + e.message);
+    return;
+  }
+  restore();
+
+  const { jsPDF } = window.jspdf;
+  const PAD = 8, A4W = 297, A4H = 210;
+  const usableW = A4W - PAD*2;
+  const pxPerMm = canvas.width / usableW;
+  const pageHpx = (A4H - PAD*2) * pxPerMm;
+
+  const doc = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  const ds = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+
+  for (let srcY = 0, pg = 0; srcY < canvas.height; srcY += pageHpx, pg++) {
+    if (pg) doc.addPage();
+    const sliceH = Math.min(pageHpx, canvas.height - srcY);
+    const slice  = document.createElement('canvas');
+    slice.width  = canvas.width;
+    slice.height = sliceH;
+    slice.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+    const uw = usableW;
+    const uh = sliceH / pxPerMm;
+    doc.addImage(slice.toDataURL('image/jpeg', 0.93), 'JPEG', PAD, PAD, uw, uh);
+  }
+  doc.save(`กระดานราคา_TRR999_${ds}.pdf`);
+}
+
+/* ══ GLOBAL UPDATE ══════════════════════════════════════════════════ */
+function onUpdate() {
+  const {diesel} = getState();
+  const fi = getFuelIdx(diesel);
+  document.getElementById('fuel-col-label').textContent = FUEL_COLS[fi].label;
+  const name = activeTabName();
+  if (name === 'matrix')    renderMatrix();
+  if (name === 'new-board') renderNewBoard();
+  if (name === 'compare')   renderCompare();
+}
+
+function buildBoard() { onUpdate(); }
+
+
+/* ══ TAB 3: COMPARE ════════════════════════════════════════════════ */
 let custPrices = new Array(ROWS.length).fill('');
 
 function updateCustPrice(ri, val) {
@@ -497,7 +639,6 @@ function updateCompareRow(ri) {
   const ok = !isNaN(cp) && cp > 0;
   const db = ok ? cp - op : NaN;
   const dp = ok ? db / op * 100 : NaN;
-
   const dc = document.getElementById(`cdiff-${ri}`);
   const pc = document.getElementById(`cpct-${ri}`);
   if (dc) {
@@ -522,11 +663,10 @@ function updateCompareSummary() {
     const op = ourPrice(r, fi, markup);
     diffs.push((cp - op) / op * 100);
   });
-
   const el = document.getElementById('cmp-summary');
   if (!el) return;
   if (diffs.length === 0) {
-    el.innerHTML = `<span style="color:var(--muted)">กรอกราคาลูกค้าอย่างน้อย 1 แถวเพื่อดูสรุป</span>`;
+    el.innerHTML = `<span style="color:var(--muted)">กรอกราคาลูกค้าอย่างน้อย 1 แถวแล้วกดวิเคราะห์</span>`;
     return;
   }
   const avg = diffs.reduce((a,b)=>a+b,0) / diffs.length;
@@ -544,17 +684,29 @@ function updateCompareRef() {
   const {diesel, markup} = getState();
   const fi = getFuelIdx(diesel);
   document.getElementById('cmp-ref-label').textContent =
-    `น้ำมัน ${diesel.toFixed(2)} บาท/ลิตร  (ช่วง ${FUEL_COLS[fi].label})` +
+    `อ้างอิง: น้ำมัน ${diesel.toFixed(2)} บาท/ลิตร  (ช่วง ${FUEL_COLS[fi].label})` +
     (markup !== 0 ? `  ·  markup ${markup>0?'+':''}${markup}%` : '');
 }
 
-/* ══ TAB 3: RENDER COMPARE ══════════════════════════════════════════ */
+function analyzeCompare() {
+  const {diesel, markup} = getState();
+  const fi = getFuelIdx(diesel);
+  ROWS.forEach((_, ri) => updateCompareRow(ri));
+  updateCompareSummary();
+}
+
+function clearCustPrices() {
+  custPrices.fill('');
+  document.querySelectorAll('.cmp-input').forEach(inp => inp.value = '');
+  ROWS.forEach((_, ri) => updateCompareRow(ri));
+  document.getElementById('cmp-summary').innerHTML =
+    `<span style="color:var(--muted)">กรอกราคาลูกค้าอย่างน้อย 1 แถวแล้วกดวิเคราะห์</span>`;
+}
+
 function renderCompare() {
   const {diesel, markup} = getState();
   const fi = getFuelIdx(diesel);
-
   updateCompareRef();
-
   document.getElementById('cmp-body').innerHTML = ROWS.map((r, ri) => {
     const op = ourPrice(r, fi, markup);
     const cv = custPrices[ri];
@@ -562,226 +714,26 @@ function renderCompare() {
     const ok = !isNaN(cp) && cp > 0;
     const db = ok ? cp - op : NaN;
     const dp = ok ? db / op * 100 : NaN;
-
     return `<tr>
       <td class="td-c" style="color:var(--muted);font-size:11px">${ri+1}</td>
-      <td>${r.km[0].toLocaleString()}–${r.km[1].toLocaleString()} กม.</td>
+      <td>${r.km[0].toLocaleString()}–${r.km[1].toLocaleString()} กม.${r.dest?' · '+r.dest:''}</td>
       <td class="td-r fw6 clr-navy" id="cour-${ri}">${fmtB(op)}</td>
-      <td class="td-r" style="padding:4px 14px">
-        <input type="number" class="cmp-input" value="${cv}"
-          oninput="updateCustPrice(${ri},this.value)" placeholder="—">
+      <td class="td-r th-cust" style="background:#F0F4FF">
+        <input class="cmp-input" type="number" min="0" step="1" value="${cv}"
+          placeholder="กรอก..." oninput="updateCustPrice(${ri},this.value)">
       </td>
-      <td id="cdiff-${ri}" class="td-r fw7 ${ok?(db>=0?'clr-g':'clr-r'):'clr-m'}">
-        ${ok ? (db>=0?'+':'')+fmtB(db) : '—'}
-      </td>
-      <td id="cpct-${ri}" class="td-r fw7 ${ok?(dp>=0?'clr-g':'clr-r'):'clr-m'}">
-        ${ok ? fmtPct(dp) : '—'}
-      </td>
+      <td class="td-r fw7 clr-m" id="cdiff-${ri}">${ok?(db>=0?'+':'')+fmtB(db):'—'}</td>
+      <td class="td-r fw7 clr-m" id="cpct-${ri}">${ok?fmtPct(dp):'—'}</td>
     </tr>`;
   }).join('');
-
-  updateCompareSummary();
+  ROWS.forEach((_,ri) => updateCompareRow(ri));
 }
 
-function refreshOurPriceCells() {
-  const {diesel, markup} = getState();
-  const fi = getFuelIdx(diesel);
-  updateCompareRef();
-  ROWS.forEach((r, ri) => {
-    const el = document.getElementById(`cour-${ri}`);
-    if (el) el.textContent = fmtB(ourPrice(r, fi, markup));
-    if (custPrices[ri] !== '') updateCompareRow(ri);
-  });
-  updateCompareSummary();
-}
-
-function clearCustPrices() {
-  custPrices.fill('');
-  document.querySelectorAll('.cmp-input').forEach(inp => inp.value = '');
-  for (let ri = 0; ri < ROWS.length; ri++) {
-    const dc = document.getElementById(`cdiff-${ri}`);
-    const pc = document.getElementById(`cpct-${ri}`);
-    if (dc) { dc.textContent='—'; dc.className='td-r fw7 clr-m'; }
-    if (pc) { pc.textContent='—'; pc.className='td-r fw7 clr-m'; }
-  }
-  updateCompareSummary();
-}
-
-/* ══ ACTIONS ═════════════════════════════════════════════════════════ */
-function onUpdate() {
-  const diesel = parseFloat(document.getElementById('fuel-price').value) || 29.5;
-  const fi = getFuelIdx(diesel);
-  document.getElementById('fuel-col-label').textContent =
-    `คอลัมน์: ${FUEL_COLS[fi].label} บาท/ลิตร`;
-
-  renderMatrix();
-  const tab = activeTabName();
-  if (tab === 'new-board') renderNewBoard();
-  if (tab === 'compare')   refreshOurPriceCells();
-}
-
-function buildBoard() { switchTab('new-board'); }
-
-/* ══ EXPORT PDF ══════════════════════════════════════════════════════ */
-async function exportPDF() {
-  if (typeof html2canvas === 'undefined') {
-    alert('html2canvas ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่'); return;
-  }
-  if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert('jsPDF ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่'); return;
-  }
-
-  if (activeTabName() !== 'new-board') {
-    switchTab('new-board');
-    await new Promise(r => setTimeout(r, 100));
-  }
-
-  const {diesel} = getState();
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-  const sel = checkedCols.filter(Boolean).length;
-  if (!sel) { alert('กรุณาเลือกอย่างน้อย 1 คอลัมน์'); return; }
-
-  document.getElementById('print-meta').textContent = `ราคาน้ำมันดีเซล: ${diesel.toFixed(2)} บาท/ลิตร`;
-  document.getElementById('print-date-meta').innerHTML = `วันที่: ${dateStr}<br>ประเภทรถ: 6 ล้อ<br>ราคายังไม่รวม VAT`;
-
-  // ── Convert logo to data URL to avoid "Tainted canvas" error ──────
-  // Images loaded normally taint the canvas; data URLs don't.
-  let logoDataUrl = null;
-  try {
-    const resp = await fetch('../TRR999logo.png');
-    const blob = await resp.blob();
-    logoDataUrl = await new Promise((res, rej) => {
-      const rd = new FileReader();
-      rd.onloadend = () => res(rd.result);
-      rd.onerror   = rej;
-      rd.readAsDataURL(blob);
-    });
-  } catch(e) { /* fetch failed — logo will be hidden during capture */ }
-
-  // ── Prep DOM for capture ──────────────────────────────────────────
-  const wrap     = document.getElementById('new-board-wrap');
-  const pHdr     = document.querySelector('#tab-new-board .print-header');
-  const tbar     = document.getElementById('new-board-toolbar');
-  const chks     = [...document.querySelectorAll('#new-board-table .col-chk')];
-  const phImgs   = [...document.querySelectorAll('#tab-new-board .ph-logo img')];
-  const origWrap = wrap.style.cssText;
-  const origSrcs = phImgs.map(i => i.src);
-
-  wrap.style.cssText = 'overflow:visible;width:max-content;background:#fff';
-  pHdr.style.display = 'flex';
-  tbar.style.display = 'none';
-  chks.forEach(c => c.style.visibility = 'hidden');
-  phImgs.forEach(img => {
-    if (logoDataUrl) img.src = logoDataUrl;   // clean data URL → no taint
-    else             img.style.display = 'none'; // fallback: hide
-  });
-
-  await new Promise(r => setTimeout(r, 300));
-
-  const restore = () => {
-    wrap.style.cssText = origWrap;
-    pHdr.style.display = '';
-    tbar.style.display = '';
-    chks.forEach(c => c.style.visibility = '');
-    phImgs.forEach((img, i) => { img.src = origSrcs[i]; img.style.display = ''; });
-  };
-
-  // ── Capture ───────────────────────────────────────────────────────
-  let canvas;
-  try {
-    canvas = await html2canvas(document.getElementById('tab-new-board'), {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      useCORS: false,
-      allowTaint: false,
-      logging: false,
-      imageTimeout: 8000,
-      onclone: (doc) => {
-        doc.querySelectorAll('.stk0,.stk1').forEach(el => {
-          el.style.position = 'static';
-          el.style.boxShadow = 'none';
-        });
-      },
-    });
-  } catch(e) {
-    restore();
-    alert('html2canvas error: ' + (e.message || e));
-    return;
-  }
-
-  restore();
-  if (!canvas || canvas.width < 10) { alert('แคปตารางไม่สำเร็จ'); return; }
-
-  // ── Build PDF ─────────────────────────────────────────────────────
-  try {
-    const PAD = 8, A4W = 297, A4H = 210;
-    const uw = A4W - PAD * 2, uh = A4H - PAD * 2;
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-
-    const pxPerMm = canvas.width / uw;
-    const slicePx = Math.round(uh * pxPerMm);
-
-    for (let srcY = 0, pg = 0; srcY < canvas.height; srcY += slicePx, pg++) {
-      if (pg) doc.addPage();
-      const h = Math.min(slicePx, canvas.height - srcY);
-      const s = document.createElement('canvas');
-      s.width = canvas.width; s.height = h;
-      s.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, h, 0, 0, canvas.width, h);
-      doc.addImage(s.toDataURL('image/jpeg', 0.93), 'JPEG', PAD, PAD, uw, h / pxPerMm);
-    }
-
-    const ds = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-    doc.save(`กระดานราคา_TRR999_${ds}.pdf`);
-  } catch(e) {
-    alert('jsPDF error: ' + (e.message || e));
-  }
-}
-
-/* ══ EXPORT EXCEL — New Board ════════════════════════════════════════ */
-function exportExcel() {
-  const {diesel, markup} = getState();
-  const fi = getFuelIdx(diesel);
-  const selCols = checkedCols.map((v,i)=>v?i:-1).filter(i=>i>=0);
-  if (selCols.length === 0) { alert('กรุณาเลือกอย่างน้อย 1 คอลัมน์'); return; }
-
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-  const aoa = [
-    ['บริษัท ธรารินทร์ 999 ขนส่ง จำกัด — กระดานราคาค่าขนส่ง รถ 6 ล้อ 5 เมตร'],
-    [`วันที่: ${dateStr}  |  น้ำมัน: ${diesel.toFixed(2)} บาท/ลิตร` +
-     (markup!==0 ? `  |  ปรับราคา ${markup>0?'+':''}${markup}%` : '')],
-    [],
-    ['#', 'ระยะทาง (กม.)', ...selCols.map(ci => FUEL_COLS[ci].label)],
-    ...ROWS.map((r, ri) => [
-      ri+1,
-      `${r.km[0]}–${r.km[1]} กม.`,
-      ...selCols.map(ci => Math.round(r.base*(1+FUEL_COLS[ci].delta)*(1+markup/100))),
-    ]),
-  ];
-
-  const ws = XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols'] = [{wch:5},{wch:20},...selCols.map(()=>({wch:11}))];
-  ws['!merges'] = [
-    {s:{r:0,c:0},e:{r:0,c:selCols.length+1}},
-    {s:{r:1,c:0},e:{r:1,c:selCols.length+1}},
-  ];
-  ws['!freeze'] = {xSplit:2,ySplit:4,topLeftCell:'C5',activePane:'bottomRight',state:'frozen'};
-
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'กระดานราคาใหม่');
-  const ds = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-  XLSX.writeFile(wb, `กระดานราคา_TRR999_${ds}.xlsx`);
-}
-
-/* ══ EXPORT EXCEL — Comparison ══════════════════════════════════════ */
 function exportCompareExcel() {
   const {diesel, markup} = getState();
   const fi = getFuelIdx(diesel);
   const now = new Date();
   const dateStr = now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-
   const rows = [];
   ROWS.forEach((r, ri) => {
     const op = ourPrice(r, fi, markup);
@@ -792,27 +744,20 @@ function exportCompareExcel() {
     const dp = ok ? parseFloat(((cp-op)/op*100).toFixed(1)) : '';
     rows.push([ri+1, `${r.km[0]}–${r.km[1]} กม.`, op, ok?cp:'', db, dp]);
   });
-
   const aoa = [
     ['บริษัท ธรารินทร์ 999 ขนส่ง จำกัด — เปรียบเทียบราคากับลูกค้า'],
-    [`วันที่: ${dateStr}  |  อ้างอิง: น้ำมัน ${diesel.toFixed(2)} บาท/ลิตร (ช่วง ${FUEL_COLS[fi].label})`+
-     (markup?`  |  markup ${markup>0?'+':''}${markup}%`:'')],
+    ['วันที่: '+dateStr+'  |  น้ำมัน '+diesel.toFixed(2)+' บาท/ลิตร (ช่วง '+FUEL_COLS[fi].label+')'],
     [],
     ['#','ระยะทาง (กม.)','ราคาของเรา (บาท)','ราคาลูกค้า (บาท)','ต่าง (บาท)','ต่าง (%)'],
     ...rows,
   ];
-
   const ws = XLSX.utils.aoa_to_sheet(aoa);
   ws['!cols'] = [{wch:5},{wch:18},{wch:18},{wch:18},{wch:14},{wch:10}];
-  ws['!merges'] = [
-    {s:{r:0,c:0},e:{r:0,c:5}},
-    {s:{r:1,c:0},e:{r:1,c:5}},
-  ];
-
+  ws['!merges'] = [{s:{r:0,c:0},e:{r:0,c:5}},{s:{r:1,c:0},e:{r:1,c:5}}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'เปรียบเทียบ');
   const ds = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-  XLSX.writeFile(wb, `เปรียบเทียบราคา_TRR999_${ds}.xlsx`);
+  XLSX.writeFile(wb, 'เปรียบเทียบราคา_TRR999_'+ds+'.xlsx');
 }
 
 /* ══ INIT ════════════════════════════════════════════════════════════ */
