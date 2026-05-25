@@ -217,6 +217,69 @@
     #modal-cancel { background: #f5f5f5; color: #444; }
     #modal-ok     { background: #1b5e20; color: #fff; }
 
+    /* ─── Card management bar ─── */
+    #card-mgmt-bar {
+      margin: 0 8px 6px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    #add-card-btn {
+      background: #1B2770;
+      color: #fff;
+      border: none;
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #add-card-btn:hover { background: #252f8a; }
+    #del-card-btn {
+      background: #fff;
+      color: #c62828;
+      border: 1.5px solid #c62828;
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #del-card-btn:hover:not(:disabled) { background: #ffebee; }
+    #del-card-btn:disabled { opacity: .4; cursor: default; }
+    .card-mgmt-hint { font-size: 12px; color: #888; }
+
+    /* ─── Add card modal ─── */
+    #add-card-modal .modal-box { max-width: 480px; }
+    .add-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .add-form-grid label { font-size: 12px; color: #555; font-weight: 600; display: block; margin-bottom: 4px; }
+    .add-form-grid input, .add-form-grid select {
+      width: 100%; border: 1.5px solid #ddd; border-radius: 6px;
+      padding: 7px 10px; font-size: 14px; font-family: inherit;
+    }
+    .add-form-grid input:focus, .add-form-grid select:focus {
+      outline: none; border-color: #F5A623;
+    }
+    .add-form-full { grid-column: 1 / -1; }
+    .add-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+    .add-tab {
+      padding: 6px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid #ddd; background: #f5f5f5; color: #555;
+    }
+    .add-tab.active { background: #1B2770; color: #fff; border-color: #1B2770; }
+
+    /* ─── New row highlight ─── */
+    .handsontable td.cell-new { background: #E8F5E9 !important; }
+    .handsontable td.cell-new-card { background: #E8F5E9 !important; color: #1b5e20 !important; font-weight: 700; }
+
     /* ─── Loading overlay ─── */
     #loading {
       position: fixed;
@@ -277,6 +340,59 @@
   <button id="paste-btn" onclick="openPasteModal()">📋 วางวงเงิน (คัดลอกทีละบรรทัด)</button>
 </div>
 
+<!-- Card management bar -->
+<div id="card-mgmt-bar">
+  <button id="add-card-btn" onclick="openAddCardModal()">➕ เพิ่มบัตร</button>
+  <button id="del-card-btn" onclick="deleteSelectedRows()" disabled>🗑 ลบที่เลือก</button>
+  <span class="card-mgmt-hint" id="sel-hint"></span>
+</div>
+
+<!-- Add card modal -->
+<div id="add-card-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h3>➕ เพิ่มบัตรใหม่</h3>
+    <div class="add-tabs">
+      <button class="add-tab active" onclick="switchAddTab('single',this)">เพิ่มทีละใบ</button>
+      <button class="add-tab"       onclick="switchAddTab('bulk',this)">วางหลายใบ</button>
+    </div>
+
+    <!-- Single tab -->
+    <div id="add-tab-single">
+      <div class="add-form-grid">
+        <div>
+          <label>หมายเลขบัตร *</label>
+          <input id="ac-cardno" type="text" placeholder="600000XXXXXXXXXX" maxlength="30">
+        </div>
+        <div>
+          <label>วงเงิน (บาท/เดือน)</label>
+          <input id="ac-limit" type="number" min="1" value="1" placeholder="1">
+        </div>
+        <div>
+          <label>ชื่อพนักงาน</label>
+          <input id="ac-name" type="text" placeholder="ชื่อ-นามสกุล">
+        </div>
+        <div>
+          <label>แผนก</label>
+          <input id="ac-dept" type="text" placeholder="แผนก">
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk tab -->
+    <div id="add-tab-bulk" style="display:none">
+      <p style="font-size:13px;color:#555;margin-bottom:8px">
+        วางหมายเลขบัตร <b>ทีละบรรทัด</b> — วงเงิน default = 1 (แก้ได้ในตารางหลังเพิ่ม)
+      </p>
+      <textarea id="ac-bulk" style="width:100%;height:150px;border:1.5px solid #ddd;border-radius:6px;padding:8px;font-size:14px;font-family:monospace;resize:vertical" placeholder="6000000XXXXXXXXX&#10;6000000XXXXXXXXX&#10;..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button onclick="closeAddCardModal()" style="background:#f5f5f5;color:#444;padding:9px 22px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;border:none">ยกเลิก</button>
+      <button onclick="applyAddCard()" style="background:#1B2770;color:#fff;padding:9px 22px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;border:none">➕ เพิ่ม</button>
+    </div>
+  </div>
+</div>
+
 <!-- Warning bar -->
 <div id="warning-bar"></div>
 
@@ -312,6 +428,8 @@
 // ─────────────────────────────────────────────
 var hot = null;
 var templateBase64 = null;
+var _origLen = 0;       // number of rows loaded from Sheet
+var _addTab  = 'single'; // current tab in add-card modal
 
 // ─────────────────────────────────────────────
 // Column definitions (mobile: วงเงิน อยู่ col 3 เข้าถึงได้ทันที)
@@ -336,6 +454,7 @@ var COL_DEFS = isMobile ? [
 // Init table
 // ─────────────────────────────────────────────
 function initTable(data) {
+  _origLen = data.length;
   var container = document.getElementById('hot-container');
 
   hot = new Handsontable(container, {
@@ -353,6 +472,32 @@ function initTable(data) {
     allowRemoveRow: false,
     allowInsertColumn: false,
     allowRemoveColumn: false,
+    contextMenu: {
+      items: {
+        'delete_row': {
+          name: '🗑 ลบบัตรนี้',
+          callback: function(key, selection) {
+            var row = selection[0].start.row;
+            var cardNo = hot.getDataAtRowProp(row, 'cardNumber') || '(ว่าง)';
+            if (!confirm('ลบบัตร ' + cardNo + ' ออกจากรายการ?')) return;
+            removeRow(row);
+          }
+        }
+      }
+    },
+
+    // afterSelectionEnd: update delete button state
+    afterSelectionEnd: function(r1, c1, r2, c2) {
+      var btn = document.getElementById('del-card-btn');
+      var hint = document.getElementById('sel-hint');
+      var cnt = Math.abs(r2 - r1) + 1;
+      btn.disabled = false;
+      hint.textContent = 'เลือก ' + cnt + ' แถว';
+    },
+    afterDeselect: function() {
+      document.getElementById('del-card-btn').disabled = true;
+      document.getElementById('sel-hint').textContent = '';
+    },
 
     // Cell renderer for visual feedback
     cells: function(row, col) {
@@ -360,13 +505,24 @@ function initTable(data) {
       var rowData = hot ? hot.getSourceDataAtRow(row) : null;
       if (!rowData) return props;
 
+      var isNew    = (row >= _origLen);
       var nameCol  = isMobile ? 3 : 2;
       var limitCol = isMobile ? 2 : 4;
-      if (col === nameCol && rowData.name && rowData.name.length > 30) {
-        props.className = 'cell-warn';
+      var cardCol  = 1; // index in COL_DEFS
+
+      if (isNew) {
+        // New rows: all columns editable
+        props.readOnly = false;
+        props.className = (col === cardCol) ? 'cell-new-card' : 'cell-new';
+      } else {
+        if (col === nameCol && rowData.name && rowData.name.length > 30) {
+          props.className = 'cell-warn';
+        }
       }
       if (col === limitCol) {
-        props.className = rowData.limit === 1 ? 'cell-limit-default' : 'cell-limit';
+        if (!isNew) {
+          props.className = rowData.limit === 1 ? 'cell-limit-default' : 'cell-limit';
+        }
       }
       return props;
     },
@@ -614,6 +770,104 @@ function applyPastedLimits() {
   closePasteModal();
   updateStats();
   setStatus('วางวงเงินแล้ว ' + applied + ' แถว', 'ok');
+}
+
+// ─────────────────────────────────────────────
+// Add / Remove cards
+// ─────────────────────────────────────────────
+function removeRow(row) {
+  var src = hot.getSourceData().slice(); // shallow copy
+  src.splice(row, 1);
+  src.forEach(function(r, i) { r.no = i + 1; });
+  _origLen = Math.max(0, _origLen - (row < _origLen ? 1 : 0));
+  hot.loadData(src);
+  updateStats();
+  document.getElementById('del-card-btn').disabled = true;
+  document.getElementById('sel-hint').textContent = '';
+}
+
+function deleteSelectedRows() {
+  if (!hot) return;
+  var sel = hot.getSelected();
+  if (!sel || !sel.length) return;
+  var rows = [];
+  sel.forEach(function(s) {
+    var r1 = Math.min(s[0], s[2]), r2 = Math.max(s[0], s[2]);
+    for (var r = r1; r <= r2; r++) rows.push(r);
+  });
+  rows = rows.filter(function(v, i, a) { return a.indexOf(v) === i; }).sort(function(a,b){ return b-a; });
+  var cards = rows.map(function(r) { return hot.getDataAtRowProp(r,'cardNumber')||'(ว่าง)'; }).join(', ');
+  if (!confirm('ลบ ' + rows.length + ' บัตร:\n' + cards + '\n\nยืนยัน?')) return;
+  var src = hot.getSourceData().slice();
+  rows.forEach(function(r) {
+    if (r < _origLen) _origLen--;
+    src.splice(r, 1);
+  });
+  src.forEach(function(r, i) { r.no = i + 1; });
+  hot.loadData(src);
+  updateStats();
+  document.getElementById('del-card-btn').disabled = true;
+  document.getElementById('sel-hint').textContent = '';
+}
+
+function openAddCardModal() {
+  _addTab = 'single';
+  document.getElementById('add-tab-single').style.display = '';
+  document.getElementById('add-tab-bulk').style.display   = 'none';
+  document.querySelectorAll('.add-tab').forEach(function(b,i){ b.classList.toggle('active', i===0); });
+  document.getElementById('ac-cardno').value = '';
+  document.getElementById('ac-name').value   = '';
+  document.getElementById('ac-dept').value   = '';
+  document.getElementById('ac-limit').value  = '1';
+  document.getElementById('ac-bulk').value   = '';
+  document.getElementById('add-card-modal').classList.remove('hidden');
+  setTimeout(function(){ document.getElementById('ac-cardno').focus(); }, 100);
+}
+
+function closeAddCardModal() {
+  document.getElementById('add-card-modal').classList.add('hidden');
+}
+
+function switchAddTab(tab, btn) {
+  _addTab = tab;
+  document.getElementById('add-tab-single').style.display = tab==='single' ? '' : 'none';
+  document.getElementById('add-tab-bulk').style.display   = tab==='bulk'   ? '' : 'none';
+  document.querySelectorAll('.add-tab').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+function applyAddCard() {
+  var src = hot.getSourceData().slice();
+  var added = 0;
+
+  if (_addTab === 'single') {
+    var cardNo = document.getElementById('ac-cardno').value.trim();
+    if (!cardNo) { alert('กรุณากรอกหมายเลขบัตร'); return; }
+    var lim = parseFloat(document.getElementById('ac-limit').value) || 1;
+    src.push({
+      no:         src.length + 1,
+      cardNumber: cardNo,
+      name:       document.getElementById('ac-name').value.trim(),
+      department: document.getElementById('ac-dept').value.trim(),
+      limit:      lim < 1 ? 1 : lim
+    });
+    added = 1;
+  } else {
+    var lines = document.getElementById('ac-bulk').value
+      .split(/[\r\n]+/)
+      .map(function(l){ return l.trim(); })
+      .filter(function(l){ return l !== ''; });
+    if (!lines.length) { alert('ไม่พบหมายเลขบัตร'); return; }
+    lines.forEach(function(cardNo) {
+      src.push({ no: src.length+1, cardNumber: cardNo, name:'', department:'', limit:1 });
+      added++;
+    });
+  }
+
+  hot.loadData(src);
+  updateStats();
+  closeAddCardModal();
+  setStatus('เพิ่ม ' + added + ' บัตรแล้ว (สีเขียว = บัตรใหม่)', 'ok');
 }
 
 // ─────────────────────────────────────────────

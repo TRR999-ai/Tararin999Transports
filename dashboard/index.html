@@ -569,8 +569,8 @@ function renderAll() {
 // ─── KPIs ──────────────────────────────────────────────────────────────
 function renderKPIs() {
   const ex = ST.excel;
-  const totalAmt = ex.summary.reduce((s,r) => s+r.amount, 0);
-  const totalLit = ex.summary.reduce((s,r) => s+r.litres, 0);
+  const totalAmt = ex.summary.reduce((s,r) => s+(parseFloat(r.amount)||0), 0);
+  const totalLit = ex.summary.reduce((s,r) => s+(parseFloat(r.litres)||0), 0);
   const avgPrice = totalLit > 0 ? totalAmt/totalLit : 0;
   document.getElementById('kv-amount').textContent   = fmt(totalAmt);
   document.getElementById('kv-vehicles').textContent = ex.summary.length;
@@ -583,9 +583,9 @@ function renderKPIs() {
 function renderTripKPIs() {
   if (!ST.trips.length) return;
   const totalTrips = ST.trips.length;
-  const totalDist  = ST.trips.reduce((s,t) => s+t.dist, 0);
-  const totalCalc  = ST.trips.reduce((s,t) => s+t.cost, 0);
-  const totalAct   = ST.excel.summary.reduce((s,r) => s+r.amount, 0);
+  const totalDist  = ST.trips.reduce((s,t) => s+(parseFloat(t.dist)||0), 0);
+  const totalCalc  = ST.trips.reduce((s,t) => s+(parseFloat(t.cost)||0), 0);
+  const totalAct   = ST.excel.summary.reduce((s,r) => s+(parseFloat(r.amount)||0), 0);
   const variance   = totalAct - totalCalc;
 
   document.getElementById('kv-trips').textContent   = fmtN(totalTrips);
@@ -715,9 +715,9 @@ function renderVariance() {
   ST.trips.forEach(t => {
     if (!t.cardNo) return;
     if (!tripByCard[t.cardNo]) tripByCard[t.cardNo] = { calc:0, trips:0, km:0 };
-    tripByCard[t.cardNo].calc  += t.cost;
+    tripByCard[t.cardNo].calc  += parseFloat(t.cost)||0;
     tripByCard[t.cardNo].trips++;
-    tripByCard[t.cardNo].km   += t.dist;
+    tripByCard[t.cardNo].km   += parseFloat(t.dist)||0;
   });
 
   // Join with Excel summary (only rows that have trip data)
@@ -804,9 +804,9 @@ function renderStationChart() {
 // ─── Vehicle Table ───────────────────────────────────────────────────
 function renderTable() {
   const ex       = ST.excel;
-  const totalAmt = ex.summary.reduce((s,r)=>s+r.amount, 0);
-  const avgPrice = ex.summary.reduce((s,r)=>s+r.litres, 0) > 0
-    ? totalAmt / ex.summary.reduce((s,r)=>s+r.litres, 0) : 0;
+  const totalAmt = ex.summary.reduce((s,r)=>s+(parseFloat(r.amount)||0), 0);
+  const avgPrice = ex.summary.reduce((s,r)=>s+(parseFloat(r.litres)||0), 0) > 0
+    ? totalAmt / ex.summary.reduce((s,r)=>s+(parseFloat(r.litres)||0), 0) : 0;
   const sorted   = [...ex.summary].sort((a,b)=>b.amount-a.amount);
   const maxAmt   = sorted[0]?.amount || 1;
 
@@ -817,7 +817,7 @@ function renderTable() {
     ST.trips.forEach(t => {
       if (!t.cardNo) return;
       if (!tripByCard[t.cardNo]) tripByCard[t.cardNo] = 0;
-      tripByCard[t.cardNo] += t.cost;
+      tripByCard[t.cardNo] += parseFloat(t.cost)||0;
     });
     document.getElementById('th-variance').style.display = '';
   }
