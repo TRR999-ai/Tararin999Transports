@@ -428,6 +428,26 @@ tbody td.missing { background: #FFF7E6; color: #92400E; }
 .dst-ok   { color: #1E8449; }
 .dst-warn { color: #C0392B; }
 
+/* ══ Searchable location select ════════════════════════════════════ */
+.ls-wrap { display:flex; flex-direction:column; gap:4px; }
+.ls-search {
+  border: 1.5px solid #ddd; border-radius: 7px; padding: 6px 10px;
+  font-size: 13px; font-family: inherit; width: 100%;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 8px center;
+  padding-left: 28px;
+}
+.ls-search:focus { outline:none; border-color: #F5A623; }
+
+/* ══ Inline manual km input ════════════════════════════════════════ */
+.km-inline-wrap { display:flex; align-items:center; gap:6px; margin-top:4px; }
+.km-mini-input {
+  border:1.5px solid #e9a; border-radius:6px; padding:4px 8px;
+  font-size:13px; font-family:inherit; width:100px; text-align:right;
+  background:#fffbe6;
+}
+.km-mini-input:focus { outline:none; border-color:#F5A623; }
+.km-manual-label { font-size:12px; color:#8B6914; font-style:italic; }
+
 /* ══ Tabs (master data) ═════════════════════════════════════════════════════ */
 .tab-bar { display: flex; gap: 2px; margin-bottom: 0; }
 .tab-btn {
@@ -1258,13 +1278,13 @@ function calcEmptyRun(depotId, pickupId, truck, fp) {
 }
 
 function calcBackhaul(oid, did, wid, truck, fp, depotId, nextId) {
-  const dOD = DB.getDist(oid, did);
-  if (dOD === null) throw new Error('ไม่พบระยะทาง: ต้นทาง → ปลายทาง');
+  const dOD = DB.getDist(oid, did) ?? _cbManualKm.od;
+  if (!dOD) throw new Error('ไม่พบระยะทาง: ต้นทาง → ปลายทาง\nกรุณากรอกระยะทางในช่องที่ปรากฏ');
   const results = {};
 
   if (depotId !== null) {
-    const dDD = DB.getBH(did, wid, depotId);
-    if (dDD === null) throw new Error('ไม่พบระยะทาง Backhaul: ปลายทาง → ที่พัก\nกรุณาเพิ่มระยะทาง Backhaul ในหน้า "จัดการข้อมูล" ก่อน');
+    const dDD = DB.getBH(did, wid, depotId) ?? _cbManualKm.bh1;
+    if (!dDD) throw new Error('ไม่พบระยะทาง Backhaul: ปลายทาง → ที่พัก\nกรุณากรอกระยะทางในช่องที่ปรากฏ หรือเพิ่มในหน้า "จัดการข้อมูล"');
     const total = dOD + dDD; const rate = getFuelRate(truck, total); const cost = (total*2)/rate*fp;
     results.case1 = { description:'รับงานเพิ่ม → กลับที่พัก',
       legs:{'ต้นทาง → ปลายทาง':dOD,'ปลายทาง → ที่พัก (รวมแวะรับแป้ง)':dDD},
@@ -1273,8 +1293,8 @@ function calcBackhaul(oid, did, wid, truck, fp, depotId, nextId) {
   }
 
   if (nextId !== null) {
-    const dDN = DB.getBH(did, wid, nextId);
-    if (dDN === null) throw new Error('ไม่พบระยะทาง Backhaul: ปลายทาง → ต้นทางถัดไป\nกรุณาเพิ่มระยะทาง Backhaul ในหน้า "จัดการข้อมูล" ก่อน');
+    const dDN = DB.getBH(did, wid, nextId) ?? _cbManualKm.bh2;
+    if (!dDN) throw new Error('ไม่พบระยะทาง Backhaul: ปลายทาง → ต้นทางถัดไป\nกรุณากรอกระยะทางในช่องที่ปรากฏ หรือเพิ่มในหน้า "จัดการข้อมูล"');
     const total = dOD + dDN; const rate = getFuelRate(truck, total); const cost = (total*2)/rate*fp;
     results.case2 = { description:'รับงานเพิ่ม → ไปขึ้นงานต่อ',
       legs:{'ต้นทาง → ปลายทาง':dOD,'ปลายทาง → ต้นทางถัดไป (รวมแวะรับแป้ง)':dDN},
@@ -1983,6 +2003,40 @@ function buildCalcForm() {
   if (CS.mode === 'multistop') form.innerHTML = buildMultistopForm();
 }
 
+/* ══ SEARCHABLE LOC SELECT ══════════════════════════════════════════ */
+const _locSelData = {};   // selectId -> {locs, placeholder}
+
+function locSearchWrap(selectId, locs, placeholder, onchangeFn) {
+  _locSelData[selectId] = { locs, placeholder };
+  return `<div class="ls-wrap">
+    <input class="ls-search" type="text" autocomplete="off"
+      placeholder="🔍 พิมพ์ชื่อสถานที่หรือจังหวัด..."
+      oninput="lsFilter('${selectId}',this.value)">
+    <select id="${selectId}" onchange="${onchangeFn}">
+      ${locOpts(locs, placeholder, null)}
+    </select>
+  </div>`;
+}
+
+function lsFilter(selectId, q) {
+  const data = _locSelData[selectId];
+  const sel  = document.getElementById(selectId);
+  if (!data || !sel) return;
+  const curVal = sel.value;
+  const qt = q.trim().toLowerCase();
+  const filtered = qt
+    ? data.locs.filter(l =>
+        l.name.toLowerCase().includes(qt) ||
+        (l.province||'').toLowerCase().includes(qt))
+    : data.locs;
+  sel.innerHTML = locOpts(filtered, data.placeholder, parseInt(curVal)||null);
+  // Re-select previous value if still available
+  if (curVal && sel.querySelector(`option[value="${curVal}"]`)) sel.value = curVal;
+}
+
+/* ══ MANUAL KM (for missing backhaul distances) ══════════════════════ */
+let _cbManualKm = { od: null, bh1: null, bh2: null };
+
 function locOpts(locs, placeholder, selId) {
   let html = `<option value="">-- ${placeholder} --</option>`;
   for (const r of REGION_ORDER) {
@@ -2006,9 +2060,9 @@ function buildNormalForm() {
     <h3>เส้นทาง — ปกติ (คำนวณแบบไป-กลับ)</h3>
     <div class="form-grid" style="gap:12px;">
       <label>ต้นทาง:</label>
-      <select id="cn-origin" onchange="cnAutoDistance()">${locOpts(origins,'เลือกต้นทาง',null)}</select>
+      ${locSearchWrap('cn-origin', origins, 'เลือกต้นทาง', 'cnAutoDistance()')}
       <label>ปลายทาง:</label>
-      <select id="cn-dest"   onchange="cnAutoDistance()">${locOpts(dests,'เลือกปลายทาง',null)}</select>
+      ${locSearchWrap('cn-dest', dests, 'เลือกปลายทาง', 'cnAutoDistance()')}
     </div>
     <div id="cn-dist-info" class="dist-info mt-12" style="display:none;"></div>
   </div>`;
@@ -2038,9 +2092,9 @@ function buildEmptyForm() {
     <h3>งานขึ้นแป้งตีเปล่า — คำนวณระยะทางขาเดียว (ไม่คูณ 2)</h3>
     <div class="form-grid" style="gap:12px;">
       <label>ที่พัก / หอพัก:</label>
-      <select id="ce-depot"  onchange="ceAutoDistance()">${locOpts([...depots,...origins],'เลือกที่พัก',null)}</select>
+      ${locSearchWrap('ce-depot', [...depots,...origins], 'เลือกที่พัก', 'ceAutoDistance()')}
       <label>จุดขึ้นงาน:</label>
-      <select id="ce-pickup" onchange="ceAutoDistance()">${locOpts(allPick,'เลือกจุดขึ้นงาน',null)}</select>
+      ${locSearchWrap('ce-pickup', allPick, 'เลือกจุดขึ้นงาน', 'ceAutoDistance()')}
     </div>
     <div id="ce-dist-info" class="dist-info mt-12" style="display:none;"></div>
   </div>`;
@@ -2065,15 +2119,16 @@ function buildBackhaulForm() {
   const dests    = DB.getLocs('destination');
   const waypts   = DB.getLocs('waypoint');
   const depots   = DB.getLocs('depot');
+  _cbManualKm = { od: null, bh1: null, bh2: null };  // reset on form rebuild
   return `<div class="form-section">
     <h3>รับงานเพิ่ม (Backhaul) — เลือกได้ 1 หรือ 2 กรณี</h3>
     <div class="form-grid" style="gap:12px;">
       <label>ต้นทาง:</label>
-      <select id="cb-origin"  onchange="cbCheckDist()">${locOpts(origins,'เลือกต้นทาง',null)}</select>
+      ${locSearchWrap('cb-origin', origins, 'เลือกต้นทาง', 'cbCheckDist()')}
       <label>ปลายทาง:</label>
-      <select id="cb-dest"    onchange="cbCheckDist()">${locOpts(dests,'เลือกปลายทาง',null)}</select>
+      ${locSearchWrap('cb-dest', dests, 'เลือกปลายทาง', 'cbCheckDist()')}
       <label>จุดขึ้นแป้ง:</label>
-      <select id="cb-waypoint" onchange="cbCheckDist()">${locOpts(waypts,'เลือกจุดขึ้นแป้ง',null)}</select>
+      ${locSearchWrap('cb-waypoint', waypts, 'เลือกจุดขึ้นแป้ง', 'cbCheckDist()')}
     </div>
     <div id="cb-status" class="dist-status-box mt-12" style="display:none;"></div>
     <div class="sep"></div>
@@ -2083,7 +2138,7 @@ function buildBackhaulForm() {
     </label>
     <div id="cb-c1-row" style="display:none;" class="form-grid" style="gap:12px;">
       <label style="padding-left:20px;">ที่พัก:</label>
-      <select id="cb-depot" onchange="cbCheckDist()">${locOpts(depots,'เลือกที่พัก',null)}</select>
+      ${locSearchWrap('cb-depot', depots, 'เลือกที่พัก', 'cbCheckDist()')}
     </div>
     <label class="check-row mt-8 mb-8">
       <input type="checkbox" id="cb-c2" onchange="cbToggleCases()">
@@ -2091,9 +2146,41 @@ function buildBackhaulForm() {
     </label>
     <div id="cb-c2-row" style="display:none;" class="form-grid">
       <label style="padding-left:20px;">ต้นทางถัดไป:</label>
-      <select id="cb-next" onchange="cbCheckDist()">${locOpts(origins,'เลือกต้นทางถัดไป',null)}</select>
+      ${locSearchWrap('cb-next', origins, 'เลือกต้นทางถัดไป', 'cbCheckDist()')}
     </div>
   </div>`;
+}
+
+function cbSaveKm(key) {
+  const o = parseInt(document.getElementById('cb-origin')?.value)||null;
+  const d = parseInt(document.getElementById('cb-dest')?.value)||null;
+  const w = parseInt(document.getElementById('cb-waypoint')?.value)||null;
+  const dep = document.getElementById('cb-c1')?.checked
+    ? (parseInt(document.getElementById('cb-depot')?.value)||null) : null;
+  const nxt = document.getElementById('cb-c2')?.checked
+    ? (parseInt(document.getElementById('cb-next')?.value)||null)  : null;
+
+  const km = _cbManualKm[key];
+  if (!km || km <= 0) { alert('กรุณากรอกระยะทางก่อนบันทึก'); return; }
+
+  if (key === 'od') {
+    if (!o || !d) { alert('กรุณาเลือกต้นทางและปลายทาง'); return; }
+    DB.setDist(o, d, km);
+    DB.save();
+    toast('บันทึกระยะทาง ' + km.toFixed(1) + ' กม. แล้ว');
+  } else if (key === 'bh1') {
+    if (!d || !w || !dep) { alert('กรุณาเลือกปลายทาง, จุดขึ้นแป้ง และที่พัก'); return; }
+    DB.setBH(d, w, dep, km);
+    DB.save();
+    toast('บันทึก Backhaul กรณี 1: ' + km.toFixed(1) + ' กม. แล้ว');
+  } else if (key === 'bh2') {
+    if (!d || !w || !nxt) { alert('กรุณาเลือกปลายทาง, จุดขึ้นแป้ง และต้นทางถัดไป'); return; }
+    DB.setBH(d, w, nxt, km);
+    DB.save();
+    toast('บันทึก Backhaul กรณี 2: ' + km.toFixed(1) + ' กม. แล้ว');
+  }
+  // Refresh status box to reflect saved value
+  cbCheckDist();
 }
 
 function cbToggleCases() {
@@ -2121,7 +2208,24 @@ function cbCheckDist() {
   const oName = DB.getLoc(o)?.name||'?', dName = DB.getLoc(d)?.name||'?';
   const od = DB.getDist(o,d);
   let html = `<div class="dst-title">📋 ระยะทางที่ต้องมีในระบบ:</div>`;
-  html += row(od!=null, `ต้นทาง (${oName}) → ปลายทาง (${dName})${od!=null?' ('+od.toFixed(1)+' กม.)':' — ยังไม่มี'}`);
+
+  function rowWithInput(ok, txt, key, curVal) {
+    if (ok) return `<div class="dst-ok">✅ ${txt}</div>`;
+    return `<div class="dst-warn">⚠️ ${txt}
+      <div class="km-inline-wrap">
+        <span class="km-manual-label">ระยะทาง (กม.):</span>
+        <input class="km-mini-input" id="cbm-${key}" type="number" step="0.1" min="0"
+          placeholder="กม." value="${curVal||''}"
+          oninput="_cbManualKm['${key}']=parseFloat(this.value)||null">
+        <button class="btn btn-green btn-sm" style="padding:3px 10px;font-size:12px"
+          onclick="cbSaveKm('${key}')">&#x1F4BE; บันทึก</button>
+      </div>
+    </div>`;
+  }
+
+  html += rowWithInput(od!=null,
+    `ต้นทาง (${oName}) → ปลายทาง (${dName})${od!=null?' ('+od.toFixed(1)+' กม.)':' — ยังไม่มี'}`,
+    'od', _cbManualKm.od);
 
   const c1 = document.getElementById('cb-c1')?.checked;
   const c2 = document.getElementById('cb-c2')?.checked;
@@ -2129,11 +2233,15 @@ function cbCheckDist() {
   const nxt = c2 ? (parseInt(document.getElementById('cb-next')?.value)||null)  : null;
   if (c1 && dep) {
     const km = DB.getBH(d,w,dep);
-    html += row(km!=null, `Backhaul กรณี 1: ปลายทาง → ที่พัก (${DB.getLoc(dep)?.name||'?'})${km!=null?' ('+km.toFixed(1)+' กม.)':' — ยังไม่มี'}`);
+    html += rowWithInput(km!=null,
+      `Backhaul กรณี 1: ปลายทาง → ที่พัก (${DB.getLoc(dep)?.name||'?'})${km!=null?' ('+km.toFixed(1)+' กม.)':' — ยังไม่มี'}`,
+      'bh1', _cbManualKm.bh1);
   }
   if (c2 && nxt) {
     const km = DB.getBH(d,w,nxt);
-    html += row(km!=null, `Backhaul กรณี 2: ปลายทาง → ต้นทางถัดไป (${DB.getLoc(nxt)?.name||'?'})${km!=null?' ('+km.toFixed(1)+' กม.)':' — ยังไม่มี'}`);
+    html += rowWithInput(km!=null,
+      `Backhaul กรณี 2: ปลายทาง → ต้นทางถัดไป (${DB.getLoc(nxt)?.name||'?'})${km!=null?' ('+km.toFixed(1)+' กม.)':' — ยังไม่มี'}`,
+      'bh2', _cbManualKm.bh2);
   }
   el.innerHTML = html;
 }
