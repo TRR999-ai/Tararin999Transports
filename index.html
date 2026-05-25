@@ -390,9 +390,44 @@ body {
   cursor: pointer; color: #999; line-height: 1;
 }
 .contact-close:hover { color: var(--navy); }
+
+/* ═══ RESPONSIVE ═══════════════════════════════════════════════════════════ */
+#sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:998;display:none}
+#sb-overlay.show{display:block}
+.tb-menu-icon{cursor:pointer;padding:4px 6px;border-radius:6px;transition:background .15s;font-size:22px;color:rgba(255,255,255,.75)}
+.tb-menu-icon:hover{background:rgba(255,255,255,.12)}
+
+@media(max-width:899px){
+  #sidebar{position:fixed;left:calc(-1*var(--sidebar-w) - 10px);top:0;height:100vh;z-index:999;transition:left .25s ease}
+  #sidebar.open{left:0;box-shadow:4px 0 28px rgba(0,0,0,.35)}
+  #main{width:100vw}
+  #topbar{padding:0 16px;height:52px}
+  .content-inner{padding:32px 20px 40px}
+  .cards-row{gap:18px}
+  .portal-card{width:200px}
+  .card-icon-circle{width:76px;height:76px;font-size:36px}
+  .card-icon-area{padding:24px 14px 16px}
+  .bg-shape-1{width:220px;height:200px}
+  .bg-shape-2{width:180px;height:150px}
+}
+@media(max-width:639px){
+  #topbar{padding:0 12px;height:48px}
+  .tb-title{font-size:14px}
+  .tb-badge{display:none}
+  .tb-user span{display:none}
+  .content-inner{padding:24px 12px 30px}
+  .portal-label{font-size:9px;letter-spacing:2px}
+  .cards-row{gap:12px}
+  .portal-card{width:calc(50% - 6px);min-width:140px}
+  .card-icon-circle{width:60px;height:60px;font-size:28px}
+  .card-icon-area{padding:18px 10px 12px}
+  .card-title{font-size:11px;letter-spacing:.5px;padding:0 8px 5px}
+  .card-sub-bar{font-size:10px;padding:7px 8px}
+}
 </style>
 </head>
 <body>
+<div id="sb-overlay" onclick="toggleSidebar()"></div>
 
 <!-- ══ Sidebar ══════════════════════════════════════════════════════════════ -->
 <aside id="sidebar">
@@ -437,7 +472,7 @@ body {
 
   <header id="topbar">
     <div class="tb-left">
-      <span class="tb-menu-icon">☰</span>
+      <span class="tb-menu-icon" onclick="toggleSidebar()">☰</span>
       <span class="tb-title">User Portal</span>
     </div>
     <div class="tb-right">
@@ -559,5 +594,20 @@ body {
   </div>
 </div>
 
+
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sb-overlay').classList.toggle('show');
+}
+document.querySelectorAll('.nav-item').forEach(function(el) {
+  el.addEventListener('click', function() {
+    if (window.innerWidth <= 899) {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sb-overlay').classList.remove('show');
+    }
+  });
+});
+</script>
 </body>
 </html>

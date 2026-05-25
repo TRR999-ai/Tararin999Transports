@@ -95,12 +95,31 @@
       background: #fff;
       max-height: calc(100vh - 210px);
     }
-    /* mobile: ยืดตารางเต็ม ให้ page scroll แทน HOT scroll */
-    @media (max-width: 639px) {
-      #table-wrap {
-        max-height: none;
-        overflow: visible;
-      }
+    /* ─── Responsive ─── */
+    @media(max-width:899px){
+      #header{padding:8px 12px;gap:10px}
+      #header h1{font-size:14px}
+      #stats-bar{padding:5px 12px;gap:12px;font-size:12px}
+      #instructions{margin:6px 6px 0;font-size:12px}
+      #table-wrap{margin:6px 6px 0}
+      #export-bar{padding:6px 10px}
+      #card-mgmt-bar{margin:0 6px 5px;gap:6px}
+    }
+    @media(max-width:639px){
+      #header{padding:7px 10px;gap:8px}
+      #header .logo{font-size:18px}
+      #header h1{font-size:13px}
+      #header small{font-size:10px}
+      #stats-bar{gap:10px;font-size:11px}
+      #instructions{font-size:11px;padding:6px 10px}
+      #table-wrap{margin:4px 4px 0;max-height:none;overflow:visible}
+      #export-bar{flex-wrap:wrap;gap:6px}
+      #status-msg{font-size:11px}
+      #export-btn{width:100%;padding:8px;font-size:13px}
+      #card-mgmt-bar{flex-wrap:wrap}
+      #add-card-btn,#del-card-btn{font-size:12px;padding:6px 12px}
+      #add-card-modal .modal-box{max-width:100%;margin:8px}
+      .add-form-grid{grid-template-columns:1fr;gap:8px}
     }
     #hot-container { min-width: 100%; }
 

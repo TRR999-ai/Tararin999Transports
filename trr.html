@@ -675,9 +675,51 @@ input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--navy); c
 .hidden { display: none !important; }
 .flex-row { display: flex; gap: 10px; align-items: center; }
 .flex-1 { flex: 1; }
+
+/* ═══ RESPONSIVE / MOBILE ═══════════════════════════════════════════════════ */
+#sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:998;display:none}
+#sb-overlay.show{display:block}
+.sb-toggle{display:none!important;align-items:center;justify-content:center;
+  background:var(--navy);color:#fff;border:none;border-radius:7px;
+  width:38px;height:38px;min-width:38px;font-size:20px;cursor:pointer;flex-shrink:0}
+.sb-toggle:hover{background:var(--navy2)}
+
+@media(max-width:899px){
+  #sidebar{
+    position:fixed;left:calc(-1*var(--sidebar-w) - 10px);top:0;
+    height:100vh;z-index:999;transition:left .25s ease;
+  }
+  #sidebar.open{left:0;box-shadow:4px 0 28px rgba(0,0,0,.35)}
+  #main{width:100vw}
+  .sb-toggle{display:flex!important}
+  .page-bar{padding:0 14px;height:52px;gap:10px}
+  .page-title{font-size:12pt}
+  .page-body{padding:14px 14px}
+  .filter-group select,.filter-group input{min-width:0!important;max-width:100%}
+  .ls-wrap select,.ls-search{width:100%!important;min-width:0!important}
+  .filters{gap:8px}
+  .filter-group{flex-wrap:wrap;width:100%}
+  .filter-group label{min-width:0}
+  .card,.card-gold,.card-navy{border-radius:8px}
+  .mode-btns{gap:6px}
+  .mode-btn{padding:7px 13px;font-size:12px}
+  .ms-stop-row{flex-wrap:wrap}
+  .ms-stop-row label{min-width:0!important;font-size:12px}
+  .settings-block{padding:14px}
+}
+@media(max-width:639px){
+  .page-bar{padding:0 10px;height:46px;gap:8px}
+  .page-title{font-size:11pt}
+  .page-body{padding:10px 8px}
+  .page-bar .btn,.page-bar button:not(.sb-toggle){font-size:12px;padding:5px 10px}
+  .step-label{font-size:9pt;padding:5px 12px}
+  .mode-btn{padding:6px 10px;font-size:11px}
+  .ls-search{font-size:12px}
+}
 </style>
 </head>
 <body>
+<div id="sb-overlay" onclick="toggleSidebar()"></div>
 
 <!-- ══════════════════════════════════════════════════════════════════════════
      SIDEBAR
@@ -2600,6 +2642,30 @@ if (GAS_URL) {
   refreshFuelDisplay();
   navigate(0);
 }
+
+// ─── Mobile sidebar toggle ───────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sb-overlay').classList.toggle('show');
+}
+(function injectHamburgers() {
+  document.querySelectorAll('.page-bar').forEach(function(bar) {
+    var btn = document.createElement('button');
+    btn.className = 'sb-toggle';
+    btn.innerHTML = '&#9776;';
+    btn.title = 'เมนู';
+    btn.onclick = toggleSidebar;
+    bar.insertBefore(btn, bar.firstChild);
+  });
+  document.querySelectorAll('.nav-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (window.innerWidth <= 899) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sb-overlay').classList.remove('show');
+      }
+    });
+  });
+})();
 </script>
 </body>
 </html>

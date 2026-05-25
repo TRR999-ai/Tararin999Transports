@@ -165,6 +165,40 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:#F1F5F9}
 ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
+/* ═══ RESPONSIVE ═══════════════════════════════════════════════════════════ */
+@media(max-width:899px){
+  #topbar{padding:0 14px;height:50px}
+  .tb-right{gap:6px}
+  .tb-right .btn{padding:5px 11px;font-size:12px}
+  #controls{padding:9px 14px;gap:12px}
+  #tabs{padding:10px 14px 0;overflow-x:auto;flex-wrap:nowrap;gap:2px}
+  .tab-btn{white-space:nowrap;padding:7px 14px;font-size:12px}
+  #content{padding:0 10px 30px}
+  #cmp-bar{padding:8px 12px;gap:8px}
+  #new-board-toolbar{padding:8px 12px;gap:8px}
+}
+@media(max-width:639px){
+  .tb-sub{display:none}
+  .tb-title{font-size:13px;letter-spacing:0}
+  .tb-logo{width:30px;height:30px}
+  .tb-right .btn{font-size:11px;padding:5px 8px;gap:4px}
+  #controls{padding:8px 10px;gap:8px;font-size:12px}
+  .ctrl-group{gap:5px}
+  .ctrl-group label{font-size:11px}
+  .ctrl-input{width:70px;font-size:12px;padding:4px 6px}
+  #tabs{padding:6px 6px 0;gap:1px}
+  .tab-btn{padding:6px 10px;font-size:11px}
+  #content{padding:0 4px 20px}
+  #cmp-bar{padding:7px 8px;gap:6px}
+  .cmp-legend{display:none}
+  #cmp-bar .btn{font-size:11px;padding:5px 8px}
+  #cmp-summary-bar{padding:6px 10px}
+  #cmp-summary{gap:8px;font-size:11px}
+  .cmp-input{width:80px;padding:3px 5px;font-size:12px}
+  #new-board-toolbar{padding:7px 8px;gap:6px}
+  .sel-label{font-size:11px}
+}
+
 </style>
 </head>
 <body>
