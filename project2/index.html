@@ -619,17 +619,29 @@ function exportToExcel() {
 
   function doExport(b64) {
     try {
-      // Decode base64 → ArrayBuffer
-      var bStr  = atob(b64);
-      var bytes = new Uint8Array(bStr.length);
-      for (var i = 0; i < bStr.length; i++) bytes[i] = bStr.charCodeAt(i);
+      var wb, ws;
+      var ROW_START;
 
-      var wb = XLSX.read(bytes, { type: 'array', cellStyles: true });
-      var ws = wb.Sheets['FleetCard'];
-      if (!ws) throw new Error('ไม่พบ Sheet "FleetCard" ใน Template');
+      if (b64) {
+        // Template from GAS — TTB bank format
+        var bStr  = atob(b64);
+        var bytes = new Uint8Array(bStr.length);
+        for (var i = 0; i < bStr.length; i++) bytes[i] = bStr.charCodeAt(i);
+        wb = XLSX.read(bytes, { type: 'array', cellStyles: true });
+        ws = wb.Sheets['FleetCard'];
+        if (!ws) throw new Error('ไม่พบ Sheet "FleetCard" ใน Template');
+        ROW_START = 7;   // Bank requirement: data begins at row 7
+      } else {
+        // No template (local mode) — create simple xlsx
+        wb = XLSX.utils.book_new();
+        var aoa = [['ลำดับ','หมายเลขบัตร','ชื่อผู้ถือบัตร','แผนก','วงเงิน (บาท/เดือน)']];
+        ws = XLSX.utils.aoa_to_sheet(aoa);
+        ws['!cols'] = [{wch:8},{wch:22},{wch:24},{wch:16},{wch:18}];
+        XLSX.utils.book_append_sheet(wb, ws, 'FleetCard');
+        ROW_START = 2;  // Data starts at row 2 (row 1 = headers)
+      }
 
-      var data     = hot.getSourceData();
-      var ROW_START = 7;   // Bank requirement: data begins at row 7
+      var data = hot.getSourceData();
 
       // ── Column letter map (Excel 1-indexed columns → letter) ──
       // A=1 B=2 C=3 D=4 I=9 AB=28 AH=34
@@ -648,26 +660,34 @@ function exportToExcel() {
         ws[addr] = { v: val, t: type || (typeof val === 'number' ? 'n' : 's') };
       }
 
+      var isTemplate = !!b64;
       data.forEach(function(row, i) {
         if (!row.cardNumber) return;
         var r   = ROW_START + i;
         var lim = Number(row.limit) || 1;
 
-        setCell(1,  r, row.no);                   // A  — ลำดับ
-        setCell(2,  r, String(row.cardNumber));    // B  — หมายเลขบัตร
-        setCell(3,  r, String(row.name));          // C  — ชื่อผู้ถือบัตร
+        setCell(1,  r, row.no);                    // A  — ลำดับ
+        setCell(2,  r, String(row.cardNumber));     // B  — หมายเลขบัตร
+        setCell(3,  r, String(row.name || ''));     // C  — ชื่อผู้ถือบัตร
         if (row.department) setCell(4, r, String(row.department)); // D — แผนก
-        setCell(9,  r, 'X');                       // I  — Product Type: All Fuel
-        setCell(28, r, 'X');                       // AB — Unit: บาท/THB
-        setCell(30, r, 'X');                       // AD — Baht unit (activate THB limit section)
-        setCell(34, r, lim);                       // AH — Per Month (THB)
-        setCell(50, r, 'N');                       // AX — Odometer (N = ไม่ระบุ)
+        if (isTemplate) {
+          // TTB bank template — write to specific columns
+          setCell(9,  r, 'X');                     // I  — Product Type: All Fuel
+          setCell(28, r, 'X');                     // AB — Unit: บาท/THB
+          setCell(30, r, 'X');                     // AD — Baht unit
+          setCell(34, r, lim);                     // AH — Per Month (THB)
+          setCell(50, r, 'N');                     // AX — Odometer
+        } else {
+          setCell(5,  r, lim);                     // E  — วงเงิน (บาท/เดือน)
+        }
       });
 
       // Update worksheet ref to cover all added rows
-      var rng = XLSX.utils.decode_range(ws['!ref'] || 'A1:AX10');
-      var lastRowIdx = ROW_START + data.length - 1; // 1-indexed Excel row
-      if (lastRowIdx > rng.e.r + 1) rng.e.r = lastRowIdx - 1; // decode_range is 0-indexed
+      var maxCol = isTemplate ? 50 : 5;
+      var rng = XLSX.utils.decode_range(ws['!ref'] || 'A1:E1');
+      var lastRowIdx = ROW_START + data.length - 1;
+      if (lastRowIdx > rng.e.r + 1) rng.e.r = lastRowIdx - 1;
+      if (maxCol - 1 > rng.e.c) rng.e.c = maxCol - 1;
       ws['!ref'] = XLSX.utils.encode_range(rng);
 
       // Download
@@ -677,7 +697,8 @@ function exportToExcel() {
       var name = 'FleetCard_' + date + '.xlsx';
       XLSX.writeFile(wb, name, { bookSST: true });
 
-      setStatus('✓ ดาวน์โหลดแล้ว: ' + name, 'ok');
+      var note = isTemplate ? '' : ' (preview — ไม่มี template TTB)';
+      setStatus('✓ ดาวน์โหลดแล้ว: ' + name + note, 'ok');
     } catch (e) {
       setStatus('Export ไม่สำเร็จ: ' + e.message, 'error');
     } finally {
