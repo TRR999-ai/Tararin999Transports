@@ -182,7 +182,7 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
 .bs-chip.c-all  {background:#f1f5f9;color:#475569;}
 .board-controls{margin-left:auto;display:flex;gap:8px;}
 .board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}
-.board-card{border-radius:12px;padding:18px 14px;text-align:center;background:var(--card);border:2px solid var(--border);transition:transform .15s,box-shadow .15s;cursor:pointer;}
+.board-card{border-radius:12px;padding:18px 14px;text-align:center;background:var(--card);border:2px solid var(--border);transition:transform .15s,box-shadow .15s;cursor:pointer;position:relative;}
 .board-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12);}
 .board-card.st-ready{background:#f0fdf4;border-color:#16a34a;}
 .board-card.st-busy {background:#fef2f2;border-color:#dc2626;}
@@ -1172,7 +1172,9 @@ function renderBoard(){
     var note=noteMap[plate]?'<div class="board-note">📝 '+noteMap[plate]+'</div>':'';
     var safePlate=plate.replace(/'/g,"\\'");
     var brief=t?('📅 '+fmtDateShort(t.date)+(t.job?' · '+(t.job.length>22?t.job.slice(0,22)+'…':t.job):'')):'(ยังไม่มีงาน)';
+    var recBadge=t?'<span class="recency '+recencyClass(t.date)+'">'+recencyLabel(t.date)+'</span>':'';
     return '<div class="board-card'+(st?' st-'+st:'')+'" onclick="openBoardDetail(\''+safePlate+'\')">'
+      +recBadge
       +'<div class="board-plate">'+plate+'</div>'
       +'<div class="board-driver">'+(driver||'—')+'</div>'
       +'<div class="board-st-lbl">'+(stLabels[st]||'— ไม่ระบุ —')+'</div>'
