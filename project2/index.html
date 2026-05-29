@@ -323,6 +323,7 @@
   </style>
 </head>
 <body>
+<script>(function(){var pw=localStorage.getItem('trr_pw_hash'),ses=localStorage.getItem('trr_session');if(pw&&ses===pw)return;try{sessionStorage.setItem('trr_redirect',location.href);}catch(e){}location.replace('../index.html');})();</script>
 
 <!-- Loading overlay -->
 <div id="loading">
@@ -741,31 +742,35 @@ if (typeof google === 'undefined') {
         withFailureHandler: function(fn) { this._err = fn; return this; },
         getEmployeeData: function() {
           var self = this;
-          fetch(FLEET_URL + '&t=' + Date.now())
-            .then(function(r) { return r.text(); })
-            .then(function(text) {
-              // Strip JSONP wrapper: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
-              var json = JSON.parse(text.replace(/^[^\(]+\(/, '').replace(/\);\s*$/, ''));
-              var rows = (json.table && json.table.rows) ? json.table.rows : [];
-              var data = [];
-              rows.forEach(function(row, i) {
-                var c   = row.c || [];
-                var get = function(idx) { return (c[idx] && c[idx].v != null) ? c[idx].v : ''; };
-                var cardNum = String(get(1)).trim();
-                if (!cardNum) return;
-                data.push({
-                  no:         Number(get(0)) || (i + 1),
-                  cardNumber: cardNum,
-                  name:       String(get(2)).trim(),
-                  department: String(get(3)).trim(),
-                  limit:      Number(get(4)) || 1
-                });
+          var cb = 'fleetCb_' + Date.now();
+          var url = 'https://docs.google.com/spreadsheets/d/' + FLEET_SHEET_ID +
+                    '/gviz/tq?tqx=out:json;responseHandler:' + cb + '&gid=' + FLEET_SHEET_GID + '&t=' + Date.now();
+          window[cb] = function(json) {
+            delete window[cb];
+            var rows = (json.table && json.table.rows) ? json.table.rows : [];
+            var data = [];
+            rows.forEach(function(row, i) {
+              var c   = row.c || [];
+              var get = function(idx) { return (c[idx] && c[idx].v != null) ? c[idx].v : ''; };
+              var cardNum = String(get(1)).trim();
+              if (!cardNum) return;
+              data.push({
+                no:         Number(get(0)) || (i + 1),
+                cardNumber: cardNum,
+                name:       String(get(2)).trim(),
+                department: String(get(3)).trim(),
+                limit:      Number(get(4)) || 1
               });
-              self._ok(data);
-            })
-            .catch(function(err) {
-              if (self._err) self._err({ message: 'โหลด Sheet ไม่สำเร็จ: ' + err.message });
             });
+            self._ok(data);
+          };
+          var s = document.createElement('script');
+          s.onerror = function() {
+            delete window[cb];
+            if (self._err) self._err({ message: 'โหลด Sheet ไม่สำเร็จ: ตรวจสอบ Sheet ID และการ Share' });
+          };
+          s.src = url;
+          document.head.appendChild(s);
         },
         getTemplateBase64: function() { var self = this; setTimeout(function() { self._ok(FLEET_TEMPLATE_B64); }, 0); }
       }

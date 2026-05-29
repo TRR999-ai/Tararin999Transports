@@ -328,6 +328,7 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
 </style>
 </head>
 <body>
+<script>(function(){var pw=localStorage.getItem('trr_pw_hash'),ses=localStorage.getItem('trr_session');if(pw&&ses===pw)return;try{sessionStorage.setItem('trr_redirect',location.href);}catch(e){}location.replace('../index.html');})();</script>
 
 <div id="ld-overlay">
   <div class="ld-title">🚚 Fleet Dashboard</div>
@@ -564,7 +565,7 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
       <input type="file" id="stmt-file-inp" accept=".xlsx,.xls" style="display:none" onchange="loadStmtFile(this)">
       <span id="stmt-file-chip"></span>
     </div>
-    <div id="stmt-month-bar" style="display:none;padding:10px 18px 0;border-bottom:1px solid var(--border);background:var(--card);display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <div id="stmt-month-bar" style="display:none;padding:10px 18px 0;border-bottom:1px solid var(--border);background:var(--card);gap:8px;flex-wrap:wrap;align-items:center;">
       <span style="font-size:11px;font-weight:700;color:var(--text2);margin-right:4px;">เดือน:</span>
       <span id="stmt-month-chips"></span>
       <span id="stmt-sheet-loading" style="font-size:11px;color:var(--text2);display:none;">⏳ กำลังโหลด...</span>
@@ -620,10 +621,16 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
       <div class="settings-section">
         <div class="settings-title">🏦 Transaction Report — Google Sheets</div>
         <div class="settings-info">
-          เชื่อม Statement วิเคราะห์กับ Google Sheets แบบ tab ต่อเดือน<br>
-          <b>รูปแบบ tab:</b> ตั้งชื่อ tab ว่า <code style="background:#f0f2f5;padding:1px 5px;border-radius:4px;">2026-04</code>, <code style="background:#f0f2f5;padding:1px 5px;border-radius:4px;">2026-05</code> ฯลฯ<br>
-          <b>โครงสร้าง sheet:</b> row 1-3 = header info, row 4 = column headers, row 5+ = data<br>
-          (ใช้ format เดิมจาก TMB export วาง paste ทับได้เลย)
+          เชื่อม Statement วิเคราะห์กับ Google Sheets แบบ tab ต่อเดือน<br><br>
+          <b>ขั้นตอนการตั้งค่า:</b><br>
+          1. สร้าง Google Sheet ใหม่ (หรือใช้ไฟล์เดิม)<br>
+          2. ตั้งชื่อ tab ตามเดือน เช่น <code style="background:#f0f2f5;padding:1px 5px;border-radius:4px;">2026-04</code> <code style="background:#f0f2f5;padding:1px 5px;border-radius:4px;">2026-05</code><br>
+          3. วาง data จาก TMB Transaction Report export ทับได้เลย (ไม่ต้องแก้ format)<br>
+          4. Share sheet → "Anyone with the link" → Viewer<br>
+          5. คัดลอก Sheet ID จาก URL แล้วใส่ด้านล่าง<br>
+          6. GAS Script ต้องอัปเดตแล้ว Re-deploy (ดูหน้า GAS Script ด้านบน)<br><br>
+          <b>Sheet ID</b> คือส่วนนี้ใน URL:<br>
+          <code style="background:#f0f2f5;padding:2px 6px;border-radius:4px;font-size:11px;">docs.google.com/spreadsheets/d/<b style="color:#1B2770">← Sheet ID อยู่ตรงนี้ →</b>/edit</code>
         </div>
         <div class="settings-row">
           <span class="settings-label">Sheet ID</span>
@@ -1739,7 +1746,7 @@ var stmtSheetId='';
 var stmtAvailSheets=[];
 var stmtLoadedTab='';
 
-function normPlate(p){return(p||'').replace(/[\s\-]/g,'').toUpperCase();}
+function normPlate(p){return(p||'').replace(/[\s\-_\/\.]/g,'').toUpperCase();}
 
 function loadStmtFile(inp){
   var file=inp.files[0];if(!file)return;
@@ -1936,8 +1943,9 @@ function renderStmt(){
       var bKm=p.bKm>0?p.bKm.toFixed(2):'—';
       var barPct=maxKmL>0&&p.kmL>0?Math.round(p.kmL/maxKmL*100):0;
       var kmLhtml=p.kmL>0?'<div>'+kmL+'</div><div class="eff-bar"><div class="eff-bar-fill" style="width:'+barPct+'%"></div></div>':kmL;
+      var noMatch=p.km===0;
       return '<tr style="cursor:pointer;" onclick="openStmtPlateDetail(\''+p.np+'\')">'
-        +'<td><span class="plate">'+p.plate+'</span></td>'
+        +'<td><span class="plate">'+p.plate+'</span>'+(noMatch?'<span title="ไม่พบทะเบียนนี้ใน Trip Sheet — km/ลิตร คำนวณไม่ได้" style="margin-left:4px;font-size:10px;color:#b45309;cursor:help;">⚠️</span>':'')+'</td>'
         +(hasRich?'<td style="font-size:11px;">'+(p.driverList||'—')+'</td><td style="font-size:11px;color:var(--text2);">'+(p.brand||'—')+'</td>':'')
         +'<td class="num">'+p.fills+'</td>'
         +'<td class="num">'+p.litres.toLocaleString(undefined,{maximumFractionDigits:1})+'</td>'
