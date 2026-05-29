@@ -424,6 +424,38 @@ body {
   .card-title{font-size:11px;letter-spacing:.5px;padding:0 8px 5px}
   .card-sub-bar{font-size:10px;padding:7px 8px}
 }
+
+/* ═══ LOGIN ═══════════════════════════════════════════════════════════════ */
+#login-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0d1340 0%,#141D5C 50%,#1B2770 100%);display:flex;align-items:center;justify-content:center;}
+.login-box{width:min(92vw,380px);background:rgba(255,255,255,.04);border:1px solid rgba(245,166,35,.25);border-radius:20px;padding:40px 36px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5);}
+.login-logo{width:80px;height:80px;border-radius:50%;border:2.5px solid var(--gold);overflow:hidden;margin:0 auto 14px;background:rgba(255,255,255,.1);}
+.login-logo img{width:100%;height:100%;object-fit:cover;}
+.login-brand{font-size:18px;font-weight:700;color:var(--gold);letter-spacing:2px;margin-bottom:3px;}
+.login-brand-sub{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:24px;}
+.login-mode-title{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:16px;}
+.login-field{margin-bottom:12px;}
+.login-field input{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid rgba(245,166,35,.3);background:rgba(255,255,255,.07);color:#fff;font-size:14px;font-family:inherit;outline:none;transition:.2s;}
+.login-field input:focus{border-color:var(--gold);background:rgba(255,255,255,.12);}
+.login-field input::placeholder{color:rgba(255,255,255,.3);}
+.login-btn{width:100%;padding:12px;border-radius:10px;border:none;background:var(--gold);color:var(--navy-dark);font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:.2s;margin-top:4px;}
+.login-btn:hover{background:var(--gold2);}
+.login-err{color:#ff6b6b;font-size:12px;min-height:18px;margin-bottom:6px;}
+.login-link{font-size:11px;color:rgba(255,255,255,.35);margin-top:12px;cursor:pointer;}
+.login-link:hover{color:var(--gold);}
+/* Logout + change pw btn */
+.logout-btn{padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:11px;cursor:pointer;margin-left:8px;transition:.15s;font-family:inherit;}
+.logout-btn:hover{background:rgba(255,80,80,.2);border-color:rgba(255,80,80,.4);color:#fff;}
+/* Change pw modal */
+#changepw-modal{display:none;position:fixed;inset:0;z-index:8888;background:rgba(0,0,0,.6);align-items:center;justify-content:center;}
+#changepw-modal.show{display:flex;}
+.changepw-box{background:#fff;border-radius:16px;padding:28px 28px;width:min(92vw,360px);box-shadow:0 16px 48px rgba(0,0,0,.3);}
+.changepw-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:16px;}
+.changepw-field{margin-bottom:10px;}
+.changepw-field label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;}
+.changepw-field input{width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:.2s;}
+.changepw-field input:focus{border-color:var(--navy2);}
+.changepw-err{color:#e53e3e;font-size:12px;min-height:16px;margin-bottom:8px;}
+.changepw-btns{display:flex;gap:8px;margin-top:4px;}
 </style>
 </head>
 <body>
@@ -454,10 +486,6 @@ body {
       <span class="nav-icon">⛽</span>
       <span>ต้นทุนน้ำมัน</span>
     </a>
-    <a class="nav-item" href="./dashboard/index.html">
-      <span class="nav-icon">📊</span>
-      <span>Dashboard</span>
-    </a>
     <a class="nav-item" href="./priceboard/index.html">
       <span class="nav-icon">💰</span>
       <span>กระดานราคา</span>
@@ -481,10 +509,11 @@ body {
     </div>
     <div class="tb-right">
       <span class="tb-badge">ระบบบริหารจัดการ</span>
-      <div class="tb-user">
+      <div class="tb-user" onclick="openChangePw()" title="เปลี่ยนรหัสผ่าน" style="cursor:pointer;">
         <div class="tb-avatar">👤</div>
         <span>TARARIN 999</span>
       </div>
+      <button class="logout-btn" onclick="doLogout()">🚪 ออกจากระบบ</button>
     </div>
   </header>
 
@@ -515,15 +544,6 @@ body {
           </div>
           <div class="card-title">Fleet Card<br>Batch Update</div>
           <div class="card-sub-bar">CARRIER WEB</div>
-        </a>
-
-        <!-- ── Dashboard ── -->
-        <a class="portal-card" href="./dashboard/index.html">
-          <div class="card-icon-area">
-            <div class="card-icon-circle">📊</div>
-          </div>
-          <div class="card-title">Executive<br>Dashboard</div>
-          <div class="card-sub-bar">FUEL ANALYTICS</div>
         </a>
 
         <!-- ── TRR Fuel ── -->
@@ -576,6 +596,62 @@ body {
 
 </div>
 
+<!-- ══ Login Overlay ════════════════════════════════════════════════════════ -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo"><img src="./TRR999logo.png" alt="TRR999"></div>
+    <div class="login-brand">TARARIN 999</div>
+    <div class="login-brand-sub">ธรารินทร์ 999 ขนส่ง จำกัด</div>
+
+    <!-- Login form -->
+    <div id="login-form">
+      <div class="login-mode-title">🔐 เข้าสู่ระบบ</div>
+      <div class="login-field">
+        <input type="password" id="login-pw" placeholder="รหัสผ่าน" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div id="login-err" class="login-err"></div>
+      <button class="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+    </div>
+
+    <!-- First-time setup form -->
+    <div id="setup-form" style="display:none;">
+      <div class="login-mode-title">🔑 ตั้งรหัสผ่านครั้งแรก</div>
+      <div class="login-field">
+        <input type="password" id="setup-pw" placeholder="รหัสผ่านใหม่" onkeydown="if(event.key==='Enter')doSetup()">
+      </div>
+      <div class="login-field">
+        <input type="password" id="setup-pw2" placeholder="ยืนยันรหัสผ่าน" onkeydown="if(event.key==='Enter')doSetup()">
+      </div>
+      <div id="setup-err" class="login-err"></div>
+      <button class="login-btn" onclick="doSetup()">ตั้งรหัสผ่าน</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Change Password Modal ═══════════════════════════════════════════════ -->
+<div id="changepw-modal" onclick="if(event.target===this)closeChangePw()">
+  <div class="changepw-box">
+    <div class="changepw-title">🔑 เปลี่ยนรหัสผ่าน</div>
+    <div class="changepw-field">
+      <label>รหัสผู้ดูแลระบบ</label>
+      <input type="password" id="changepw-admin" placeholder="รหัสผู้ดูแล">
+    </div>
+    <div class="changepw-field">
+      <label>รหัสผ่านใหม่</label>
+      <input type="password" id="changepw-new" placeholder="รหัสผ่านใหม่">
+    </div>
+    <div class="changepw-field">
+      <label>ยืนยันรหัสผ่านใหม่</label>
+      <input type="password" id="changepw-confirm" placeholder="ยืนยันรหัสผ่าน" onkeydown="if(event.key==='Enter')doChangePw()">
+    </div>
+    <div id="changepw-err" class="changepw-err"></div>
+    <div class="changepw-btns">
+      <button class="login-btn" style="background:var(--navy);color:#fff;" onclick="doChangePw()">เปลี่ยนรหัสผ่าน</button>
+      <button class="login-btn" style="background:#e2e8f0;color:var(--text);" onclick="closeChangePw()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ Contact Modal ════════════════════════════════════════════════════════ -->
 <div id="contact-overlay" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="contact-box">
@@ -609,6 +685,102 @@ body {
 
 
 <script>
+// ══ Auth ══════════════════════════════════════════════════════════════════
+var ADMIN_CODE = '092615';
+var PW_KEY     = 'trr_pw_hash';
+var SES_KEY    = 'trr_session';
+
+function hashPw(pw){
+  // simple deterministic hash (not cryptographic — local file use)
+  var s='TRR999:'+pw+':tararin';
+  var h=0;
+  for(var i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;}
+  return h.toString(16)+'::'+btoa(unescape(encodeURIComponent(s))).slice(0,24);
+}
+
+function checkAuth(){
+  var pwHash=localStorage.getItem(PW_KEY);
+  var session=localStorage.getItem(SES_KEY);
+  if(!pwHash){
+    // First time — show setup form
+    document.getElementById('login-form').style.display='none';
+    document.getElementById('setup-form').style.display='block';
+    document.getElementById('login-overlay').style.display='flex';
+    return;
+  }
+  if(session===pwHash){
+    // Already logged in on this device
+    document.getElementById('login-overlay').style.display='none';
+    return;
+  }
+  // Need to login
+  document.getElementById('login-overlay').style.display='flex';
+}
+
+function doLogin(){
+  var pw=(document.getElementById('login-pw').value||'').trim();
+  if(!pw){document.getElementById('login-err').textContent='กรุณาใส่รหัสผ่าน';return;}
+  var pwHash=localStorage.getItem(PW_KEY);
+  if(hashPw(pw)===pwHash){
+    localStorage.setItem(SES_KEY,pwHash);
+    document.getElementById('login-overlay').style.display='none';
+    document.getElementById('login-pw').value='';
+    document.getElementById('login-err').textContent='';
+  } else {
+    document.getElementById('login-err').textContent='รหัสผ่านไม่ถูกต้อง';
+    document.getElementById('login-pw').value='';
+    document.getElementById('login-pw').focus();
+  }
+}
+
+function doSetup(){
+  var pw=(document.getElementById('setup-pw').value||'').trim();
+  var pw2=(document.getElementById('setup-pw2').value||'').trim();
+  if(pw.length<4){document.getElementById('setup-err').textContent='รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร';return;}
+  if(pw!==pw2){document.getElementById('setup-err').textContent='รหัสผ่านไม่ตรงกัน';return;}
+  var h=hashPw(pw);
+  localStorage.setItem(PW_KEY,h);
+  localStorage.setItem(SES_KEY,h);
+  document.getElementById('login-overlay').style.display='none';
+}
+
+function doLogout(){
+  localStorage.removeItem(SES_KEY);
+  location.reload();
+}
+
+function openChangePw(){
+  document.getElementById('changepw-admin').value='';
+  document.getElementById('changepw-new').value='';
+  document.getElementById('changepw-confirm').value='';
+  document.getElementById('changepw-err').textContent='';
+  document.getElementById('changepw-modal').classList.add('show');
+  setTimeout(function(){document.getElementById('changepw-admin').focus();},80);
+}
+function closeChangePw(){
+  document.getElementById('changepw-modal').classList.remove('show');
+}
+
+function doChangePw(){
+  var admin=(document.getElementById('changepw-admin').value||'').trim();
+  var newPw=(document.getElementById('changepw-new').value||'').trim();
+  var confirm=(document.getElementById('changepw-confirm').value||'').trim();
+  var errEl=document.getElementById('changepw-err');
+  if(admin!==ADMIN_CODE){errEl.textContent='รหัสผู้ดูแลไม่ถูกต้อง';return;}
+  if(newPw.length<4){errEl.textContent='รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร';return;}
+  if(newPw!==confirm){errEl.textContent='รหัสผ่านใหม่ไม่ตรงกัน';return;}
+  var h=hashPw(newPw);
+  localStorage.setItem(PW_KEY,h);
+  localStorage.removeItem(SES_KEY); // force re-login on all devices
+  closeChangePw();
+  alert('เปลี่ยนรหัสผ่านสำเร็จ\nกรุณาเข้าสู่ระบบใหม่');
+  doLogout();
+}
+
+// Run auth check on load
+checkAuth();
+
+// ══ Sidebar ═══════════════════════════════════════════════════════════════
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('sb-overlay').classList.toggle('show');
