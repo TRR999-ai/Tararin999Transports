@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คู่มือการใช้งาน — TARARIN 999</title>
+<link rel="icon" type="image/png" href="./TRR999logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#1B2770;--navy2:#2233A0;--navy-dark:#141D5C;
+  --gold:#F5A623;--gold2:#FBBF24;
+  --bg:#F0F4FF;--card:#fff;--border:#E2E8F0;
+  --text:#2D3748;--muted:#64748B;
+  --green:#16a34a;--red:#dc2626;
+}
+body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color:var(--text);background:var(--bg);display:flex;min-height:100vh;}
+
+/* ── Sidebar ── */
+#sidebar{width:240px;flex-shrink:0;background:var(--navy-dark);min-height:100vh;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.sb-top{padding:20px 16px 14px;border-bottom:1px solid rgba(245,166,35,.2);text-align:center;}
+.sb-logo{width:52px;height:52px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;margin:0 auto 8px;}
+.sb-logo img{width:100%;height:100%;object-fit:cover;}
+.sb-title{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:1px;}
+.sb-sub{font-size:9px;color:rgba(255,255,255,.35);margin-top:2px;}
+.sb-nav{flex:1;padding:10px 0;}
+.sb-group{padding:8px 14px 3px;font-size:9px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.3);text-transform:uppercase;}
+.sb-link{display:flex;align-items:center;gap:8px;padding:8px 16px;color:rgba(255,255,255,.6);font-size:12.5px;cursor:pointer;transition:.15s;border:none;background:none;width:100%;text-align:left;text-decoration:none;}
+.sb-link:hover{background:rgba(255,255,255,.07);color:#fff;}
+.sb-link.active{background:rgba(245,166,35,.15);color:var(--gold);}
+.sb-link .ic{width:16px;text-align:center;flex-shrink:0;}
+.sb-back{display:flex;align-items:center;gap:8px;padding:12px 16px;color:rgba(255,255,255,.45);font-size:12px;text-decoration:none;border-top:1px solid rgba(255,255,255,.08);margin-top:auto;}
+.sb-back:hover{color:var(--gold);}
+
+/* ── Main ── */
+#main{flex:1;padding:32px 40px 60px;max-width:900px;}
+.page-header{margin-bottom:36px;}
+.page-header h1{font-size:24px;font-weight:800;color:var(--navy);margin-bottom:4px;}
+.page-header p{color:var(--muted);font-size:13px;}
+
+/* ── Section cards ── */
+.help-section{background:var(--card);border-radius:16px;border:1px solid var(--border);margin-bottom:28px;overflow:hidden;}
+.help-section-hdr{padding:16px 22px;background:linear-gradient(135deg,var(--navy-dark),var(--navy2));display:flex;align-items:center;gap:10px;}
+.help-section-hdr .sys-icon{font-size:22px;}
+.help-section-hdr .sys-name{font-size:15px;font-weight:700;color:#fff;letter-spacing:.3px;}
+.help-section-hdr .sys-desc{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px;}
+.help-body{padding:20px 22px;}
+
+/* ── Steps ── */
+.step-group{margin-bottom:20px;}
+.step-group-title{font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--gold);display:inline-block;}
+.steps{list-style:none;}
+.steps li{display:flex;gap:12px;margin-bottom:9px;align-items:flex-start;}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-txt{font-size:13px;line-height:1.55;flex:1;}
+.step-txt b{color:var(--navy);}
+.step-txt code{background:#EEF2FF;color:var(--navy2);padding:1px 6px;border-radius:4px;font-size:12px;font-family:monospace;}
+
+/* ── Tips / Notes ── */
+.tip{display:flex;gap:10px;background:#FFF8EC;border:1px solid rgba(245,166,35,.3);border-radius:8px;padding:10px 14px;margin-top:10px;}
+.tip-icon{font-size:16px;flex-shrink:0;}
+.tip-txt{font-size:12.5px;line-height:1.5;color:#78350f;}
+.note{display:flex;gap:10px;background:#EEF2FF;border:1px solid rgba(27,39,112,.15);border-radius:8px;padding:10px 14px;margin-top:10px;}
+.note-icon{font-size:16px;flex-shrink:0;}
+.note-txt{font-size:12.5px;line-height:1.5;color:var(--navy);}
+
+/* ── Feature table ── */
+.feat-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+.feat-table th{background:var(--navy);color:#fff;padding:7px 12px;text-align:left;font-weight:600;font-size:12px;}
+.feat-table td{padding:7px 12px;border-bottom:1px solid var(--border);}
+.feat-table tr:last-child td{border-bottom:none;}
+.feat-table tr:hover td{background:#F5F7FF;}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.badge-green{background:#dcfce7;color:#15803d;}
+.badge-gold{background:#fef3c7;color:#92400e;}
+.badge-navy{background:#e0e7ff;color:#1e40af;}
+
+/* ── Divider ── */
+.divider{border:none;border-top:1px solid var(--border);margin:18px 0;}
+
+/* ── Scroll offset for sticky headers ── */
+.anchor{scroll-margin-top:24px;}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  #sidebar{display:none;}
+  #main{padding:20px 16px 40px;}
+}
+</style>
+</head>
+<body>
+<script>(function(){var pw=localStorage.getItem('trr_pw_hash'),ses=localStorage.getItem('trr_session');if(pw&&ses===pw)return;try{sessionStorage.setItem('trr_redirect',location.href);}catch(e){}location.replace('./index.html');})();</script>
+
+<!-- ── Sidebar ── -->
+<aside id="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo"><img src="./TRR999logo.png" alt="TRR999"></div>
+    <div class="sb-title">คู่มือการใช้งาน</div>
+    <div class="sb-sub">TARARIN 999 SYSTEM</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-group">ระบบหลัก</div>
+    <a class="sb-link active" onclick="scrollTo('sec-portal')"><span class="ic">🏠</span>Portal & ล็อกอิน</a>
+    <a class="sb-link" onclick="scrollTo('sec-fleet-view')"><span class="ic">🚦</span>Fleet Dashboard</a>
+    <a class="sb-link" onclick="scrollTo('sec-fleet-card')"><span class="ic">💳</span>Fleet Card Batch</a>
+    <a class="sb-link" onclick="scrollTo('sec-trr')"><span class="ic">⛽</span>ต้นทุนน้ำมัน TRR</a>
+    <a class="sb-link" onclick="scrollTo('sec-price')"><span class="ic">💰</span>กระดานราคา</a>
+    <a class="sb-link" onclick="scrollTo('sec-transport')"><span class="ic">🚚</span>งานขนส่ง</a>
+    <div class="sb-group" style="margin-top:8px;">การตั้งค่า</div>
+    <a class="sb-link" onclick="scrollTo('sec-gas')"><span class="ic">⚙️</span>GAS Sync Setup</a>
+    <a class="sb-link" onclick="scrollTo('sec-stmt-setup')"><span class="ic">🏦</span>Statement Setup</a>
+  </nav>
+  <a class="sb-back" href="./index.html">← กลับหน้าหลัก</a>
+</aside>
+
+<!-- ── Main Content ── -->
+<main id="main">
+  <div class="page-header">
+    <h1>📖 คู่มือการใช้งาน</h1>
+    <p>TARARIN 999 Transport System — ครอบคลุมทุกระบบ</p>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       1. PORTAL
+  ════════════════════════════════════════════════ -->
+  <div class="help-section anchor" id="sec-portal">
+    <div class="help-section-hdr">
+      <span class="sys-icon">🏠</span>
+      <div>
+        <div class="sys-name">User Portal — หน้าหลัก</div>
+        <div class="sys-desc">ศูนย์กลางนำทางไปทุกระบบ พร้อมระบบล็อกอิน</div>
+      </div>
+    </div>
+    <div class="help-body">
+
+      <div class="step-group">
+        <div class="step-group-title">🔐 ล็อกอินครั้งแรก (ตั้งรหัสผ่าน)</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">เปิดไฟล์ <code>project4/index.html</code> — จะขึ้นหน้า "ตั้งรหัสผ่านครั้งแรก"</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">พิมพ์ <b>รหัสผ่าน</b> ที่ต้องการ (ขั้นต่ำ 4 ตัวอักษร) ในช่องแรก</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">พิมพ์ยืนยันรหัสผ่านอีกครั้ง → กด <b>ตั้งรหัสผ่าน</b></span></li>
+          <li><span class="step-num">4</span><span class="step-txt">เข้าสู่ระบบได้ทันที เครื่องนี้จะจำ session ไว้ไม่ต้องล็อกอินซ้ำ</span></li>
+        </ol>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">🔑 ล็อกอินปกติ</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">เปิดหน้า portal — ถ้า session หมด จะขึ้นหน้าล็อกอิน</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">พิมพ์รหัสผ่าน → กด <b>เข้าสู่ระบบ</b> หรือกด Enter</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">ถ้าเปิดหน้าระบบย่อยโดยตรง (เช่น fleet_view) จะ redirect มาล็อกอินที่นี่ก่อน แล้วกลับไปหน้าเดิมอัตโนมัติ</span></li>
+        </ol>
+        <div class="tip"><span class="tip-icon">💡</span><span class="tip-txt">เครื่องเดิม session อยู่ตลอด — ไม่ต้อง login ซ้ำทุกวัน ยกเว้นมีการเปลี่ยนรหัสผ่าน</span></div>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">🔄 เปลี่ยนรหัสผ่าน</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">คลิกที่ <b>👤 TARARIN 999</b> มุมขวาบน</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">ใส่ <b>รหัสผู้ดูแล</b> (admin code) ก่อน — ผู้ดูแลระบบเท่านั้นรู้รหัสนี้</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">พิมพ์รหัสผ่านใหม่ + ยืนยัน → กด <b>เปลี่ยนรหัสผ่าน</b></span></li>
+          <li><span class="step-num">4</span><span class="step-txt">ระบบ logout อัตโนมัติ — ทุกเครื่องต้อง login ใหม่ด้วยรหัสใหม่</span></li>
+        </ol>
+        <div class="note"><span class="note-icon">ℹ️</span><span class="note-txt">ปุ่ม <b>🚪 ออกจากระบบ</b> มุมขวาบน — ล้าง session ของเครื่องนั้นทันที</span></div>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">🗂 การนำทาง</div>
+        <table class="feat-table">
+          <thead><tr><th>การ์ด / ลิงก์</th><th>ไปที่</th></tr></thead>
+          <tbody>
+            <tr><td>🚚 ระบบจัดการงานขนส่ง</td><td>Transport — บันทึก/ดูงานขนส่ง</td></tr>
+            <tr><td>💳 Fleet Card Batch Update</td><td>อัปเดตวงเงินบัตรน้ำมันทีละหลายใบ</td></tr>
+            <tr><td>⛽ ต้นทุนน้ำมัน TRR</td><td>คำนวณต้นทุนน้ำมันต่อเที่ยว</td></tr>
+            <tr><td>💰 กระดานราคา</td><td>ตารางราคาค่าขนส่ง</td></tr>
+            <tr><td>🚦 Fleet Dashboard</td><td>สถานะกำลังรถ + วิเคราะห์ข้อมูล</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       2. FLEET VIEW
+  ════════════════════════════════════════════════ -->
+  <div class="help-section anchor" id="sec-fleet-view">
+    <div class="help-section-hdr">
+      <span class="sys-icon">🚦</span>
+      <div>
+        <div class="sys-name">Fleet Dashboard — ระบบติดตามกำลังรถ</div>
+        <div class="sys-desc">ดึงข้อมูลจาก Google Sheets แบบ real-time วิเคราะห์ต้นทุน + สถานะรถ</div>
+      </div>
+    </div>
+    <div class="help-body">
+
+      <div class="step-group">
+        <div class="step-group-title">📊 ภาพรวม KPI</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">หน้าแรกแสดง KPI รวม — จำนวน trips, km รวม, ค่าน้ำมันรวม, ฿/km เฉลี่ย</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">กด <b>dropdown เดือน</b> มุมขวาบนเพื่อเปลี่ยนเดือนดู</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">กราฟแท่งแสดงยอดรายเดือน — hover เพื่อดูตัวเลขละเอียด</span></li>
+        </ol>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">🚦 กำลังรถวันนี้ (Board)</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">แสดงการ์ดรถทุกคัน พร้อมสถานะ ทะเบียน คนขับ และงานล่าสุด</span></li>
+          <li><span class="step-num">2</span><span class="step-txt"><b>กดการ์ด</b> เพื่อดูรายละเอียด — ตั้งสถานะ <span class="badge badge-green">✅ พร้อม</span> <span class="badge badge-gold">❌ ไม่พร้อม</span> <span class="badge" style="background:#fef9c3;color:#854d0e;">🏖️ ลา</span></span></li>
+          <li><span class="step-num">3</span><span class="step-txt">แถบด้านบน filter ตาม <b>ประเภทรถ</b> — กดชิปเพื่อกรองเฉพาะกลุ่ม</span></li>
+          <li><span class="step-num">4</span><span class="step-txt">ปุ่ม <b>⚙ จัดการทะเบียน</b> — เรียงลำดับ/ซ่อนรถ และสร้างประเภทรถเอง</span></li>
+        </ol>
+        <div class="tip"><span class="tip-icon">💡</span><span class="tip-txt">สถานะ "พร้อม/ไม่พร้อม" รีเซ็ตอัตโนมัติทุกเที่ยงคืน — "ลา" ไม่รีเซ็ต</span></div>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">🔍 งานล่าสุดแต่ละคัน</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">แสดงการ์ดรถพร้อมงานล่าสุด — <span class="badge badge-green">วันนี้</span> <span class="badge badge-gold">เมื่อวาน</span> บอกความใหม่</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">ช่อง <b>Note</b> ในการ์ด — พิมพ์หมายเหตุ บันทึกอัตโนมัติ</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">กด <b>ทะเบียน</b> ในการ์ด → ไปหน้าสรุปรายคันของรถนั้นทันที</span></li>
+          <li><span class="step-num">4</span><span class="step-txt">filter แถบบน: ตาม <b>สถานะ</b> หรือ <b>ประเภทรถ</b></span></li>
+        </ol>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">🚗 สรุปรายคัน + 👤 สรุปรายคนขับ</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">ตารางสรุป trips, km, ค่าน้ำมัน, ฿/km แยกตามทะเบียน/คนขับ</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">กดหัวคอลัมน์เพื่อ <b>sort</b> — กดซ้ำเพื่อกลับทิศ</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">กดแถวรถ/คนขับ เพื่อขยายดู <b>ประวัติ 30 งานล่าสุด</b></span></li>
+        </ol>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">📈 วิเคราะห์</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt"><b>เปรียบเทียบเดือนนี้ vs เดือนก่อน</b> — KPI 4 ตัว พร้อม % เปลี่ยนแปลง</span></li>
+          <li><span class="step-num">2</span><span class="step-txt"><b>Top Routes</b> — chart + ตาราง 12 เส้นทางต้นทุนสูงสุด</span></li>
+          <li><span class="step-num">3</span><span class="step-txt"><b>Trend ฿/km รายคัน</b> — เลือกทะเบียนจาก dropdown → กราฟ trend รายเดือน</span></li>
+        </ol>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">🏦 Statement วิเคราะห์</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt"><b>วิธีที่ 1 (อัปโหลดไฟล์):</b> กด <b>📂 อัปโหลดไฟล์</b> → เลือกไฟล์ <code>.xlsx</code> จาก TMB Transaction Report</span></li>
+          <li><span class="step-num">2</span><span class="step-txt"><b>วิธีที่ 2 (Google Sheets):</b> ตั้งค่า Sheet ID ใน Settings → กด <b>☁️ ดึงจาก Sheets</b> → เลือกเดือน</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">ดู 4 tab: <b>🚗 รายคัน</b> / <b>📍 สถานีน้ำมัน</b> / <b>🗺️ รายจังหวัด</b> / <b>📅 รายวัน</b></span></li>
+          <li><span class="step-num">4</span><span class="step-txt"><b>คลิก</b> ที่แถวใดก็ได้ใน 3 tab แรกเพื่อ drill-down ดูรายละเอียด</span></li>
+          <li><span class="step-num">5</span><span class="step-txt">กด bar ใน tab รายวัน → ดูว่าวันนั้นรถไหนเติมที่ไหนบ้าง</span></li>
+        </ol>
+        <div class="tip"><span class="tip-icon">💡</span><span class="tip-txt">ทะเบียนที่มี ⚠️ หมายถึงไม่พบใน Trip Sheet — km/ลิตร คำนวณไม่ได้ ตรวจสอบรูปแบบชื่อทะเบียน</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       3. FLEET CARD BATCH UPDATE
+  ════════════════════════════════════════════════ -->
+  <div class="help-section anchor" id="sec-fleet-card">
+    <div class="help-section-hdr">
+      <span class="sys-icon">💳</span>
+      <div>
+        <div class="sys-name">Fleet Card Batch Update — อัปเดตวงเงินบัตรน้ำมัน</div>
+        <div class="sys-desc">อัปเดตวงเงินบัตรน้ำมันหลายใบพร้อมกัน export ไฟล์ส่ง TMB</div>
+      </div>
+    </div>
+    <div class="help-body">
+
+      <div class="step-group">
+        <div class="step-group-title">📋 ขั้นตอนการใช้งาน</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">ระบบโหลดข้อมูลบัตรจาก Google Sheet อัตโนมัติ (หมายเลขบัตร + ชื่อ + วงเงินปัจจุบัน)</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">แก้ไข <b>วงเงิน</b> ในตารางโดยตรง — คลิกที่ช่องวงเงินแล้วพิมพ์ค่าใหม่</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">หรือกด <b>📋 วางวงเงิน</b> — วาง list วงเงินทีละบรรทัด (ต้องตรงลำดับกับตาราง)</span></li>
+          <li><span class="step-num">4</span><span class="step-txt">กด <b>➕ เพิ่มบัตร</b> เพื่อเพิ่มบัตรใหม่ทีละใบ หรือวางหลายใบพร้อมกัน</span></li>
+          <li><span class="step-num">5</span><span class="step-txt">เมื่อแก้ครบ กด <b>Export</b> → ดาวน์โหลดไฟล์ Excel พร้อมส่งธนาคาร</span></li>
+        </ol>
+        <div class="note"><span class="note-icon">ℹ️</span><span class="note-txt">ไฟล์ที่ export จะใช้ <b>Template TTB</b> อัตโนมัติถ้าโหลดได้ — ถ้าไม่มี template จะ export แบบ preview</span></div>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">🗑️ ลบบัตร</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">ติ๊ก checkbox หน้าแถวที่ต้องการลบ</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">กด <b>🗑 ลบที่เลือก</b></span></li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       4. TRR TRANSPORT (ต้นทุนน้ำมัน)
+  ════════════════════════════════════════════════ -->
+  <div class="help-section anchor" id="sec-trr">
+    <div class="help-section-hdr">
+      <span class="sys-icon">⛽</span>
+      <div>
+        <div class="sys-name">ต้นทุนน้ำมัน TRR Transport</div>
+        <div class="sys-desc">คำนวณต้นทุนน้ำมันตามระยะทาง + จัดการตารางระยะทาง</div>
+      </div>
+    </div>
+    <div class="help-body">
+
+      <div class="step-group">
+        <div class="step-group-title">🧮 คำนวณต้นทุนน้ำมัน</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">เลือกเมนู <b>🧮 คำนวณต้นทุน</b> จาก sidebar</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">เลือก <b>ต้นทาง → ปลายทาง</b> จาก dropdown</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">ใส่ <b>ราคาน้ำมัน (฿/ลิตร)</b> และ <b>อัตราสิ้นเปลือง (กม/ลิตร)</b></span></li>
+          <li><span class="step-num">4</span><span class="step-txt">กด <b>คำนวณ</b> → ระบบแสดงต้นทุนน้ำมัน ไป-กลับ พร้อม breakdown</span></li>
+          <li><span class="step-num">5</span><span class="step-txt">ผลการคำนวณบันทึกใน <b>แดชบอร์ด</b> อัตโนมัติ</span></li>
+        </ol>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">📊 ตารางระยะทาง</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">หน้าแรก — แสดง matrix ระยะทางระหว่างทุกสถานที่</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">คลิกที่ช่องใน matrix เพื่อดูรายละเอียดเส้นทาง</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">กด <b>🏠 แดชบอร์ด</b> → ดูประวัติการคำนวณล่าสุด + ตั้งค่าน้ำมันปัจจุบัน</span></li>
+        </ol>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">📍 จัดการข้อมูล</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt"><b>Tab สถานที่</b> — เพิ่ม/แก้/ลบ สถานที่ที่ใช้บ่อย</span></li>
+          <li><span class="step-num">2</span><span class="step-txt"><b>Tab ระยะทาง</b> — กำหนดระยะทางระหว่างคู่สถานที่</span></li>
+          <li><span class="step-num">3</span><span class="step-txt"><b>Tab Backhaul</b> — ระยะทางขากลับ (อาจต่างจากขาไป)</span></li>
+        </ol>
+        <div class="tip"><span class="tip-icon">💡</span><span class="tip-txt">ข้อมูลทั้งหมดบันทึกใน localStorage — ใช้งานได้ offline ไม่ต้องการ internet</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       5. กระดานราคา
+  ════════════════════════════════════════════════ -->
+  <div class="help-section anchor" id="sec-price">
+    <div class="help-section-hdr">
+      <span class="sys-icon">💰</span>
+      <div>
+        <div class="sys-name">กระดานราคาขนส่ง 6 ล้อ</div>
+        <div class="sys-desc">ตารางราคาค่าขนส่งพร้อม markup + คำนวณ quotation</div>
+      </div>
+    </div>
+    <div class="help-body">
+
+      <div class="step-group">
+        <div class="step-group-title">📊 ดูตารางราคา</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">หน้าแรกแสดง <b>ตารางราคา matrix</b> — แถวคือต้นทาง คอลัมน์คือปลายทาง</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">คลิกชื่อ <b>ต้นทาง/ปลายทาง</b> ใน header เพื่อ highlight เส้นทางนั้น</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">ราคาที่ highlight สีทอง = เส้นทางที่เลือก / สีม่วง = markup พิเศษ</span></li>
+        </ol>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">⚙️ ตั้งค่า Markup และราคา</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">ไปที่ <b>⚙️ ตั้งค่า / Admin</b></span></li>
+          <li><span class="step-num">2</span><span class="step-txt">ตั้ง <b>% markup</b> ที่ต้องการบวกเพิ่มจากต้นทุน</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">แก้ไขราคาแต่ละเส้นทางได้โดยตรงในตาราง</span></li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       6. งานขนส่ง
+  ════════════════════════════════════════════════ -->
+  <div class="help-section anchor" id="sec-transport">
+    <div class="help-section-hdr">
+      <span class="sys-icon">🚚</span>
+      <div>
+        <div class="sys-name">ระบบจัดการงานขนส่ง</div>
+        <div class="sys-desc">บันทึก ติดตาม และสรุปงานขนส่ง 6 ล้อ / หัวลาก</div>
+      </div>
+    </div>
+    <div class="help-body">
+
+      <div class="step-group">
+        <div class="step-group-title">📋 ดูรายการงาน</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">Tab <span class="badge badge-navy">6 ล้อ</span> และ <span class="badge" style="background:#fff3e0;color:#e65100;">หัวลาก</span> — สลับดูแต่ละประเภทรถ</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">ตารางแสดงรายการงานทั้งหมด — วันที่ เส้นทาง คนขับ สถานะ</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">กด <b>+ เพิ่มงาน</b> เพื่อบันทึกงานใหม่</span></li>
+        </ol>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">✏️ บันทึกงานใหม่</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">กรอก วันที่, ทะเบียนรถ, คนขับ, ต้นทาง-ปลายทาง, ประเภทงาน</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">กด <b>บันทึก</b> — ข้อมูลส่งไป Google Sheets อัตโนมัติ</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">แก้ไขงานที่มีอยู่ — คลิกแถวนั้น → แก้ไขข้อมูล → บันทึก</span></li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       7. GAS Sync Setup
+  ════════════════════════════════════════════════ -->
+  <div class="help-section anchor" id="sec-gas">
+    <div class="help-section-hdr">
+      <span class="sys-icon">⚙️</span>
+      <div>
+        <div class="sys-name">ตั้งค่า GAS Sync — Google Apps Script</div>
+        <div class="sys-desc">เชื่อม Fleet Dashboard กับ Google Sheets สำหรับ sync สถานะรถข้ามอุปกรณ์</div>
+      </div>
+    </div>
+    <div class="help-body">
+
+      <div class="step-group">
+        <div class="step-group-title">🔧 ขั้นตอนติดตั้ง GAS (ครั้งแรก)</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">เปิด Google Sheet ของ trip data → <b>Extensions → Apps Script</b></span></li>
+          <li><span class="step-num">2</span><span class="step-txt">ลบ code เดิมทั้งหมด → วาง code จาก <b>📋 GAS Script</b> ในหน้า Settings ของ Fleet Dashboard</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">กด <b>Deploy → New deployment → Web app</b></span></li>
+          <li><span class="step-num">4</span><span class="step-txt">ตั้งค่า: Execute as = <b>Me</b> / Who has access = <b>Anyone</b> → Deploy</span></li>
+          <li><span class="step-num">5</span><span class="step-txt">คัดลอก URL ที่ได้ → วางในช่อง <b>GAS URL</b> ใน Settings → กด <b>💾 บันทึก</b></span></li>
+          <li><span class="step-num">6</span><span class="step-txt">กด <b>🔌 Test</b> — ถ้า ✅ แสดงว่าเชื่อมต่อสำเร็จ</span></li>
+        </ol>
+        <div class="note"><span class="note-icon">ℹ️</span><span class="note-txt">GAS sync ใช้สำหรับ <b>sync สถานะรถ + Note</b> ข้ามอุปกรณ์ และ <b>list sheet tabs</b> สำหรับ Statement วิเคราะห์</span></div>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">🔄 Re-deploy เมื่อ update code</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">Copy code ใหม่จาก Settings (กด 📋 Copy Code)</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">Apps Script → วาง code ใหม่ทับ → <b>Deploy → Manage deployments</b></span></li>
+          <li><span class="step-num">3</span><span class="step-txt">กด Edit (ดินสอ) → Version = <b>New version</b> → Deploy</span></li>
+          <li><span class="step-num">4</span><span class="step-txt">URL เดิมยังใช้ได้ ไม่ต้องอัปเดตใน Settings</span></li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       8. Statement Sheet Setup
+  ════════════════════════════════════════════════ -->
+  <div class="help-section anchor" id="sec-stmt-setup">
+    <div class="help-section-hdr">
+      <span class="sys-icon">🏦</span>
+      <div>
+        <div class="sys-name">ตั้งค่า Statement Google Sheets</div>
+        <div class="sys-desc">เชื่อม Transaction Report กับ Google Sheets แบบ tab ต่อเดือน</div>
+      </div>
+    </div>
+    <div class="help-body">
+
+      <div class="step-group">
+        <div class="step-group-title">📁 เตรียม Google Sheet</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">สร้าง Google Sheet ใหม่ (แยกจาก trip data sheet)</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">ตั้งชื่อ tab ตามเดือน รูปแบบ <code>YYYY-MM</code> เช่น <code>2026-04</code>, <code>2026-05</code></span></li>
+          <li><span class="step-num">3</span><span class="step-txt">วาง data จาก TMB Transaction Report export (<b>ทั้งไฟล์</b> รวม header rows ด้วย) ลงใน tab นั้น</span></li>
+          <li><span class="step-num">4</span><span class="step-txt">Share sheet → <b>Anyone with the link → Viewer</b></span></li>
+          <li><span class="step-num">5</span><span class="step-txt">คัดลอก <b>Sheet ID</b> จาก URL (ส่วนระหว่าง <code>/d/</code> และ <code>/edit</code>)</span></li>
+        </ol>
+      </div>
+
+      <div class="step-group">
+        <div class="step-group-title">🔗 ตั้งค่าใน Fleet Dashboard</div>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="step-txt">Fleet Dashboard → <b>⚙️ ตั้งค่า GAS Sync</b> → หัวข้อ <b>🏦 Transaction Report</b></span></li>
+          <li><span class="step-num">2</span><span class="step-txt">วาง Sheet ID → กด <b>💾 บันทึก</b></span></li>
+          <li><span class="step-num">3</span><span class="step-txt">ไปหน้า <b>🏦 Statement วิเคราะห์</b> → กด <b>☁️ ดึงจาก Sheets</b></span></li>
+          <li><span class="step-num">4</span><span class="step-txt">เลือกเดือนจาก chip ที่ขึ้นมา → ข้อมูลโหลดอัตโนมัติ</span></li>
+        </ol>
+        <div class="tip"><span class="tip-icon">💡</span><span class="tip-txt">เดือนถัดไป: เพิ่ม tab ใหม่ชื่อ <code>2026-05</code> วาง data ลงไป → กด "ดึงจาก Sheets" แล้วเลือกเดือนใหม่ได้เลย</span></div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<script>
+function scrollTo(id){
+  var el=document.getElementById(id);
+  if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.sb-link').forEach(function(l){l.classList.remove('active');});
+  event.target.closest('.sb-link').classList.add('active');
+}
+// Highlight sidebar on scroll
+var sections=['sec-portal','sec-fleet-view','sec-fleet-card','sec-trr','sec-price','sec-transport','sec-gas','sec-stmt-setup'];
+var links=document.querySelectorAll('.sb-link');
+window.addEventListener('scroll',function(){
+  var scrollY=window.scrollY+80;
+  var current='';
+  sections.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el&&el.offsetTop<=scrollY)current=id;
+  });
+  links.forEach(function(l){
+    l.classList.toggle('active',l.getAttribute('onclick')&&l.getAttribute('onclick').indexOf(current)!==-1);
+  });
+},{passive:true});
+</script>
+</body>
+</html>
