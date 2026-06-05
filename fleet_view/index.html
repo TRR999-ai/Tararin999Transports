@@ -756,8 +756,9 @@ function fetchSheet(name){
 function parseFuel(data,sh){
   if(!data||!data.table)return[];
   var cols=data.table.cols,rows=data.table.rows;
-  var c=findCols(cols,{date:['วันที่'],driver:['คนขับ'],plate:['ทะเบียนรถ','ทะเบียน'],route:['สายงาน'],job:['ชื่องาน'],km:['ระยะทาง','กม'],fuelType:['ประเภทน้ำมัน'],price:['ราคาต่อ','ราคา/ล'],total:['รวมเงิน'],card:['เลขบัตร']});
-  if(c.date===undefined||c.plate===undefined)return[];
+  var c=findCols(cols,{date:['วันที่'],driver:['คนขับ'],plate:['ทะเบียนรถ','ทะเบียน','plate','car'],route:['สายงาน','route'],job:['ชื่องาน','job'],km:['ระยะทาง','กม','km'],fuelType:['ประเภทน้ำมัน'],price:['ราคาต่อ','ราคา/ล'],total:['รวมเงิน'],card:['เลขบัตร']});
+  if(c.date===undefined)return[];
+  if(c.plate===undefined)c.plate=2; // fallback: column C (0-indexed)
   var out=[];
   rows.forEach(function(row){
     var dt=parseDate(gv(row,c.date));if(!dt)return;
@@ -1040,13 +1041,14 @@ function loadAll(){
     var type=FUEL_SH.indexOf(name)!==-1?'fuel':HUB_SH.indexOf(name)!==-1?'hub':'khon';
     return fetchSheet(name).then(function(data){
       loadDone++;setLd('โหลด "'+name+'" ('+loadDone+'/'+total+')');return{name:name,type:type,data:data};
-    }).catch(function(){loadDone++;return{name:name,type:type,data:null};});
+    }).catch(function(e){loadDone++;console.warn('[Fleet] sheet load failed:',name,e&&e.message);return{name:name,type:type,data:null};});
   });
   Promise.all([rosterP].concat(dataPs)).then(function(results){
     allTrips=[];
     results.slice(1).forEach(function(r){
       if(!r||!r.data)return;
       var parsed=r.type==='fuel'?parseFuel(r.data,r.name):r.type==='hub'?parseHub(r.data,r.name):parseKhon(r.data,r.name);
+      console.log('[Fleet] sheet "'+r.name+'" → '+parsed.length+' trips');
       allTrips=allTrips.concat(parsed);
     });
     allTrips.sort(function(a,b){return b.date-a.date;});
