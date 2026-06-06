@@ -678,7 +678,7 @@ var statusMap    = {};
 var noteMap      = {};
 // ── Hardcoded defaults (work on any device without Settings) ──
 var DEFAULT_GAS_URL     = 'https://script.google.com/macros/s/AKfycby4cVxSxzNuZUqSRmCTWf6dnGtsyQlW6mswPWx9ZHYr7a-s6sBLzhASXM51Mp2lSz1J/exec';
-var DEFAULT_STMT_SHEET  = '1CkSlIT1xS189a2cMMSqaRJ-Qc4joh86eMhJODUCVH-c';
+var DEFAULT_STMT_SHEET  = '1CkSiIT1xS189a2cMMSqaRJ-Qc4joh86eMhJODUCVH-c';
 
 var gasUrl       = '';
 var statusFilter = '';
@@ -1077,7 +1077,7 @@ function copyGasCode(){
   navigator.clipboard.writeText(code).then(function(){alert('คัดลอกแล้ว!');}).catch(function(){});
 }
 function buildGasCode(){
-  var code='// Fleet Dashboard — GAS Sync Script\n// Deploy: Web App, Execute as Me, Anyone can access\n\nvar SHEET_ID = "'+SHEET_ID+'";\n\nfunction getStatusSheet() {\n  var ss = SpreadsheetApp.openById(SHEET_ID);\n  var sh = ss.getSheetByName("Fleet_Status");\n  if (!sh) {\n    sh = ss.insertSheet("Fleet_Status");\n    sh.appendRow(["ทะเบียน","สถานะ","Note","อัปเดต"]);\n  }\n  return sh;\n}\n\nfunction getConfigSheet() {\n  var ss = SpreadsheetApp.openById(SHEET_ID);\n  var sh = ss.getSheetByName("Fleet_Config");\n  if (!sh) {\n    sh = ss.insertSheet("Fleet_Config");\n    sh.appendRow(["key","value","updated"]);\n  }\n  return sh;\n}\n\nfunction doGet(e) {\n  var cb = e.parameter.callback || e.parameter.cb || "";\n  var action = e.parameter.action || "getall";\n  var result;\n\n  // ── Transaction Report: list sheet tabs ──\n  if (action === "listSheets") {\n    try {\n      var id = e.parameter.id || SHEET_ID;\n      var ss = SpreadsheetApp.openById(id);\n      var sheets = ss.getSheets().map(function(s){ return s.getName(); });\n      result = {ok: true, sheets: sheets};\n    } catch(err) {\n      result = {ok: false, error: err.toString()};\n    }\n    var json = JSON.stringify(result);\n    if (cb) return ContentService.createTextOutput(cb+"("+json+")").setMimeType(ContentService.MimeType.JAVASCRIPT);\n    return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n  }\n\n  // ── Config sync ──\n  if (action === "setConfig") {\n    var sh = getConfigSheet();\n    var key = e.parameter.key || "";\n    var val = e.parameter.val || "";\n    if (key) {\n      var vals = sh.getDataRange().getValues();\n      var found = false;\n      for (var i = 1; i < vals.length; i++) {\n        if (vals[i][0] === key) {\n          sh.getRange(i+1,1,1,3).setValues([[key,val,new Date()]]);\n          found = true; break;\n        }\n      }\n      if (!found) sh.appendRow([key, val, new Date()]);\n    }\n    result = {ok: true};\n  } else if (action === "getConfig") {\n    var sh = getConfigSheet();\n    var vals = sh.getDataRange().getValues();\n    result = {ok: true};\n    for (var i = 1; i < vals.length; i++) {\n      if (vals[i][0]) result[vals[i][0]] = vals[i][1] || "";\n    }\n\n  // ── Status sync ──\n  } else if (action === "ping") {\n    result = {ok: true};\n  } else if (action === "set") {\n    var sh = getStatusSheet();\n    var plate = e.parameter.plate || "";\n    var status = e.parameter.status || "";\n    var note = e.parameter.note || "";\n    if (plate) {\n      var vals = sh.getDataRange().getValues();\n      var found = false;\n      for (var i = 1; i < vals.length; i++) {\n        if (vals[i][0] === plate) {\n          sh.getRange(i+1,1,1,4).setValues([[plate,status,note,new Date()]]);\n          found = true; break;\n        }\n      }\n      if (!found) sh.appendRow([plate,status,note,new Date()]);\n    }\n    result = {ok: true};\n  } else {\n    var sh = getStatusSheet();\n    var vals = sh.getDataRange().getValues();\n    result = {};\n    for (var i = 1; i < vals.length; i++) {\n      if (vals[i][0]) result[vals[i][0]] = {status: vals[i][1]||"", note: vals[i][2]||""};\n    }\n  }\n  var json = JSON.stringify(result);\n  if (cb) return ContentService.createTextOutput(cb+"("+json+")").setMimeType(ContentService.MimeType.JAVASCRIPT);\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}';
+  var code='// Fleet Dashboard — GAS Sync Script\n// Deploy: Web App, Execute as Me, Anyone can access\n\nvar SHEET_ID = "'+SHEET_ID+'";\n\nfunction getStatusSheet() {\n  var ss = SpreadsheetApp.openById(SHEET_ID);\n  var sh = ss.getSheetByName("Fleet_Status");\n  if (!sh) {\n    sh = ss.insertSheet("Fleet_Status");\n    sh.appendRow(["ทะเบียน","สถานะ","Note","อัปเดต"]);\n  }\n  return sh;\n}\n\nfunction getConfigSheet() {\n  var ss = SpreadsheetApp.openById(SHEET_ID);\n  var sh = ss.getSheetByName("Fleet_Config");\n  if (!sh) {\n    sh = ss.insertSheet("Fleet_Config");\n    sh.appendRow(["key","value","updated"]);\n  }\n  return sh;\n}\n\nfunction doGet(e) {\n  var cb = e.parameter.callback || e.parameter.cb || "";\n  var action = e.parameter.action || "getall";\n  var result;\n\n  // ── Transaction Report: list sheet tabs ──\n  if (action === "listSheets") {\n    try {\n      var id = e.parameter.id || SHEET_ID;\n      var ss = SpreadsheetApp.openById(id);\n      var sheets = ss.getSheets().map(function(s){ return s.getName(); });\n      result = {ok: true, sheets: sheets};\n    } catch(err) {\n      result = {ok: false, error: err.toString()};\n    }\n    var json = JSON.stringify(result);\n    if (cb) return ContentService.createTextOutput(cb+"("+json+")").setMimeType(ContentService.MimeType.JAVASCRIPT);\n    return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n  }\n\n  // ── Transaction Report: fetch sheet rows ──\n  if (action === "getStmtRows") {\n    try {\n      var id = e.parameter.id || "";\n      var tab = e.parameter.tab || "";\n      var ss = SpreadsheetApp.openById(id);\n      var sh = ss.getSheetByName(tab);\n      if (!sh) { result = {ok: false, error: "tab not found"}; }\n      else {\n        var data = sh.getDataRange().getValues();\n        result = {ok: true, rows: data};\n      }\n    } catch(err) {\n      result = {ok: false, error: err.toString()};\n    }\n    var json = JSON.stringify(result);\n    if (cb) return ContentService.createTextOutput(cb+"("+json+")").setMimeType(ContentService.MimeType.JAVASCRIPT);\n    return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n  }\n\n  // ── Config sync ──\n  if (action === "setConfig") {\n    var sh = getConfigSheet();\n    var key = e.parameter.key || "";\n    var val = e.parameter.val || "";\n    if (key) {\n      var vals = sh.getDataRange().getValues();\n      var found = false;\n      for (var i = 1; i < vals.length; i++) {\n        if (vals[i][0] === key) {\n          sh.getRange(i+1,1,1,3).setValues([[key,val,new Date()]]);\n          found = true; break;\n        }\n      }\n      if (!found) sh.appendRow([key, val, new Date()]);\n    }\n    result = {ok: true};\n  } else if (action === "getConfig") {\n    var sh = getConfigSheet();\n    var vals = sh.getDataRange().getValues();\n    result = {ok: true};\n    for (var i = 1; i < vals.length; i++) {\n      if (vals[i][0]) result[vals[i][0]] = vals[i][1] || "";\n    }\n\n  // ── Status sync ──\n  } else if (action === "ping") {\n    result = {ok: true};\n  } else if (action === "set") {\n    var sh = getStatusSheet();\n    var plate = e.parameter.plate || "";\n    var status = e.parameter.status || "";\n    var note = e.parameter.note || "";\n    if (plate) {\n      var vals = sh.getDataRange().getValues();\n      var found = false;\n      for (var i = 1; i < vals.length; i++) {\n        if (vals[i][0] === plate) {\n          sh.getRange(i+1,1,1,4).setValues([[plate,status,note,new Date()]]);\n          found = true; break;\n        }\n      }\n      if (!found) sh.appendRow([plate,status,note,new Date()]);\n    }\n    result = {ok: true};\n  } else {\n    var sh = getStatusSheet();\n    var vals = sh.getDataRange().getValues();\n    result = {};\n    for (var i = 1; i < vals.length; i++) {\n      if (vals[i][0]) result[vals[i][0]] = {status: vals[i][1]||"", note: vals[i][2]||""};\n    }\n  }\n  var json = JSON.stringify(result);\n  if (cb) return ContentService.createTextOutput(cb+"("+json+")").setMimeType(ContentService.MimeType.JAVASCRIPT);\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}';
   document.getElementById('gas-code-block').textContent=code;
 }
 
@@ -2232,20 +2232,96 @@ function loadStmtMonth(tab){
   if(loading)loading.style.display='inline';
   var chip=document.getElementById('stmt-file-chip');
   if(chip)chip.innerHTML='<span class="file-chip">☁️ '+tab+'</span>';
-  var cb='stmtGv_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-  window[cb]=function(resp){
-    delete window[cb];
+  // Route through GAS (no need for sheet to be public)
+  if(gasUrl){
+    var cb='stmtGas_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    window[cb]=function(res){
+      delete window[cb];
+      if(loading)loading.style.display='none';
+      console.log('[Stmt] GAS response ok=',res&&res.ok,'rows=',res&&res.rows&&res.rows.length,'error=',res&&res.error);
+      if(!res||!res.ok){alert('โหลด tab '+tab+' ไม่สำเร็จ: '+(res&&res.error||'ไม่ทราบสาเหตุ'));return;}
+      stmtTx=parseRawStmtRows(res.rows||[]);
+      console.log('[Stmt] parsed tx=',stmtTx.length);
+      if(stmtTx.length===0){
+        var dbg='GAS ส่งมา '+(res.rows||[]).length+' rows แต่ parse ได้ 0\n';
+        for(var _i=0;_i<Math.min(15,(res.rows||[]).length);_i++){dbg+='Row '+_i+': '+JSON.stringify((res.rows[_i]||[]).slice(0,5))+'\n';}
+        alert(dbg);
+      }
+      renderStmt();
+    };
+    var s=document.createElement('script');
+    s.onerror=function(){delete window[cb];if(loading)loading.style.display='none';alert('โหลด tab '+tab+' ไม่สำเร็จ');};
+    s.src=gasUrl+'?callback='+cb+'&action=getStmtRows&id='+encodeURIComponent(stmtSheetId)+'&tab='+encodeURIComponent(tab);
+    document.head.appendChild(s);
+    return;
+  }
+  // Fallback: direct gviz (requires sheet to be public)
+  var cb2='stmtGv_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  window[cb2]=function(resp){
+    delete window[cb2];
     if(loading)loading.style.display='none';
     stmtTx=parseGvizStmtData(resp);
     renderStmt();
   };
   var url='https://docs.google.com/spreadsheets/d/'+encodeURIComponent(stmtSheetId)
-    +'/gviz/tq?tqx=out:json;responseHandler:'+cb
+    +'/gviz/tq?tqx=out:json;responseHandler:'+cb2
     +'&sheet='+encodeURIComponent(tab);
-  var s=document.createElement('script');
-  s.onerror=function(){delete window[cb];if(loading)loading.style.display='none';alert('โหลด tab '+tab+' ไม่สำเร็จ');};
-  s.src=url;
-  document.head.appendChild(s);
+  var s2=document.createElement('script');
+  s2.onerror=function(){delete window[cb2];if(loading)loading.style.display='none';alert('โหลด tab '+tab+' ไม่สำเร็จ');};
+  s2.src=url;
+  document.head.appendChild(s2);
+}
+
+// Parse raw 2D array from GAS (rows[0]=header or title rows, scan for actual header)
+function parseRawStmtRows(rawRows){
+  if(!rawRows||!rawRows.length)return[];
+  function fc(kw,vals){var k=kw.toLowerCase();for(var i=0;i<vals.length;i++){if(String(vals[i]||'').toLowerCase().indexOf(k)!==-1)return i;}return -1;}
+  var headerIdx=-1,headerVals=[];
+  for(var ri=0;ri<Math.min(20,rawRows.length);ri++){
+    var rv=rawRows[ri].map(function(x){return String(x||'');});
+    var rs=rv.join('|').toLowerCase();
+    if(rs.indexOf('plate no')!==-1||rs.indexOf('card no')!==-1){headerIdx=ri;headerVals=rv;break;}
+  }
+  if(headerIdx===-1)return[];
+  var ci={
+    card:fc('Card No',headerVals),plate:fc('Plate No',headerVals),brand:fc('Car Brand',headerVals),driver:fc('Card Holder',headerVals),
+    date:fc('Date',headerVals),time:fc('Time',headerVals),product:fc('Product',headerVals),qty:fc('Quantity',headerVals),
+    price:fc('Price',headerVals),amount:fc('Amount',headerVals),odo:fc('Odometer',headerVals),rate:fc('Consump',headerVals),
+    stnName:fc('Station Name',headerVals),location:fc('Location',headerVals),oilCo:fc('Oil Company',headerVals),plateProvince:fc('Plate Province',headerVals)
+  };
+  if(ci.plate===-1)return[];
+  var out=[];
+  for(var ri2=headerIdx+1;ri2<rawRows.length;ri2++){
+    var c=rawRows[ri2];
+    var plate=String(c[ci.plate]||'').trim();if(!plate)continue;
+    var dv=c[ci.date];
+    var dt;
+    if(dv instanceof Date){dt=dv;}
+    else{
+      var ds=String(dv||'');
+      if(ds.indexOf('/')!==-1){var p=ds.split('/');dt=new Date(+p[2],+p[1]-1,+p[0]);}
+      else if(ds.indexOf('-')!==-1){var pp=ds.split('-');dt=new Date(+pp[0],+pp[1]-1,+pp[2]);}
+    }
+    if(!dt||isNaN(dt.getTime()))continue;
+    var litres=parseFloat(String(c[ci.qty]||'0').replace(/,/g,''))||0;
+    var amount=parseFloat(String(c[ci.amount]||'0').replace(/,/g,''))||0;
+    if(litres<=0&&amount<=0)continue;
+    var loc=String(c[ci.location]||'').trim();
+    var lp=loc.split(/\s+/);
+    out.push({
+      card:String(c[ci.card]||''),plate:plate,np:normPlate(plate),
+      date:dt,dateStr:pad2(dt.getDate())+'/'+pad2(dt.getMonth()+1)+'/'+dt.getFullYear(),
+      time:String(c[ci.time]||''),station:String(c[ci.stnName]||''),
+      location:loc,province:lp.length>=1?lp[lp.length-1]:'',district:lp.length>=2?lp[lp.length-2]:'',
+      oilCo:String(c[ci.oilCo]||''),driver:String(c[ci.driver]||''),brand:String(c[ci.brand]||''),
+      product:String(c[ci.product]||''),
+      litres:litres,price:parseFloat(String(c[ci.price]||'0'))||0,
+      amount:amount,odometer:parseFloat(String(c[ci.odo]||'0'))||0,
+      consumpRate:parseFloat(String(c[ci.rate]||'0'))||0,
+      plateProvince:String(c[ci.plateProvince]||'')
+    });
+  }
+  return out;
 }
 
 function parseGvizStmtData(resp){
