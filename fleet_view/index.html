@@ -2238,15 +2238,8 @@ function loadStmtMonth(tab){
     window[cb]=function(res){
       delete window[cb];
       if(loading)loading.style.display='none';
-      console.log('[Stmt] GAS response ok=',res&&res.ok,'rows=',res&&res.rows&&res.rows.length,'error=',res&&res.error);
       if(!res||!res.ok){alert('โหลด tab '+tab+' ไม่สำเร็จ: '+(res&&res.error||'ไม่ทราบสาเหตุ'));return;}
       stmtTx=parseRawStmtRows(res.rows||[]);
-      console.log('[Stmt] parsed tx=',stmtTx.length);
-      if(stmtTx.length===0){
-        var dbg='GAS ส่งมา '+(res.rows||[]).length+' rows แต่ parse ได้ 0\n';
-        for(var _i=0;_i<Math.min(15,(res.rows||[]).length);_i++){dbg+='Row '+_i+': '+JSON.stringify((res.rows[_i]||[]).slice(0,5))+'\n';}
-        alert(dbg);
-      }
       renderStmt();
     };
     var s=document.createElement('script');
