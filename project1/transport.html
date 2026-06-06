@@ -222,10 +222,45 @@ textarea:focus { outline: none; border-color: #F5A623; }
   .main{padding:10px 8px}
   .card{padding:12px;margin-bottom:10px;border-radius:8px}
   .card-title{font-size:13px;margin-bottom:12px;padding-bottom:8px}
-  .form-row { grid-template-columns: 1fr 1fr; }
+  .form-row{grid-template-columns:1fr 1fr}
   .btn{padding:7px 12px;font-size:13px}
   .tabs{overflow-x:auto;flex-wrap:nowrap}
   .tab{white-space:nowrap;padding:7px 14px;font-size:13px}
+  /* Table horizontal scroll */
+  .dtable{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}
+  .dtable td,.dtable th{white-space:nowrap}
+  /* Section actions wrap */
+  .section-actions{gap:6px}
+}
+@media (max-width: 480px) {
+  header h1{font-size:14px}
+  .main{padding:8px 6px}
+  .card{padding:10px}
+  .form-row{grid-template-columns:1fr}
+  /* Prevent iOS auto-zoom on inputs */
+  input,select,textarea,.trip-desc,.site-inp{font-size:16px!important}
+  /* Trip card: stack all fields vertically */
+  .trip-top{flex-wrap:wrap;gap:8px}
+  .trip-top .trip-num{order:1;flex-shrink:0}
+  .trip-top .trip-desc{order:2;flex:1;min-width:0}
+  .trip-top .form-group{order:3;width:100%}
+  /* Type buttons: bigger touch targets */
+  .type-btn{padding:10px 16px;font-size:13px;flex:1;text-align:center}
+  .type-toggle{width:100%}
+  /* Plate input full width */
+  .plate-input-wrap{flex-wrap:wrap}
+  .plate-input-wrap input{flex:1;min-width:0}
+  /* Action buttons: wrap and fill */
+  .section-actions{flex-wrap:wrap}
+  .section-actions .btn{flex:1;min-width:120px;justify-content:center;text-align:center}
+  /* Output box */
+  .output-box{font-size:12px;padding:12px;line-height:1.7}
+  /* Add row */
+  .add-row{flex-direction:column}
+  .add-row .form-group{width:100%;min-width:100%}
+  /* Modal full screen */
+  .modal{width:100%;max-width:100%;border-radius:12px 12px 0 0;margin-top:auto;padding:16px}
+  .overlay{align-items:flex-end}
 }
 
 </style>

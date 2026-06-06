@@ -198,6 +198,34 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
   #new-board-toolbar{padding:7px 8px;gap:6px}
   .sel-label{font-size:11px}
 }
+@media(max-width:480px){
+  /* Prevent iOS auto-zoom */
+  input,select,textarea{font-size:16px!important}
+  /* Topbar compact */
+  #topbar{padding:0 10px;height:46px}
+  .tb-title{font-size:12px}
+  .tb-right .btn span{display:none} /* hide button text, keep icon */
+  .tb-right .btn{padding:6px 8px;min-width:34px;justify-content:center}
+  /* Controls: stack into 2-column grid */
+  #controls{display:grid;grid-template-columns:1fr 1fr;padding:8px;gap:8px}
+  .ctrl-group{flex-direction:column;align-items:flex-start;gap:3px}
+  .ctrl-group label{font-size:10px}
+  .ctrl-input{width:100%;font-size:16px!important;padding:6px 8px}
+  .fuel-badge{font-size:11px;padding:3px 8px}
+  /* Tabs: scrollable, bigger touch */
+  .tab-btn{padding:8px 12px;font-size:12px;min-height:38px}
+  /* Table cells slightly larger on touch */
+  #matrix-table td,#matrix-table th{padding:6px 8px;font-size:11px}
+  #new-board-table tbody td,#new-board-table thead th{padding:6px 8px;font-size:11px}
+  /* Toolbar buttons */
+  #new-board-toolbar .btn,#cmp-bar .btn{padding:7px 10px;font-size:12px;min-height:38px}
+  /* Compare inputs */
+  .cmp-input{font-size:16px!important;width:100%;padding:6px 8px}
+  #cmp-bar{flex-wrap:wrap}
+  /* Custom price rows */
+  .cust-row{flex-wrap:wrap}
+  .cust-row input{font-size:16px!important}
+}
 
 </style>
 </head>

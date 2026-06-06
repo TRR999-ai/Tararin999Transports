@@ -690,6 +690,25 @@ input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--navy); c
   .step-label{font-size:9pt;padding:5px 12px}
   .mode-btn{padding:6px 10px;font-size:11px}
 }
+@media(max-width:480px){
+  /* iOS zoom prevention */
+  input,select,textarea{font-size:16px!important}
+  /* Table: horizontal scroll */
+  .tbl-wrap{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tbl-wrap table{white-space:nowrap}
+  /* Filter rows: stack */
+  .filters{flex-direction:column;align-items:stretch}
+  .filter-group{width:100%}
+  /* Step tabs: smaller */
+  .step-label{font-size:8pt;padding:4px 8px}
+  /* Mode buttons: wrap */
+  .mode-btns{flex-wrap:wrap}
+  .mode-btn{flex:1;min-width:80px;text-align:center}
+  /* Cards */
+  .card,.card-gold,.card-navy{padding:12px}
+  .page-body{padding:8px 6px}
+  .settings-block input,.settings-block select{font-size:16px!important}
+}
 </style>
 </head>
 <body>

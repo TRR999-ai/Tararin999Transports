@@ -716,6 +716,27 @@ input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--navy); c
   .mode-btn{padding:6px 10px;font-size:11px}
   .ls-search{font-size:12px}
 }
+@media(max-width:480px){
+  /* iOS zoom prevention */
+  input,select,textarea{font-size:16px!important}
+  /* Table: horizontal scroll */
+  .tbl-wrap{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tbl-wrap table{white-space:nowrap}
+  /* Filter rows: stack */
+  .filters{flex-direction:column;align-items:stretch}
+  .filter-group{width:100%}
+  /* Step tabs: smaller */
+  .step-label{font-size:8pt;padding:4px 8px}
+  /* Mode buttons: wrap */
+  .mode-btns{flex-wrap:wrap}
+  .mode-btn{flex:1;min-width:80px;text-align:center}
+  /* Cards full width */
+  .card,.card-gold,.card-navy{padding:12px}
+  /* Page padding */
+  .page-body{padding:8px 6px}
+  /* Settings fields */
+  .settings-block input,.settings-block select{font-size:16px!important}
+}
 </style>
 </head>
 <body>

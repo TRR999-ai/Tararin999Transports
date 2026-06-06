@@ -301,6 +301,24 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
   .trip-grid,.board-grid{grid-template-columns:1fr 1fr;}
   .bar-sub{display:none;}
 }
+@media(max-width:480px){
+  /* iOS zoom prevention */
+  input,select,textarea{font-size:16px!important}
+  /* Board cards: single column on very small phones */
+  .board-grid{grid-template-columns:1fr}
+  /* Type filter chips: scrollable row */
+  #board-type-bar,#latest-type-bar{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .type-chip{white-space:nowrap;flex-shrink:0}
+  /* KPI row: 2 columns */
+  .kpi-row{display:grid;grid-template-columns:1fr 1fr}
+  .kpi-card{max-width:100%}
+  /* Page bar: wrap */
+  .page-bar{flex-wrap:wrap;height:auto;min-height:54px;padding:6px 12px}
+  /* Statement KPI */
+  .stmt-kpi{min-width:calc(50% - 7px)}
+  /* Settings inputs */
+  .settings-inp{font-size:16px!important}
+}
 /* ── Statement Page ── */
 .stmt-upload-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;border:2.5px dashed var(--border);border-radius:14px;padding:60px 24px;margin:40px auto;max-width:460px;cursor:pointer;transition:border-color .2s,background .2s;}
 .stmt-upload-zone:hover{border-color:var(--gold);background:rgba(201,162,39,.04);}
@@ -892,10 +910,12 @@ function resetDailyStatus(){
   if(stored===todayStr())return; // same day — skip
   // New day: reset ready/busy, keep leave
   Object.keys(statusMap).forEach(function(p){
-    if(statusMap[p]==='ready'||statusMap[p]==='busy')delete statusMap[p];
+    if(statusMap[p]==='ready'||statusMap[p]==='busy'){
+      delete statusMap[p];
+      if(gasUrl)syncToGAS(p,'',noteMap[p]||''); // push reset to GAS so other devices see it
+    }
   });
   saveStatus();
-  try{localStorage.setItem('fleet_reset_date',todayStr());}catch(e){} // mark reset done today
 }
 function saveNotes() {try{localStorage.setItem('fleet_notes', JSON.stringify(noteMap)); }catch(e){}}
 function savePlateOrder(){try{localStorage.setItem('fleet_plate_order',JSON.stringify(plateOrder));}catch(e){}syncConfigToGAS('plateOrder',plateOrder);}
@@ -919,6 +939,7 @@ function setStatus(plate, val){
 }
 function setNote(plate, val){
   noteMap[plate]=val;saveNotes();
+  if(gasUrl)syncToGAS(plate,statusMap[plate]||'',val);
   if(gasUrl)syncToGAS(plate,statusMap[plate]||'',val);
 }
 
@@ -1010,14 +1031,10 @@ function autoSyncStatusFromGAS(){
   window[cb]=function(data){
     cleanup();
     if(!data)return;
-    var resetToday=(localStorage.getItem('fleet_reset_date')||'')===todayStr();
     var changed=false;
     Object.keys(data).forEach(function(plate){
       var st=data[plate].status;
-      // ถ้า reset วันนี้แล้ว ไม่นำ ready/busy กลับมา
-      if(resetToday&&(st==='ready'||st==='busy'))st='';
       if(st){statusMap[plate]=st;changed=true;}
-      else if(resetToday&&statusMap[plate]&&(statusMap[plate]==='ready'||statusMap[plate]==='busy')){delete statusMap[plate];changed=true;}
       if(data[plate].note!==undefined){noteMap[plate]=data[plate].note;changed=true;}
     });
     if(changed){saveStatus();saveNotes();renderAll();renderBoard();}
@@ -1037,11 +1054,8 @@ function importFromGAS(){
   window[cb]=function(data){
     cleanup();
     if(!data){setSyncStatus('err','No data');return;}
-    var resetToday=(localStorage.getItem('fleet_reset_date')||'')===todayStr();
     Object.keys(data).forEach(function(plate){
-      var st=data[plate].status;
-      if(resetToday&&(st==='ready'||st==='busy'))st='';
-      if(st)statusMap[plate]=st;
+      if(data[plate].status)statusMap[plate]=data[plate].status;
       if(data[plate].note!==undefined)noteMap[plate]=data[plate].note;
     });
     saveStatus();saveNotes();
@@ -2569,11 +2583,18 @@ setInterval(function(){
 },60000);
 
 // ── Init ──
-loadLocal();
-// Auto-sync config + status from GAS on startup
+var _preResetDate=localStorage.getItem('fleet_status_date')||'';
+loadLocal(); // resetDailyStatus() runs inside here
+var _resetJustHappened=(_preResetDate!==todayStr()); // true = new day, reset occurred
+
 if(gasUrl){
   loadConfigFromGAS(function(){renderAll();});
-  autoSyncStatusFromGAS();
+  if(_resetJustHappened){
+    // Delay sync 12s so GAS receives reset-pushes first
+    setTimeout(function(){autoSyncStatusFromGAS();},12000);
+  } else {
+    autoSyncStatusFromGAS();
+  }
 }
 loadAll();
 updateStmtSheetBtn();

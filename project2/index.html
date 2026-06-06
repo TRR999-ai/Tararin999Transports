@@ -121,6 +121,24 @@
       #add-card-modal .modal-box{max-width:100%;margin:8px}
       .add-form-grid{grid-template-columns:1fr;gap:8px}
     }
+    @media(max-width:480px){
+      /* iOS zoom prevention */
+      input,select,textarea{font-size:16px!important}
+      /* Header: tighter */
+      #header{flex-wrap:wrap;gap:6px}
+      #header h1{font-size:12px}
+      /* Export buttons: stack */
+      #export-bar{flex-direction:column;align-items:stretch}
+      #export-btn,#card-mgmt-bar button{width:100%;font-size:14px;padding:10px;min-height:40px}
+      /* Card management bar */
+      #add-card-btn,#del-card-btn{flex:1;justify-content:center}
+      /* Handsontable container: horizontal scroll */
+      #table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+      /* Modal inputs */
+      #add-card-modal input,#add-card-modal select{font-size:16px!important;min-height:40px}
+      /* Reduce stats bar */
+      #stats-bar{font-size:10px;gap:8px;flex-wrap:wrap}
+    }
     #hot-container { min-width: 100%; }
 
     /* ─── Handsontable overrides ─── */
