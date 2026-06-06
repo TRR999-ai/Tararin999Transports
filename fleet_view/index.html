@@ -895,6 +895,7 @@ function resetDailyStatus(){
     if(statusMap[p]==='ready'||statusMap[p]==='busy')delete statusMap[p];
   });
   saveStatus();
+  try{localStorage.setItem('fleet_reset_date',todayStr());}catch(e){} // mark reset done today
 }
 function saveNotes() {try{localStorage.setItem('fleet_notes', JSON.stringify(noteMap)); }catch(e){}}
 function savePlateOrder(){try{localStorage.setItem('fleet_plate_order',JSON.stringify(plateOrder));}catch(e){}syncConfigToGAS('plateOrder',plateOrder);}
@@ -1009,9 +1010,14 @@ function autoSyncStatusFromGAS(){
   window[cb]=function(data){
     cleanup();
     if(!data)return;
+    var resetToday=(localStorage.getItem('fleet_reset_date')||'')===todayStr();
     var changed=false;
     Object.keys(data).forEach(function(plate){
-      if(data[plate].status){statusMap[plate]=data[plate].status;changed=true;}
+      var st=data[plate].status;
+      // ถ้า reset วันนี้แล้ว ไม่นำ ready/busy กลับมา
+      if(resetToday&&(st==='ready'||st==='busy'))st='';
+      if(st){statusMap[plate]=st;changed=true;}
+      else if(resetToday&&statusMap[plate]&&(statusMap[plate]==='ready'||statusMap[plate]==='busy')){delete statusMap[plate];changed=true;}
       if(data[plate].note!==undefined){noteMap[plate]=data[plate].note;changed=true;}
     });
     if(changed){saveStatus();saveNotes();renderAll();renderBoard();}
@@ -1031,8 +1037,11 @@ function importFromGAS(){
   window[cb]=function(data){
     cleanup();
     if(!data){setSyncStatus('err','No data');return;}
+    var resetToday=(localStorage.getItem('fleet_reset_date')||'')===todayStr();
     Object.keys(data).forEach(function(plate){
-      if(data[plate].status)statusMap[plate]=data[plate].status;
+      var st=data[plate].status;
+      if(resetToday&&(st==='ready'||st==='busy'))st='';
+      if(st)statusMap[plate]=st;
       if(data[plate].note!==undefined)noteMap[plate]=data[plate].note;
     });
     saveStatus();saveNotes();
