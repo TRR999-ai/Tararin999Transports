@@ -676,6 +676,10 @@ var selectedMonth= '';
 var availMonths  = [];
 var statusMap    = {};
 var noteMap      = {};
+// ── Hardcoded defaults (work on any device without Settings) ──
+var DEFAULT_GAS_URL     = 'https://script.google.com/macros/s/AKfycby4cVxSxzNuZUqSRmCTWf6dnGtsyQlW6mswPWx9ZHYr7a-s6sBLzhASXM51Mp2lSz1J/exec';
+var DEFAULT_STMT_SHEET  = '1CkSlIT1xS189a2cMMSqaRJ-Qc4joh86eMhJODUCVH-c';
+
 var gasUrl       = '';
 var statusFilter = '';
 var plateOrder      = []; // custom plate order (array of plate strings)
@@ -872,8 +876,8 @@ function loadLocal(){
   try{hiddenPlates=JSON.parse(localStorage.getItem('fleet_hidden_plates')||'{}');}catch(e){hiddenPlates={};}
   try{customTypes=JSON.parse(localStorage.getItem('fleet_custom_types')||'[]');}catch(e){customTypes=[];}
   try{vehicleTypeMap=JSON.parse(localStorage.getItem('fleet_vehicle_type_map')||'{}');}catch(e){vehicleTypeMap={};}
-  gasUrl=localStorage.getItem('fleet_gas_url')||'';
-  stmtSheetId=localStorage.getItem('fleet_stmt_sheet_id')||'';
+  gasUrl=localStorage.getItem('fleet_gas_url')||DEFAULT_GAS_URL;
+  stmtSheetId=localStorage.getItem('fleet_stmt_sheet_id')||DEFAULT_STMT_SHEET;
   var inp=document.getElementById('gas-url-inp');
   if(inp)inp.value=gasUrl;
 }
@@ -893,10 +897,10 @@ function resetDailyStatus(){
   saveStatus();
 }
 function saveNotes() {try{localStorage.setItem('fleet_notes', JSON.stringify(noteMap)); }catch(e){}}
-function savePlateOrder(){try{localStorage.setItem('fleet_plate_order',JSON.stringify(plateOrder));}catch(e){}}
-function saveHiddenPlates(){try{localStorage.setItem('fleet_hidden_plates',JSON.stringify(hiddenPlates));}catch(e){}}
-function saveCustomTypes(){try{localStorage.setItem('fleet_custom_types',JSON.stringify(customTypes));}catch(e){}}
-function saveVehicleTypeMap(){try{localStorage.setItem('fleet_vehicle_type_map',JSON.stringify(vehicleTypeMap));}catch(e){}}
+function savePlateOrder(){try{localStorage.setItem('fleet_plate_order',JSON.stringify(plateOrder));}catch(e){}syncConfigToGAS('plateOrder',plateOrder);}
+function saveHiddenPlates(){try{localStorage.setItem('fleet_hidden_plates',JSON.stringify(hiddenPlates));}catch(e){}syncConfigToGAS('hiddenPlates',hiddenPlates);}
+function saveCustomTypes(){try{localStorage.setItem('fleet_custom_types',JSON.stringify(customTypes));}catch(e){}syncConfigToGAS('customTypes',customTypes);}
+function saveVehicleTypeMap(){try{localStorage.setItem('fleet_vehicle_type_map',JSON.stringify(vehicleTypeMap));}catch(e){}syncConfigToGAS('vehicleTypeMap',vehicleTypeMap);}
 
 function setStatus(plate, val){
   statusMap[plate]=val;saveStatus();
@@ -962,6 +966,60 @@ function syncToGAS(plate, status, note){
   script.onerror=function(){cleanup();setSyncStatus('err','Connection failed');};
   script.src=url;document.head.appendChild(script);
 }
+// ─── Config sync to/from GAS ───────────────
+function syncConfigToGAS(key,val){
+  if(!gasUrl)return;
+  var cb='gas_cfg_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  var url=gasUrl+'?callback='+cb+'&action=setConfig&key='+encodeURIComponent(key)+'&val='+encodeURIComponent(JSON.stringify(val));
+  var script=document.createElement('script');
+  var timer=setTimeout(function(){cleanup();},8000);
+  function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
+  window[cb]=function(){cleanup();};
+  script.onerror=function(){cleanup();};
+  script.src=url;document.head.appendChild(script);
+}
+function loadConfigFromGAS(onDone){
+  if(!gasUrl){if(onDone)onDone();return;}
+  var cb='gas_gcfg_'+Date.now();
+  var url=gasUrl+'?callback='+cb+'&action=getConfig';
+  var script=document.createElement('script');
+  var timer=setTimeout(function(){cleanup();if(onDone)onDone();},8000);
+  function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
+  window[cb]=function(data){
+    cleanup();
+    if(data&&data.ok){
+      if(data.vehicleTypeMap){try{vehicleTypeMap=JSON.parse(data.vehicleTypeMap);localStorage.setItem('fleet_vehicle_type_map',data.vehicleTypeMap);}catch(e){}}
+      if(data.customTypes){try{customTypes=JSON.parse(data.customTypes);localStorage.setItem('fleet_custom_types',data.customTypes);}catch(e){}}
+      if(data.plateOrder){try{plateOrder=JSON.parse(data.plateOrder);localStorage.setItem('fleet_plate_order',data.plateOrder);}catch(e){}}
+      if(data.hiddenPlates){try{hiddenPlates=JSON.parse(data.hiddenPlates);localStorage.setItem('fleet_hidden_plates',data.hiddenPlates);}catch(e){}}
+    }
+    if(onDone)onDone();
+  };
+  script.onerror=function(){cleanup();if(onDone)onDone();};
+  script.src=url;document.head.appendChild(script);
+}
+// Auto-import status silently (no alerts)
+function autoSyncStatusFromGAS(){
+  if(!gasUrl)return;
+  var cb='gas_auto_'+Date.now();
+  var url=gasUrl+'?callback='+cb+'&action=getall';
+  var script=document.createElement('script');
+  var timer=setTimeout(function(){cleanup();},10000);
+  function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
+  window[cb]=function(data){
+    cleanup();
+    if(!data)return;
+    var changed=false;
+    Object.keys(data).forEach(function(plate){
+      if(data[plate].status){statusMap[plate]=data[plate].status;changed=true;}
+      if(data[plate].note!==undefined){noteMap[plate]=data[plate].note;changed=true;}
+    });
+    if(changed){saveStatus();saveNotes();renderAll();renderBoard();}
+  };
+  script.onerror=function(){cleanup();};
+  script.src=url;document.head.appendChild(script);
+}
+
 function importFromGAS(){
   if(!gasUrl){alert('กรอก GAS URL ก่อน');return;}
   setSyncStatus('','กำลังโหลด...');
@@ -1019,7 +1077,7 @@ function copyGasCode(){
   navigator.clipboard.writeText(code).then(function(){alert('คัดลอกแล้ว!');}).catch(function(){});
 }
 function buildGasCode(){
-  var code='// Fleet Dashboard — GAS Sync Script\n// Deploy: Web App, Execute as Me, Anyone can access\n\nvar SHEET_ID = "'+SHEET_ID+'";\n\nfunction getStatusSheet() {\n  var ss = SpreadsheetApp.openById(SHEET_ID);\n  var sh = ss.getSheetByName("Fleet_Status");\n  if (!sh) {\n    sh = ss.insertSheet("Fleet_Status");\n    sh.appendRow(["ทะเบียน","สถานะ","Note","อัปเดต"]);\n  }\n  return sh;\n}\n\nfunction doGet(e) {\n  var cb = e.parameter.callback || e.parameter.cb || "";\n  var action = e.parameter.action || "getall";\n  var result;\n\n  // ── Transaction Report: list sheet tabs ──\n  if (action === "listSheets") {\n    try {\n      var id = e.parameter.id || SHEET_ID;\n      var ss = SpreadsheetApp.openById(id);\n      var sheets = ss.getSheets().map(function(s){ return s.getName(); });\n      result = {ok: true, sheets: sheets};\n    } catch(err) {\n      result = {ok: false, error: err.toString()};\n    }\n    var json = JSON.stringify(result);\n    if (cb) return ContentService.createTextOutput(cb+"("+json+")").setMimeType(ContentService.MimeType.JAVASCRIPT);\n    return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n  }\n\n  // ── Status sync ──\n  if (action === "ping") {\n    result = {ok: true};\n  } else if (action === "set") {\n    var sh = getStatusSheet();\n    var plate = e.parameter.plate || "";\n    var status = e.parameter.status || "";\n    var note = e.parameter.note || "";\n    if (plate) {\n      var vals = sh.getDataRange().getValues();\n      var found = false;\n      for (var i = 1; i < vals.length; i++) {\n        if (vals[i][0] === plate) {\n          sh.getRange(i+1,1,1,4).setValues([[plate,status,note,new Date()]]);\n          found = true; break;\n        }\n      }\n      if (!found) sh.appendRow([plate,status,note,new Date()]);\n    }\n    result = {ok: true};\n  } else {\n    var sh = getStatusSheet();\n    var vals = sh.getDataRange().getValues();\n    result = {};\n    for (var i = 1; i < vals.length; i++) {\n      if (vals[i][0]) result[vals[i][0]] = {status: vals[i][1]||"", note: vals[i][2]||""};\n    }\n  }\n  var json = JSON.stringify(result);\n  if (cb) return ContentService.createTextOutput(cb+"("+json+")").setMimeType(ContentService.MimeType.JAVASCRIPT);\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}';
+  var code='// Fleet Dashboard — GAS Sync Script\n// Deploy: Web App, Execute as Me, Anyone can access\n\nvar SHEET_ID = "'+SHEET_ID+'";\n\nfunction getStatusSheet() {\n  var ss = SpreadsheetApp.openById(SHEET_ID);\n  var sh = ss.getSheetByName("Fleet_Status");\n  if (!sh) {\n    sh = ss.insertSheet("Fleet_Status");\n    sh.appendRow(["ทะเบียน","สถานะ","Note","อัปเดต"]);\n  }\n  return sh;\n}\n\nfunction getConfigSheet() {\n  var ss = SpreadsheetApp.openById(SHEET_ID);\n  var sh = ss.getSheetByName("Fleet_Config");\n  if (!sh) {\n    sh = ss.insertSheet("Fleet_Config");\n    sh.appendRow(["key","value","updated"]);\n  }\n  return sh;\n}\n\nfunction doGet(e) {\n  var cb = e.parameter.callback || e.parameter.cb || "";\n  var action = e.parameter.action || "getall";\n  var result;\n\n  // ── Transaction Report: list sheet tabs ──\n  if (action === "listSheets") {\n    try {\n      var id = e.parameter.id || SHEET_ID;\n      var ss = SpreadsheetApp.openById(id);\n      var sheets = ss.getSheets().map(function(s){ return s.getName(); });\n      result = {ok: true, sheets: sheets};\n    } catch(err) {\n      result = {ok: false, error: err.toString()};\n    }\n    var json = JSON.stringify(result);\n    if (cb) return ContentService.createTextOutput(cb+"("+json+")").setMimeType(ContentService.MimeType.JAVASCRIPT);\n    return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n  }\n\n  // ── Config sync ──\n  if (action === "setConfig") {\n    var sh = getConfigSheet();\n    var key = e.parameter.key || "";\n    var val = e.parameter.val || "";\n    if (key) {\n      var vals = sh.getDataRange().getValues();\n      var found = false;\n      for (var i = 1; i < vals.length; i++) {\n        if (vals[i][0] === key) {\n          sh.getRange(i+1,1,1,3).setValues([[key,val,new Date()]]);\n          found = true; break;\n        }\n      }\n      if (!found) sh.appendRow([key, val, new Date()]);\n    }\n    result = {ok: true};\n  } else if (action === "getConfig") {\n    var sh = getConfigSheet();\n    var vals = sh.getDataRange().getValues();\n    result = {ok: true};\n    for (var i = 1; i < vals.length; i++) {\n      if (vals[i][0]) result[vals[i][0]] = vals[i][1] || "";\n    }\n\n  // ── Status sync ──\n  } else if (action === "ping") {\n    result = {ok: true};\n  } else if (action === "set") {\n    var sh = getStatusSheet();\n    var plate = e.parameter.plate || "";\n    var status = e.parameter.status || "";\n    var note = e.parameter.note || "";\n    if (plate) {\n      var vals = sh.getDataRange().getValues();\n      var found = false;\n      for (var i = 1; i < vals.length; i++) {\n        if (vals[i][0] === plate) {\n          sh.getRange(i+1,1,1,4).setValues([[plate,status,note,new Date()]]);\n          found = true; break;\n        }\n      }\n      if (!found) sh.appendRow([plate,status,note,new Date()]);\n    }\n    result = {ok: true};\n  } else {\n    var sh = getStatusSheet();\n    var vals = sh.getDataRange().getValues();\n    result = {};\n    for (var i = 1; i < vals.length; i++) {\n      if (vals[i][0]) result[vals[i][0]] = {status: vals[i][1]||"", note: vals[i][2]||""};\n    }\n  }\n  var json = JSON.stringify(result);\n  if (cb) return ContentService.createTextOutput(cb+"("+json+")").setMimeType(ContentService.MimeType.JAVASCRIPT);\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}';
   document.getElementById('gas-code-block').textContent=code;
 }
 
@@ -2147,6 +2205,8 @@ function loadStmtSheetList(){
     renderStmtMonthBar();
     var bar=document.getElementById('stmt-month-bar');
     if(bar)bar.style.display='flex';
+    // Auto-load most recent month
+    if(stmtAvailSheets.length>0)loadStmtMonth(stmtAvailSheets[0]);
   };
   var s=document.createElement('script');
   s.onerror=function(){delete window[cb];if(loading)loading.style.display='none';alert('เชื่อม GAS ไม่ได้');};
@@ -2181,7 +2241,7 @@ function loadStmtMonth(tab){
   };
   var url='https://docs.google.com/spreadsheets/d/'+encodeURIComponent(stmtSheetId)
     +'/gviz/tq?tqx=out:json;responseHandler:'+cb
-    +'&sheet='+encodeURIComponent(tab)+'&range=A4:AE';
+    +'&sheet='+encodeURIComponent(tab);
   var s=document.createElement('script');
   s.onerror=function(){delete window[cb];if(loading)loading.style.display='none';alert('โหลด tab '+tab+' ไม่สำเร็จ');};
   s.src=url;
@@ -2192,15 +2252,38 @@ function parseGvizStmtData(resp){
   if(!resp||!resp.table)return[];
   var cols=resp.table.cols||[];
   var rows=resp.table.rows||[];
-  function fc(kw){for(var i=0;i<cols.length;i++){if((cols[i].label||'').toLowerCase().indexOf(kw.toLowerCase())!==-1)return i;}return -1;}
+  function fc(kw,src){for(var i=0;i<src.length;i++){if((src[i]||'').toLowerCase().indexOf(kw.toLowerCase())!==-1)return i;}return -1;}
+  // Build column labels from gviz cols header
+  var colLabels=cols.map(function(c){return c.label||'';});
   var ci={
-    card:fc('Card No'),plate:fc('Plate No'),brand:fc('Car Brand'),driver:fc('Card Holder'),
-    date:fc('Date'),time:fc('Time'),product:fc('Product'),qty:fc('Quantity'),
-    price:fc('Price'),amount:fc('Amount'),odo:fc('Odometer'),rate:fc('Consump'),
-    stnName:fc('Station Name'),location:fc('Location'),oilCo:fc('Oil Company'),plateProvince:fc('Plate Province')
+    card:fc('Card No',colLabels),plate:fc('Plate No',colLabels),brand:fc('Car Brand',colLabels),driver:fc('Card Holder',colLabels),
+    date:fc('Date',colLabels),time:fc('Time',colLabels),product:fc('Product',colLabels),qty:fc('Quantity',colLabels),
+    price:fc('Price',colLabels),amount:fc('Amount',colLabels),odo:fc('Odometer',colLabels),rate:fc('Consump',colLabels),
+    stnName:fc('Station Name',colLabels),location:fc('Location',colLabels),oilCo:fc('Oil Company',colLabels),plateProvince:fc('Plate Province',colLabels)
   };
+  // If headers not found (sheet has title rows before data — col labels are title text, not field names)
+  // Scan first 10 rows to find actual header row
+  var dataStartIdx=0;
+  if(ci.plate===-1){
+    for(var ri=0;ri<Math.min(10,rows.length);ri++){
+      var rr=rows[ri];if(!rr||!rr.c)continue;
+      var rowVals=rr.c.map(function(x){return String((x&&(x.v||x.f))||'');});
+      var rowStr=rowVals.join('|').toLowerCase();
+      if(rowStr.indexOf('plate no')!==-1||rowStr.indexOf('card no')!==-1){
+        ci={
+          card:fc('Card No',rowVals),plate:fc('Plate No',rowVals),brand:fc('Car Brand',rowVals),driver:fc('Card Holder',rowVals),
+          date:fc('Date',rowVals),time:fc('Time',rowVals),product:fc('Product',rowVals),qty:fc('Quantity',rowVals),
+          price:fc('Price',rowVals),amount:fc('Amount',rowVals),odo:fc('Odometer',rowVals),rate:fc('Consump',rowVals),
+          stnName:fc('Station Name',rowVals),location:fc('Location',rowVals),oilCo:fc('Oil Company',rowVals),plateProvince:fc('Plate Province',rowVals)
+        };
+        dataStartIdx=ri+1;
+        break;
+      }
+    }
+  }
+  if(ci.plate===-1)return[]; // still can't find headers — bail
   var out=[];
-  rows.forEach(function(row){
+  rows.slice(dataStartIdx).forEach(function(row){
     var c=row.c;if(!c)return;
     var plate=String((c[ci.plate]&&(c[ci.plate].v||c[ci.plate].f))||'').trim();
     if(!plate)return;
@@ -2393,7 +2476,7 @@ if(!String.prototype.padStart){String.prototype.padStart=function(len,f){var s=S
 setInterval(updateBoardClock,1000);
 updateBoardClock();
 
-// ── Daily reset check (for boards left open overnight) ──
+// ── Daily reset check + GAS auto-sync (every 60s) ──
 var _lastCheckedDay=todayStr();
 setInterval(function(){
   var today=todayStr();
@@ -2403,10 +2486,17 @@ setInterval(function(){
     renderAll();
     if(document.getElementById('page-board').classList.contains('active'))renderBoard();
   }
+  // Auto-sync status from GAS every 60s if GAS URL set
+  if(gasUrl)autoSyncStatusFromGAS();
 },60000);
 
 // ── Init ──
 loadLocal();
+// Auto-sync config + status from GAS on startup
+if(gasUrl){
+  loadConfigFromGAS(function(){renderAll();});
+  autoSyncStatusFromGAS();
+}
 loadAll();
 updateStmtSheetBtn();
 </script>
