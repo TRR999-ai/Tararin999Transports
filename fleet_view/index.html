@@ -1041,7 +1041,12 @@ function loadConfigFromGAS(onDone){
     cleanup();
     try{
       var entry=data&&data[CFG_VPLATE];
-      if(entry&&entry.note){_applyConfig(JSON.parse(entry.note));}
+      if(entry&&entry.note){
+        _applyConfig(JSON.parse(entry.note));
+      } else {
+        // No config in GAS yet — push local config up (iPad's push will fail silently due to blocked script.google.com; computer's push will succeed)
+        syncConfigToGAS('vehicleTypeMap',vehicleTypeMap);
+      }
     }catch(e){}
     if(onDone)onDone();
   };
@@ -1056,14 +1061,17 @@ function loadConfigFromGAS(onDone){
       clearTimeout(t2);delete window[cb2];if(s2.parentNode)s2.parentNode.removeChild(s2);
       try{
         var rows=d&&d.table&&d.table.rows||[];
+        var foundCfg=false;
         for(var i=0;i<rows.length;i++){
           var r=rows[i];if(!r.c)continue;
           if(r.c[0]&&r.c[0].v===CFG_VPLATE){
             var note=r.c[2]&&r.c[2].v;
-            if(note)_applyConfig(JSON.parse(note));
+            if(note){_applyConfig(JSON.parse(note));foundCfg=true;}
             break;
           }
         }
+        // gviz/tq is read-only (blocked devices); if no entry found, nothing to do
+        void foundCfg;
       }catch(e){}
       if(onDone)onDone();
     };
