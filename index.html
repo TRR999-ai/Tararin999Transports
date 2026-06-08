@@ -801,8 +801,7 @@ var PF_SHEET_ID   = '1HC2aGOvAUx-s82kBi2cMU-8U3k4POiqn7IXYeWr-C4c';
 
 // ── GAS profile sync ──────────────────────────────────────────────────────
 // Uses action=set/getall with virtual plate "__pf__" (guaranteed to work, no GAS changes needed)
-// Syncs: id, name, avatar (emoji), pwHash
-// NOT synced: avatarImg (base64 photo — too large for URL)
+// Syncs: id, name, avatar (emoji), pwHash, avatarImg (resized to 64x64 JPEG q0.3 ~1-3KB)
 var PF_VPLATE='__portal_pf_v1__';
 var PF_EDIT_TS_KEY='portal_pf_edit_ts';  // when user last edited profiles ON THIS device
 var PF_SYNC_TS_KEY='portal_pf_sync_ts';  // when we last pulled from GAS
@@ -810,7 +809,7 @@ var PF_SYNC_TS_KEY='portal_pf_sync_ts';  // when we last pulled from GAS
 function syncProfilesToGAS(profs){
   var gasUrl=localStorage.getItem('fleet_gas_url')||PF_GAS_URL;
   if(!gasUrl)return;
-  var slim=profs.map(function(p){return{id:p.id,name:p.name,avatar:p.avatar,pwHash:p.pwHash||null};});
+  var slim=profs.map(function(p){return{id:p.id,name:p.name,avatar:p.avatar,pwHash:p.pwHash||null,avatarImg:p.avatarImg||null};});
   var cb='gas_pfsave_'+Date.now();
   var script=document.createElement('script');
   var timer=setTimeout(function(){cleanup();},8000);
@@ -829,8 +828,8 @@ function _pfMerge(remote){
   var local=getProfiles(),changed=false;
   remote.forEach(function(rp){
     var lp=local.find(function(p){return p.id===rp.id;});
-    if(lp&&(lp.name!==rp.name||lp.avatar!==rp.avatar||lp.pwHash!==(rp.pwHash||null))){
-      lp.name=rp.name;lp.avatar=rp.avatar;lp.pwHash=rp.pwHash||null;changed=true;
+    if(lp&&(lp.name!==rp.name||lp.avatar!==rp.avatar||lp.pwHash!==(rp.pwHash||null)||(rp.avatarImg||null)!==(lp.avatarImg||null))){
+      lp.name=rp.name;lp.avatar=rp.avatar;lp.pwHash=rp.pwHash||null;lp.avatarImg=rp.avatarImg||null;changed=true;
     }
   });
   if(changed)try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}
@@ -1071,13 +1070,29 @@ function setPfEmoji(e){
   document.querySelectorAll('.pf-emoji-btn').forEach(function(b){b.classList.remove('active');if(b.textContent===e)b.classList.add('active');});
   document.getElementById('pf-edit-cur-av').innerHTML='<span style="font-size:42px;line-height:1">'+e+'</span>';
 }
+function _resizeThumbnail(dataUrl,size,quality,cb){
+  var img=new Image();
+  img.onload=function(){
+    var canvas=document.createElement('canvas');
+    canvas.width=size;canvas.height=size;
+    var ctx=canvas.getContext('2d');
+    // center-crop to square then scale
+    var s=Math.min(img.width,img.height);
+    var ox=(img.width-s)/2,oy=(img.height-s)/2;
+    ctx.drawImage(img,ox,oy,s,s,0,0,size,size);
+    cb(canvas.toDataURL('image/jpeg',quality));
+  };
+  img.src=dataUrl;
+}
 function handlePfPhoto(inp){
   if(!inp.files||!inp.files[0])return;
   var reader=new FileReader();
   reader.onload=function(ev){
-    _pfEditAvatarImg=ev.target.result;
-    document.getElementById('pf-edit-cur-av').innerHTML='<img src="'+_pfEditAvatarImg+'" style="width:100%;height:100%;object-fit:cover;">';
-    document.querySelectorAll('.pf-emoji-btn').forEach(function(b){b.classList.remove('active');});
+    _resizeThumbnail(ev.target.result,64,0.3,function(thumb){
+      _pfEditAvatarImg=thumb;
+      document.getElementById('pf-edit-cur-av').innerHTML='<img src="'+thumb+'" style="width:100%;height:100%;object-fit:cover;">';
+      document.querySelectorAll('.pf-emoji-btn').forEach(function(b){b.classList.remove('active');});
+    });
   };
   reader.readAsDataURL(inp.files[0]);inp.value='';
 }
