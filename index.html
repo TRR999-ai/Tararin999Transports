@@ -827,6 +827,8 @@ function loadProfilesFromGAS(onDone){
   function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
   window[cb]=function(data){
     cleanup();
+    // Always mark synced when GAS responds — prevents device pushing stale local data
+    try{localStorage.setItem(PF_SYNC_TS_KEY,Date.now().toString());}catch(e){}
     try{
       // getall returns all rows including virtual plate __portal_pf_v1__
       var entry=data&&data[PF_VPLATE];
@@ -842,7 +844,6 @@ function loadProfilesFromGAS(onDone){
             }
           });
           if(changed)try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}
-          try{localStorage.setItem(PF_SYNC_TS_KEY,Date.now().toString());}catch(e){}
         }
       }
     }catch(e){}
