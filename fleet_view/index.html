@@ -705,6 +705,7 @@ var hiddenPlates    = {}; // {plate: true}
 var statusSetAt     = {}; // {plate: timestamp} — when status was last set locally
 var _pendingGasSync = {}; // {plate: {status,note}} — failed syncs waiting to retry
 var boardTypeFilter  = ''; // '', 'fuel', 'hub', 'khon', or custom type id
+var boardStatusFilter= ''; // '', 'ready', 'busy', 'leave', '_none'
 var latestTypeFilter = ''; // custom type id or '' or '_none'
 var customTypes     = []; // [{id, name, emoji, ci}]
 var vehicleTypeMap  = {}; // {plate: typeId}
@@ -1000,6 +1001,7 @@ function _executeSyncToGAS(plate, status, note){
     cleanup();
     if(r&&r.ok){
       delete _pendingGasSync[plate]; // confirmed — remove from retry queue
+      statusSetAt[plate]=Date.now(); // refresh guard timestamp so autoSync won't overwrite for another 30min
       setSyncStatus('ok','Synced');
     } else {
       setSyncStatus('err','Error: '+(r&&r.error||'?'));
@@ -1100,9 +1102,9 @@ function autoSyncStatusFromGAS(){
     Object.keys(data).forEach(function(plate){
       var st=data[plate].status;
       if(st){
-        // Guard 2: user set this plate locally <5min ago OR sync still pending → trust local
+        // Guard 2: user set this plate locally <30min ago OR sync still pending → trust local
         var localAge=now-(statusSetAt[plate]||0);
-        var recentlySet=(statusSetAt[plate]&&localAge<300000);
+        var recentlySet=(statusSetAt[plate]&&localAge<1800000);
         var syncPending=!!_pendingGasSync[plate];
         if(justReset&&(st==='ready'||st==='busy')){/* skip stale after daily reset */}
         else if(recentlySet||syncPending){/* skip — local change not yet confirmed in GAS */}
@@ -1450,11 +1452,14 @@ function renderBoard(){
   }
   var counts={ready:0,busy:0,leave:0,none:0};
   allPlates.forEach(function(p){var s=statusMap[p]||'';if(s==='ready')counts.ready++;else if(s==='busy')counts.busy++;else if(s==='leave')counts.leave++;else counts.none++;});
+  var bsf=boardStatusFilter;
   document.getElementById('board-summary').innerHTML=
-    '<span class="bs-chip c-ready">✅ พร้อม '+counts.ready+'</span>'
-    +'<span class="bs-chip c-busy">❌ ไม่พร้อม '+counts.busy+'</span>'
-    +'<span class="bs-chip c-leave">🏖️ ลา '+counts.leave+'</span>'
-    +'<span class="bs-chip c-none">⬜ ไม่ระบุ '+counts.none+'</span>';
+    '<span class="bs-chip c-ready'+(bsf==='ready'?' active':'')+'" onclick="setBoardStatusFilter(\'ready\')">✅ พร้อม '+counts.ready+'</span>'
+    +'<span class="bs-chip c-busy'+(bsf==='busy'?' active':'')+'" onclick="setBoardStatusFilter(\'busy\')">❌ ไม่พร้อม '+counts.busy+'</span>'
+    +'<span class="bs-chip c-leave'+(bsf==='leave'?' active':'')+'" onclick="setBoardStatusFilter(\'leave\')">🏖️ ลา '+counts.leave+'</span>'
+    +'<span class="bs-chip c-none'+(bsf==='_none'?' active':'')+'" onclick="setBoardStatusFilter(\'_none\')">⬜ ไม่ระบุ '+counts.none+'</span>';
+  if(bsf==='_none')allPlates=allPlates.filter(function(p){return !statusMap[p];});
+  else if(bsf)allPlates=allPlates.filter(function(p){return statusMap[p]===bsf;});
   var stLabels={ready:'✅ พร้อมรับงาน',busy:'❌ ไม่พร้อมรับงาน',leave:'🏖️ ลา','':'— ไม่ระบุ —'};
   if(!allPlates.length){
     var emptyMsg='<div style="grid-column:1/-1;text-align:center;padding:50px 20px;">'
@@ -1491,6 +1496,10 @@ function renderBoard(){
 }
 function setBoardTypeFilter(val){
   boardTypeFilter=boardTypeFilter===val&&val!==''?'':val;
+  renderBoard();
+}
+function setBoardStatusFilter(val){
+  boardStatusFilter=boardStatusFilter===val?'':val;
   renderBoard();
 }
 function cycleBoardStatus(plate,e){
