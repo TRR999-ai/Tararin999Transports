@@ -702,6 +702,8 @@ var gasUrl       = '';
 var statusFilter = '';
 var plateOrder      = []; // custom plate order (array of plate strings)
 var hiddenPlates    = {}; // {plate: true}
+var statusSetAt     = {}; // {plate: timestamp} — when status was last set locally
+var _pendingGasSync = {}; // {plate: {status,note}} — failed syncs waiting to retry
 var boardTypeFilter  = ''; // '', 'fuel', 'hub', 'khon', or custom type id
 var latestTypeFilter = ''; // custom type id or '' or '_none'
 var customTypes     = []; // [{id, name, emoji, ci}]
@@ -888,6 +890,7 @@ function setMonth(ym,btn){
 // ═══════════════════════════════════════════
 function loadLocal(){
   try{statusMap=JSON.parse(localStorage.getItem('fleet_status')||'{}');}catch(e){statusMap={};}
+  try{statusSetAt=JSON.parse(localStorage.getItem('fleet_status_set_at')||'{}');}catch(e){statusSetAt={};}
   resetDailyStatus(); // reset ready/busy if new day
   try{noteMap=JSON.parse(localStorage.getItem('fleet_notes')||'{}');}catch(e){noteMap={};}
   try{plateOrder=JSON.parse(localStorage.getItem('fleet_plate_order')||'[]');}catch(e){plateOrder=[];}
@@ -902,7 +905,8 @@ function loadLocal(){
 function saveStatus(){
   try{
     localStorage.setItem('fleet_status',JSON.stringify(statusMap));
-    localStorage.setItem('fleet_status_date',todayStr()); // mark today
+    localStorage.setItem('fleet_status_date',todayStr());
+    localStorage.setItem('fleet_status_set_at',JSON.stringify(statusSetAt));
   }catch(e){}
 }
 var _resetTime=0; // epoch ms when daily reset last occurred
@@ -926,7 +930,9 @@ function saveCustomTypes(){try{localStorage.setItem('fleet_custom_types',JSON.st
 function saveVehicleTypeMap(){try{localStorage.setItem('fleet_vehicle_type_map',JSON.stringify(vehicleTypeMap));}catch(e){}syncConfigToGAS('vehicleTypeMap',vehicleTypeMap);}
 
 function setStatus(plate, val){
-  statusMap[plate]=val;saveStatus();
+  statusMap[plate]=val;
+  statusSetAt[plate]=Date.now(); // track when user set this locally
+  saveStatus();
   // Targeted DOM update
   var card=document.querySelector('[data-plate="'+plate.replace(/"/g,'&quot;')+'"]');
   if(card){
@@ -980,12 +986,25 @@ function setStFilter(val){
 // ═══════════════════════════════════════════
 function syncToGAS(plate, status, note){
   if(!gasUrl)return;
+  _pendingGasSync[plate]={status:status,note:note||''}; // queue for retry until confirmed
+  _executeSyncToGAS(plate, status, note||'');
+}
+function _executeSyncToGAS(plate, status, note){
+  if(!gasUrl)return;
   var cb='gas_'+Date.now()+'_'+Math.random().toString(36).slice(2);
   var url=gasUrl+'?callback='+cb+'&action=set&plate='+encodeURIComponent(plate)+'&status='+encodeURIComponent(status)+'&note='+encodeURIComponent(note||'');
   var script=document.createElement('script');
   var timer=setTimeout(function(){cleanup();setSyncStatus('err','Sync timeout');},8000);
   function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
-  window[cb]=function(r){cleanup();setSyncStatus(r&&r.ok?'ok':'err',r&&r.ok?'Synced':'Error: '+(r&&r.error||'?'));};
+  window[cb]=function(r){
+    cleanup();
+    if(r&&r.ok){
+      delete _pendingGasSync[plate]; // confirmed — remove from retry queue
+      setSyncStatus('ok','Synced');
+    } else {
+      setSyncStatus('err','Error: '+(r&&r.error||'?'));
+    }
+  };
   script.onerror=function(){cleanup();setSyncStatus('err','Connection failed');};
   script.src=url;document.head.appendChild(script);
 }
@@ -1034,12 +1053,18 @@ function autoSyncStatusFromGAS(){
     cleanup();
     if(!data)return;
     var changed=false;
-    // If reset happened less than 90s ago, GAS may still have stale ready/busy → skip them
-    var justReset=(_resetTime>0&&(Date.now()-_resetTime)<90000);
+    var now=Date.now();
+    // Guard 1: reset happened <90s ago → GAS may still have stale ready/busy
+    var justReset=(_resetTime>0&&(now-_resetTime)<90000);
     Object.keys(data).forEach(function(plate){
       var st=data[plate].status;
       if(st){
-        if(justReset&&(st==='ready'||st==='busy')){/* skip stale GAS status after reset */}
+        // Guard 2: user set this plate locally <5min ago OR sync still pending → trust local
+        var localAge=now-(statusSetAt[plate]||0);
+        var recentlySet=(statusSetAt[plate]&&localAge<300000);
+        var syncPending=!!_pendingGasSync[plate];
+        if(justReset&&(st==='ready'||st==='busy')){/* skip stale after daily reset */}
+        else if(recentlySet||syncPending){/* skip — local change not yet confirmed in GAS */}
         else{statusMap[plate]=st;changed=true;}
       }
       if(data[plate].note!==undefined){noteMap[plate]=data[plate].note;changed=true;}
@@ -2589,7 +2614,14 @@ setInterval(function(){
     renderAll();
     if(document.getElementById('page-board').classList.contains('active'))renderBoard();
   }
-  // Auto-sync status from GAS every 60s if GAS URL set
+  // Retry any pending (failed) GAS syncs before pulling
+  if(gasUrl){
+    Object.keys(_pendingGasSync).forEach(function(plate){
+      var p=_pendingGasSync[plate];
+      _executeSyncToGAS(plate,p.status,p.note);
+    });
+  }
+  // Auto-sync status from GAS every 60s
   if(gasUrl)autoSyncStatusFromGAS();
 },60000);
 
