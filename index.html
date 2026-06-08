@@ -797,8 +797,11 @@ var LEGACY_TOKEN  = '__pf_v2__';
 var PF_GAS_URL    = 'https://script.google.com/macros/s/AKfycby4cVxSxSzNuZUqSRmCTWf6dnGtsyQlW6mswPWx9ZHYr7a-s6sBLzhASXM51Mp2lSz1J/exec';
 
 // ── GAS profile sync ──────────────────────────────────────────────────────
+// Uses action=set/getall with virtual plate "__pf__" (guaranteed to work, no GAS changes needed)
 // Syncs: id, name, avatar (emoji), pwHash
-// NOT synced: avatarImg (base64 photo — too large for JSONP URL)
+// NOT synced: avatarImg (base64 photo — too large for URL)
+var PF_VPLATE='__portal_pf_v1__';
+
 function syncProfilesToGAS(profs){
   var gasUrl=localStorage.getItem('fleet_gas_url')||PF_GAS_URL;
   if(!gasUrl)return;
@@ -809,7 +812,8 @@ function syncProfilesToGAS(profs){
   function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
   window[cb]=function(){cleanup();};
   script.onerror=function(){cleanup();};
-  script.src=gasUrl+'?callback='+cb+'&action=setConfig&key=portal_profiles&val='+encodeURIComponent(JSON.stringify(slim));
+  // Store as "note" for a virtual plate entry — uses existing set action, no GAS script change needed
+  script.src=gasUrl+'?callback='+cb+'&action=set&plate='+encodeURIComponent(PF_VPLATE)+'&status=&note='+encodeURIComponent(JSON.stringify(slim));
   document.head.appendChild(script);
 }
 function loadProfilesFromGAS(onDone){
@@ -821,32 +825,28 @@ function loadProfilesFromGAS(onDone){
   function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
   window[cb]=function(data){
     cleanup();
-    if(data&&data.ok&&data.portal_profiles){
-      try{
-        var remote=typeof data.portal_profiles==='object'?data.portal_profiles:JSON.parse(data.portal_profiles);
+    try{
+      var entry=data&&data[PF_VPLATE];
+      if(entry&&entry.note){
+        var remote=JSON.parse(entry.note);
         if(remote&&remote.length){
           var local=getProfiles();
           var changed=false;
           remote.forEach(function(rp){
             var lp=local.find(function(p){return p.id===rp.id;});
-            if(lp){
-              if(lp.name!==rp.name||(lp.avatar!==rp.avatar)||(lp.pwHash!==(rp.pwHash||null))){
-                lp.name=rp.name;lp.avatar=rp.avatar;lp.pwHash=rp.pwHash||null;
-                changed=true;
-              }
+            if(lp&&(lp.name!==rp.name||lp.avatar!==rp.avatar||lp.pwHash!==(rp.pwHash||null))){
+              lp.name=rp.name;lp.avatar=rp.avatar;lp.pwHash=rp.pwHash||null;changed=true;
             }
           });
-          if(changed){
-            // save locally without re-pushing to GAS
-            try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}
-          }
+          if(changed)try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}
         }
-      }catch(e){}
-    }
+      }
+    }catch(e){}
     if(onDone)onDone();
   };
   script.onerror=function(){cleanup();if(onDone)onDone();};
-  script.src=gasUrl+'?callback='+cb+'&action=getConfig';
+  // getall returns all plate data including our virtual plate
+  script.src=gasUrl+'?callback='+cb+'&action=getall';
   document.head.appendChild(script);
 }
 
