@@ -795,7 +795,9 @@ var ACTIVE_PF_KEY = 'portal_active_profile';
 var PW_KEY        = 'trr_pw_hash';
 var SES_KEY       = 'trr_session';
 var LEGACY_TOKEN  = '__pf_v2__';
-var PF_GAS_URL    = 'https://script.google.com/macros/s/AKfycby4cVxSxSzNuZUqSRmCTWf6dnGtsyQlW6mswPWx9ZHYr7a-s6sBLzhASXM51Mp2lSz1J/exec';
+var PF_GAS_URL    = 'https://script.google.com/macros/s/AKfycby4cVxSxzNuZUqSRmCTWf6dnGtsyQlW6mswPWx9ZHYr7a-s6sBLzhASXM51Mp2lSz1J/exec';
+// Fallback: read Fleet_Status sheet via gviz/tq (docs.google.com) when GAS is blocked
+var PF_SHEET_ID   = '1HC2aGOvAUx-s82kBi2cMU-8U3k4POiqn7IXYeWr-C4c';
 
 // ── GAS profile sync ──────────────────────────────────────────────────────
 // Uses action=set/getall with virtual plate "__pf__" (guaranteed to work, no GAS changes needed)
@@ -820,44 +822,76 @@ function syncProfilesToGAS(profs){
   document.head.appendChild(script);
 }
 function _pfSyncMsg(msg){var el=document.getElementById('pf-sync-status');if(el)el.textContent=msg;}
+
+// Merge remote profiles into local storage, return true if changed
+function _pfMerge(remote){
+  if(!remote||!remote.length)return false;
+  var local=getProfiles(),changed=false;
+  remote.forEach(function(rp){
+    var lp=local.find(function(p){return p.id===rp.id;});
+    if(lp&&(lp.name!==rp.name||lp.avatar!==rp.avatar||lp.pwHash!==(rp.pwHash||null))){
+      lp.name=rp.name;lp.avatar=rp.avatar;lp.pwHash=rp.pwHash||null;changed=true;
+    }
+  });
+  if(changed)try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}
+  try{localStorage.setItem(PF_SYNC_TS_KEY,Date.now().toString());}catch(e){}
+  return changed;
+}
+
+// Fallback: read Fleet_Status via gviz/tq (docs.google.com) — works even when script.google.com is blocked
+function _loadPFviaSheet(onDone){
+  var sheetId=localStorage.getItem('fleet_sheet_id')||PF_SHEET_ID;
+  var cb='gas_pfgviz_'+Date.now();
+  var script=document.createElement('script');
+  var timer=setTimeout(function(){cleanup();_pfSyncMsg('⚠️ GAS connect failed');if(onDone)onDone();},8000);
+  function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
+  window[cb]=function(data){
+    cleanup();
+    try{
+      var rows=data&&data.table&&data.table.rows||[];
+      for(var i=0;i<rows.length;i++){
+        var r=rows[i];if(!r.c)continue;
+        var plate=r.c[0]&&r.c[0].v;
+        if(plate===PF_VPLATE){
+          var note=r.c[2]&&r.c[2].v;
+          if(note){
+            var remote=JSON.parse(note);
+            var changed=_pfMerge(remote);
+            _pfSyncMsg(changed?'✅ sync แล้ว':'✅ ข้อมูลตรงกัน');
+          }
+          break;
+        }
+      }
+    }catch(e){_pfSyncMsg('⚠️ parse error');}
+    if(onDone)onDone();
+  };
+  script.onerror=function(){cleanup();_pfSyncMsg('⚠️ GAS connect failed');if(onDone)onDone();};
+  script.src='https://docs.google.com/spreadsheets/d/'+sheetId+'/gviz/tq?tqx=out:json;responseHandler:'+cb+'&sheet=Fleet_Status';
+  document.head.appendChild(script);
+}
+
 function _doLoadPF(gasUrl,onDone,isRetry){
   _pfSyncMsg('🔄 กำลัง sync โปรไฟล์...');
   var cb='gas_pfload_'+Date.now();
   var script=document.createElement('script');
-  var timer=setTimeout(function(){cleanup();if(!isRetry&&gasUrl!==PF_GAS_URL){_doLoadPF(PF_GAS_URL,onDone,true);}else{_pfSyncMsg('⚠️ sync timeout');if(onDone)onDone();}},8000);
+  var timer=setTimeout(function(){cleanup();if(!isRetry&&gasUrl!==PF_GAS_URL){_doLoadPF(PF_GAS_URL,onDone,true);}else{_loadPFviaSheet(onDone);}},8000);
   function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
   window[cb]=function(data){
     cleanup();
-    try{localStorage.setItem(PF_SYNC_TS_KEY,Date.now().toString());}catch(e){}
     try{
       var entry=data&&data[PF_VPLATE];
       if(entry&&entry.note){
         var remote=JSON.parse(entry.note);
-        if(remote&&remote.length){
-          var local=getProfiles();
-          var changed=false;
-          remote.forEach(function(rp){
-            var lp=local.find(function(p){return p.id===rp.id;});
-            if(lp&&(lp.name!==rp.name||lp.avatar!==rp.avatar||lp.pwHash!==(rp.pwHash||null))){
-              lp.name=rp.name;lp.avatar=rp.avatar;lp.pwHash=rp.pwHash||null;changed=true;
-            }
-          });
-          if(changed){try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}}
-          _pfSyncMsg(changed?'✅ sync แล้ว':'✅ ข้อมูลตรงกัน');
-        } else { _pfSyncMsg(''); }
+        var changed=_pfMerge(remote);
+        _pfSyncMsg(changed?'✅ sync แล้ว':'✅ ข้อมูลตรงกัน');
       } else { _pfSyncMsg('⚠️ ไม่พบข้อมูลใน GAS'); }
     }catch(e){_pfSyncMsg('⚠️ parse error');}
     if(onDone)onDone();
   };
   script.onerror=function(){
     cleanup();
-    if(!isRetry&&gasUrl!==PF_GAS_URL){
-      // Primary URL failed — retry with default PF_GAS_URL
-      _doLoadPF(PF_GAS_URL,onDone,true);
-    } else {
-      _pfSyncMsg('⚠️ GAS connect failed');
-      if(onDone)onDone();
-    }
+    if(!isRetry&&gasUrl!==PF_GAS_URL){_doLoadPF(PF_GAS_URL,onDone,true);}
+    else{_loadPFviaSheet(onDone);}  // GAS fully blocked — try docs.google.com
   };
   script.src=gasUrl+'?callback='+cb+'&action=getall';
   document.head.appendChild(script);
