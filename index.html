@@ -820,20 +820,16 @@ function syncProfilesToGAS(profs){
   document.head.appendChild(script);
 }
 function _pfSyncMsg(msg){var el=document.getElementById('pf-sync-status');if(el)el.textContent=msg;}
-function loadProfilesFromGAS(onDone){
-  var gasUrl=localStorage.getItem('fleet_gas_url')||PF_GAS_URL;
-  if(!gasUrl){if(onDone)onDone();return;}
+function _doLoadPF(gasUrl,onDone,isRetry){
   _pfSyncMsg('🔄 กำลัง sync โปรไฟล์...');
   var cb='gas_pfload_'+Date.now();
   var script=document.createElement('script');
-  var timer=setTimeout(function(){cleanup();_pfSyncMsg('⚠️ sync timeout');if(onDone)onDone();},8000);
+  var timer=setTimeout(function(){cleanup();if(!isRetry&&gasUrl!==PF_GAS_URL){_doLoadPF(PF_GAS_URL,onDone,true);}else{_pfSyncMsg('⚠️ sync timeout');if(onDone)onDone();}},8000);
   function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
   window[cb]=function(data){
     cleanup();
-    // Always mark synced when GAS responds — prevents device pushing stale local data
     try{localStorage.setItem(PF_SYNC_TS_KEY,Date.now().toString());}catch(e){}
     try{
-      // getall returns all rows including virtual plate __portal_pf_v1__
       var entry=data&&data[PF_VPLATE];
       if(entry&&entry.note){
         var remote=JSON.parse(entry.note);
@@ -846,25 +842,30 @@ function loadProfilesFromGAS(onDone){
               lp.name=rp.name;lp.avatar=rp.avatar;lp.pwHash=rp.pwHash||null;changed=true;
             }
           });
-          if(changed){
-            try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}
-            _pfSyncMsg('✅ sync แล้ว');
-          } else {
-            _pfSyncMsg('✅ ข้อมูลตรงกัน');
-          }
-        } else {
-          _pfSyncMsg('');
-        }
-      } else {
-        _pfSyncMsg('⚠️ ไม่พบข้อมูลใน GAS');
-      }
+          if(changed){try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}}
+          _pfSyncMsg(changed?'✅ sync แล้ว':'✅ ข้อมูลตรงกัน');
+        } else { _pfSyncMsg(''); }
+      } else { _pfSyncMsg('⚠️ ไม่พบข้อมูลใน GAS'); }
     }catch(e){_pfSyncMsg('⚠️ parse error');}
     if(onDone)onDone();
   };
-  script.onerror=function(){cleanup();_pfSyncMsg('⚠️ GAS connect failed');if(onDone)onDone();};
-  // getall returns ALL rows from Fleet_Status sheet including virtual plates
+  script.onerror=function(){
+    cleanup();
+    if(!isRetry&&gasUrl!==PF_GAS_URL){
+      // Primary URL failed — retry with default PF_GAS_URL
+      _doLoadPF(PF_GAS_URL,onDone,true);
+    } else {
+      _pfSyncMsg('⚠️ GAS connect failed');
+      if(onDone)onDone();
+    }
+  };
   script.src=gasUrl+'?callback='+cb+'&action=getall';
   document.head.appendChild(script);
+}
+function loadProfilesFromGAS(onDone){
+  var gasUrl=localStorage.getItem('fleet_gas_url')||PF_GAS_URL;
+  if(!gasUrl){if(onDone)onDone();return;}
+  _doLoadPF(gasUrl,onDone,false);
 }
 
 var PF_EMOJIS = ['👷','🔧','🚛','⛽','👔','👩‍💼','🏢','💼','🎯','📊','🔑','⚙️','🌟','🎖️','🏆','👨‍💼','🚗','🛻','🧑‍🔧','👩‍🔧'];
