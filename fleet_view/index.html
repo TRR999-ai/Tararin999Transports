@@ -1008,38 +1008,71 @@ function _executeSyncToGAS(plate, status, note){
   script.onerror=function(){cleanup();setSyncStatus('err','Connection failed');};
   script.src=url;document.head.appendChild(script);
 }
-// ─── Config sync to/from GAS ───────────────
+// ─── Config sync to/from GAS (virtual plate __fleet_cfg_v1__) ───────────────
+var CFG_VPLATE='__fleet_cfg_v1__';
 function syncConfigToGAS(key,val){
   if(!gasUrl)return;
+  // Write entire config as a single virtual plate note
+  var cfg={customTypes:customTypes,vehicleTypeMap:vehicleTypeMap,plateOrder:plateOrder,hiddenPlates:hiddenPlates};
+  cfg[key]=val;
   var cb='gas_cfg_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-  var url=gasUrl+'?callback='+cb+'&action=setConfig&key='+encodeURIComponent(key)+'&val='+encodeURIComponent(JSON.stringify(val));
   var script=document.createElement('script');
   var timer=setTimeout(function(){cleanup();},8000);
   function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
   window[cb]=function(){cleanup();};
   script.onerror=function(){cleanup();};
-  script.src=url;document.head.appendChild(script);
+  script.src=gasUrl+'?callback='+cb+'&action=set&plate='+encodeURIComponent(CFG_VPLATE)+'&status=&note='+encodeURIComponent(JSON.stringify(cfg));
+  document.head.appendChild(script);
+}
+function _applyConfig(cfg){
+  function safeParse(v){if(!v)return null;if(typeof v==='object')return v;try{return JSON.parse(v);}catch(e){return null;}}
+  var vtm=safeParse(cfg.vehicleTypeMap);if(vtm){vehicleTypeMap=vtm;try{localStorage.setItem('fleet_vehicle_type_map',JSON.stringify(vtm));}catch(e){}}
+  var ct=safeParse(cfg.customTypes);if(ct){customTypes=ct;try{localStorage.setItem('fleet_custom_types',JSON.stringify(ct));}catch(e){}}
+  var po=safeParse(cfg.plateOrder);if(po){plateOrder=po;try{localStorage.setItem('fleet_plate_order',JSON.stringify(po));}catch(e){}}
+  var hp=safeParse(cfg.hiddenPlates);if(hp){hiddenPlates=hp;try{localStorage.setItem('fleet_hidden_plates',JSON.stringify(hp));}catch(e){}}
 }
 function loadConfigFromGAS(onDone){
   if(!gasUrl){if(onDone)onDone();return;}
   var cb='gas_gcfg_'+Date.now();
-  var url=gasUrl+'?callback='+cb+'&action=getConfig';
   var script=document.createElement('script');
   var timer=setTimeout(function(){cleanup();if(onDone)onDone();},8000);
   function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
   window[cb]=function(data){
     cleanup();
-    if(data&&data.ok){
-      function safeParse(v){if(!v)return null;if(typeof v==='object')return v;try{return JSON.parse(v);}catch(e){return null;}}
-      var vtm=safeParse(data.vehicleTypeMap);if(vtm){vehicleTypeMap=vtm;try{localStorage.setItem('fleet_vehicle_type_map',JSON.stringify(vtm));}catch(e){}}
-      var ct=safeParse(data.customTypes);if(ct){customTypes=ct;try{localStorage.setItem('fleet_custom_types',JSON.stringify(ct));}catch(e){}}
-      var po=safeParse(data.plateOrder);if(po){plateOrder=po;try{localStorage.setItem('fleet_plate_order',JSON.stringify(po));}catch(e){}}
-      var hp=safeParse(data.hiddenPlates);if(hp){hiddenPlates=hp;try{localStorage.setItem('fleet_hidden_plates',JSON.stringify(hp));}catch(e){}}
-    }
+    try{
+      var entry=data&&data[CFG_VPLATE];
+      if(entry&&entry.note){_applyConfig(JSON.parse(entry.note));}
+    }catch(e){}
     if(onDone)onDone();
   };
-  script.onerror=function(){cleanup();if(onDone)onDone();};
-  script.src=url;document.head.appendChild(script);
+  script.onerror=function(){
+    cleanup();
+    // Fallback: try reading via docs.google.com gviz/tq (works when script.google.com is blocked)
+    var sheetId=stmtSheetId||'1HC2aGOvAUx-s82kBi2cMU-8U3k4POiqn7IXYeWr-C4c';
+    var cb2='gas_gcfg2_'+Date.now();
+    var s2=document.createElement('script');
+    var t2=setTimeout(function(){if(s2.parentNode)s2.parentNode.removeChild(s2);delete window[cb2];if(onDone)onDone();},8000);
+    window[cb2]=function(d){
+      clearTimeout(t2);delete window[cb2];if(s2.parentNode)s2.parentNode.removeChild(s2);
+      try{
+        var rows=d&&d.table&&d.table.rows||[];
+        for(var i=0;i<rows.length;i++){
+          var r=rows[i];if(!r.c)continue;
+          if(r.c[0]&&r.c[0].v===CFG_VPLATE){
+            var note=r.c[2]&&r.c[2].v;
+            if(note)_applyConfig(JSON.parse(note));
+            break;
+          }
+        }
+      }catch(e){}
+      if(onDone)onDone();
+    };
+    s2.onerror=function(){clearTimeout(t2);delete window[cb2];if(s2.parentNode)s2.parentNode.removeChild(s2);if(onDone)onDone();};
+    s2.src='https://docs.google.com/spreadsheets/d/'+sheetId+'/gviz/tq?tqx=out:json;responseHandler:'+cb2+'&sheet=Fleet_Status';
+    document.head.appendChild(s2);
+  };
+  script.src=gasUrl+'?callback='+cb+'&action=getall';
+  document.head.appendChild(script);
 }
 // Auto-import status silently (no alerts)
 function autoSyncStatusFromGAS(){
