@@ -446,37 +446,86 @@ body {
   .cards-row{gap:10px}
 }
 
-/* ═══ LOGIN ═══════════════════════════════════════════════════════════════ */
-#login-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0d1340 0%,#141D5C 50%,#1B2770 100%);display:flex;align-items:center;justify-content:center;padding:16px;}
-.login-box{width:min(92vw,380px);max-height:90vh;overflow-y:auto;background:rgba(255,255,255,.04);border:1px solid rgba(245,166,35,.25);border-radius:20px;padding:40px 36px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5);}
-.login-logo{width:80px;height:80px;border-radius:50%;border:2.5px solid var(--gold);overflow:hidden;margin:0 auto 14px;background:rgba(255,255,255,.1);}
-.login-logo img{width:100%;height:100%;object-fit:cover;}
-.login-brand{font-size:18px;font-weight:700;color:var(--gold);letter-spacing:2px;margin-bottom:3px;}
-.login-brand-sub{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:24px;}
-.login-mode-title{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:16px;}
-.login-field{margin-bottom:12px;}
-.login-field input{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid rgba(245,166,35,.3);background:rgba(255,255,255,.07);color:#fff;font-size:14px;font-family:inherit;outline:none;transition:.2s;}
-.login-field input:focus{border-color:var(--gold);background:rgba(255,255,255,.12);}
-.login-field input::placeholder{color:rgba(255,255,255,.3);}
-.login-btn{width:100%;padding:12px;border-radius:10px;border:none;background:var(--gold);color:var(--navy-dark);font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:.2s;margin-top:4px;}
-.login-btn:hover{background:var(--gold2);}
-.login-err{color:#ff6b6b;font-size:12px;min-height:18px;margin-bottom:6px;}
-.login-link{font-size:11px;color:rgba(255,255,255,.35);margin-top:12px;cursor:pointer;}
-.login-link:hover{color:var(--gold);}
-/* Logout + change pw btn */
-.logout-btn{padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:11px;cursor:pointer;margin-left:8px;transition:.15s;font-family:inherit;}
-.logout-btn:hover{background:rgba(255,80,80,.2);border-color:rgba(255,80,80,.4);color:#fff;}
-/* Change pw modal */
-#changepw-modal{display:none;position:fixed;inset:0;z-index:8888;background:rgba(0,0,0,.6);align-items:center;justify-content:center;}
-#changepw-modal.show{display:flex;}
-.changepw-box{background:#fff;border-radius:16px;padding:28px 28px;width:min(92vw,360px);max-height:90vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.3);}
-.changepw-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:16px;}
-.changepw-field{margin-bottom:10px;}
-.changepw-field label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;}
-.changepw-field input{width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:.2s;}
-.changepw-field input:focus{border-color:var(--navy2);}
-.changepw-err{color:#e53e3e;font-size:12px;min-height:16px;margin-bottom:8px;}
-.changepw-btns{display:flex;gap:8px;margin-top:4px;}
+/* ═══ PROFILE PICKER (Netflix-style) ════════════════════════════════════ */
+#profile-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0d1340 0%,#141D5C 50%,#1B2770 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto;}
+.pf-brand{text-align:center;margin-bottom:6px;}
+.pf-brand-logo{width:54px;height:54px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;margin:0 auto 6px;background:rgba(255,255,255,.1);}
+.pf-brand-logo img{width:100%;height:100%;object-fit:cover;}
+.pf-brand-name{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:2px;}
+.pf-title{font-size:24px;font-weight:700;color:#fff;margin:14px 0 28px;text-align:center;}
+.pf-grid{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;max-width:720px;}
+.pf-card{display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;padding:14px;border-radius:12px;transition:transform .15s,background .15s;border:2px solid transparent;position:relative;min-width:95px;}
+.pf-card:hover,.pf-card:focus{background:rgba(255,255,255,.07);border-color:rgba(245,166,35,.5);transform:scale(1.06);outline:none;}
+.pf-avatar-wrap{position:relative;display:inline-block;}
+.pf-avatar{width:108px;height:108px;border-radius:12px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:50px;overflow:hidden;border:3px solid rgba(255,255,255,.15);transition:border-color .15s;}
+.pf-card:hover .pf-avatar{border-color:var(--gold);}
+.pf-avatar img{width:100%;height:100%;object-fit:cover;}
+.pf-name{font-size:13px;font-weight:600;color:rgba(255,255,255,.8);text-align:center;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pf-edit-badge{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;font-size:24px;border-radius:10px;}
+.pf-edit-mode .pf-edit-badge{display:flex;}
+.pf-actions{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.pf-action-btn{padding:8px 18px;border-radius:8px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:rgba(255,255,255,.65);font-size:13px;cursor:pointer;font-family:inherit;transition:.15s;}
+.pf-action-btn:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.5);}
+/* Password prompt */
+#pf-pw-box{display:none;flex-direction:column;align-items:center;text-align:center;max-width:320px;width:100%;}
+.pf-pw-avatar{font-size:52px;width:80px;height:80px;border-radius:12px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;border:2px solid rgba(245,166,35,.35);overflow:hidden;}
+.pf-pw-avatar img{width:100%;height:100%;object-fit:cover;}
+.pf-pw-name{font-size:16px;font-weight:700;color:#fff;margin-bottom:18px;}
+.pf-pw-inp{width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid rgba(245,166,35,.35);background:rgba(255,255,255,.07);color:#fff;font-size:20px;font-family:inherit;outline:none;transition:.2s;text-align:center;letter-spacing:6px;margin-bottom:8px;}
+.pf-pw-inp:focus{border-color:var(--gold);background:rgba(255,255,255,.12);}
+.pf-pw-inp::placeholder{letter-spacing:1px;font-size:14px;}
+.pf-pw-err{color:#ff6b6b;font-size:12px;min-height:18px;margin-bottom:8px;}
+.pf-pw-btn{width:100%;padding:12px;border-radius:10px;border:none;background:var(--gold);color:var(--navy-dark);font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;transition:.15s;}
+.pf-pw-btn:hover{background:var(--gold2);}
+.pf-pw-back{font-size:12px;color:rgba(255,255,255,.4);cursor:pointer;border:none;background:none;font-family:inherit;padding:4px 8px;}
+.pf-pw-back:hover{color:rgba(255,255,255,.7);}
+/* Profile Edit Modal */
+#pf-edit-modal{display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:16px;}
+#pf-edit-modal.show{display:flex;}
+.pf-edit-box{background:#fff;border-radius:18px;padding:26px;width:min(92vw,400px);max-height:90vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.4);}
+.pf-edit-title{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:18px;}
+.pf-edit-cur-row{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+.pf-edit-cur-av{font-size:42px;width:68px;height:68px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;border:2px solid var(--border);overflow:hidden;flex-shrink:0;}
+.pf-edit-cur-av img{width:100%;height:100%;object-fit:cover;}
+.pf-emoji-grid{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px;max-height:130px;overflow-y:auto;padding:2px;}
+.pf-emoji-btn{font-size:22px;padding:6px;border-radius:7px;border:2px solid transparent;cursor:pointer;background:none;transition:.1s;line-height:1;min-width:36px;text-align:center;}
+.pf-emoji-btn:hover,.pf-emoji-btn.active{border-color:var(--navy);background:#eef2ff;}
+.pf-edit-field{margin-bottom:12px;}
+.pf-edit-field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.pf-edit-field input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;transition:.2s;}
+.pf-edit-field input:focus{border-color:var(--navy2);}
+.pf-pw-toggle{display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;padding:4px 0;}
+.pf-pw-toggle input[type=checkbox]{width:16px;height:16px;cursor:pointer;}
+.pf-pw-toggle span{font-size:13px;color:var(--text);}
+.pf-edit-err{color:#e53e3e;font-size:12px;min-height:16px;margin-bottom:6px;}
+.pf-edit-btns{display:flex;gap:8px;margin-top:4px;}
+.pf-edit-btn-save{flex:1;padding:10px;border-radius:8px;border:none;background:var(--navy);color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
+.pf-edit-btn-save:hover{background:var(--navy2);}
+.pf-edit-btn-cancel{flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-size:13px;cursor:pointer;}
+.pf-upload-lbl{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:6px;border:1.5px solid var(--border);font-size:12px;cursor:pointer;color:var(--text);transition:.15s;white-space:nowrap;}
+.pf-upload-lbl:hover{background:#f1f5f9;}
+/* Header profile badge */
+.pf-badge{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 8px;border-radius:8px;transition:background .15s;}
+.pf-badge:hover{background:rgba(255,255,255,.1);}
+.pf-badge-av{font-size:18px;width:28px;height:28px;border-radius:6px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+.pf-badge-av img{width:100%;height:100%;object-fit:cover;}
+.pf-badge-name{font-size:12px;color:rgba(255,255,255,.85);font-weight:600;}
+.pf-switch-btn{padding:5px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;margin-left:6px;transition:.15s;font-family:inherit;}
+.pf-switch-btn:hover{background:rgba(245,166,35,.15);border-color:rgba(245,166,35,.4);color:var(--gold);}
+@media(max-width:639px){
+  .pf-title{font-size:18px;margin:10px 0 20px;}
+  .pf-grid{gap:10px;}
+  .pf-avatar{width:82px;height:82px;font-size:36px;}
+  .pf-card{padding:10px;min-width:80px;}
+  .pf-name{font-size:12px;max-width:90px;}
+}
+@media(max-width:480px){
+  .pf-avatar{width:70px;height:70px;font-size:30px;}
+  .pf-card{padding:8px;min-width:68px;}
+  .pf-title{font-size:16px;}
+  .pf-grid{gap:8px;}
+  .pf-pw-inp{font-size:16px!important;}
+}
 </style>
 </head>
 <body>
@@ -515,6 +564,10 @@ body {
       <span class="nav-icon">🚦</span>
       <span>Fleet View</span>
     </a>
+    <a class="nav-item" href="./attendance/index.html">
+      <span class="nav-icon">🕐</span>
+      <span>เช็คชื่อเข้างาน</span>
+    </a>
     <a class="nav-item" href="./help.html">
       <span class="nav-icon">📖</span>
       <span>คู่มือการใช้งาน</span>
@@ -534,11 +587,12 @@ body {
     </div>
     <div class="tb-right">
       <span class="tb-badge">ระบบบริหารจัดการ</span>
-      <div class="tb-user" onclick="openChangePw()" title="เปลี่ยนรหัสผ่าน" style="cursor:pointer;">
-        <div class="tb-avatar">👤</div>
-        <span>TARARIN 999</span>
+      <div class="pf-badge" title="โปรไฟล์ปัจจุบัน">
+        <div class="pf-badge-av" id="hdr-pf-av"></div>
+        <span class="pf-badge-name" id="hdr-pf-name">—</span>
       </div>
-      <button class="logout-btn" onclick="doLogout()">🚪 ออกจากระบบ</button>
+      <button class="pf-switch-btn" onclick="openCurrentPfEdit()">✏️ แก้ไขโปรไฟล์</button>
+      <button class="pf-switch-btn" onclick="switchProfile()">🔄 เปลี่ยนโปรไฟล์</button>
     </div>
   </header>
 
@@ -598,6 +652,15 @@ body {
           <div class="card-sub-bar">FLEET VIEW</div>
         </a>
 
+        <!-- ── Attendance ── -->
+        <a class="portal-card" href="./attendance/index.html">
+          <div class="card-icon-area">
+            <div class="card-icon-circle">🕐</div>
+          </div>
+          <div class="card-title">เช็คชื่อ<br>เข้าทำงาน</div>
+          <div class="card-sub-bar">ATTENDANCE</div>
+        </a>
+
         <!-- ── Help ── -->
         <a class="portal-card" href="./help.html">
           <div class="card-icon-area">
@@ -630,58 +693,63 @@ body {
 
 </div>
 
-<!-- ══ Login Overlay ════════════════════════════════════════════════════════ -->
-<div id="login-overlay">
-  <div class="login-box">
-    <div class="login-logo"><img src="./TRR999logo.png" alt="TRR999"></div>
-    <div class="login-brand">TARARIN 999</div>
-    <div class="login-brand-sub">ธรารินทร์ 999 ขนส่ง จำกัด</div>
-
-    <!-- Login form -->
-    <div id="login-form">
-      <div class="login-mode-title">🔐 เข้าสู่ระบบ</div>
-      <div class="login-field">
-        <input type="password" id="login-pw" placeholder="รหัสผ่าน" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-      </div>
-      <div id="login-err" class="login-err"></div>
-      <button class="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+<!-- ══ Profile Picker Overlay ═══════════════════════════════════════════ -->
+<div id="profile-overlay">
+  <!-- Profile grid -->
+  <div id="pf-grid-box" style="display:flex;flex-direction:column;align-items:center;width:100%;">
+    <div class="pf-brand">
+      <div class="pf-brand-logo"><img src="./TRR999logo.png" alt="TRR999"></div>
+      <div class="pf-brand-name">TARARIN 999</div>
     </div>
-
-    <!-- First-time setup form -->
-    <div id="setup-form" style="display:none;">
-      <div class="login-mode-title">🔑 ตั้งรหัสผ่านครั้งแรก</div>
-      <div class="login-field">
-        <input type="password" id="setup-pw" placeholder="รหัสผ่านใหม่" onkeydown="if(event.key==='Enter')doSetup()">
-      </div>
-      <div class="login-field">
-        <input type="password" id="setup-pw2" placeholder="ยืนยันรหัสผ่าน" onkeydown="if(event.key==='Enter')doSetup()">
-      </div>
-      <div id="setup-err" class="login-err"></div>
-      <button class="login-btn" onclick="doSetup()">ตั้งรหัสผ่าน</button>
-    </div>
+    <div class="pf-title" id="pf-title-txt">ใครกำลังใช้งาน?</div>
+    <div class="pf-grid" id="pf-grid"></div>
+  </div>
+  <!-- Password prompt -->
+  <div id="pf-pw-box">
+    <div class="pf-pw-avatar" id="pf-pw-av"></div>
+    <div class="pf-pw-name" id="pf-pw-name"></div>
+    <input type="password" class="pf-pw-inp" id="pf-pw-inp" placeholder="รหัส 4 หลัก" autocomplete="current-password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" onkeydown="if(event.key==='Enter')verifyProfilePw()" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
+    <div class="pf-pw-err" id="pf-pw-err"></div>
+    <button class="pf-pw-btn" onclick="verifyProfilePw()">เข้าสู่ระบบ</button>
+    <button class="pf-pw-back" onclick="showProfileGrid()">← กลับเลือกโปรไฟล์</button>
   </div>
 </div>
 
-<!-- ══ Change Password Modal ═══════════════════════════════════════════════ -->
-<div id="changepw-modal" onclick="if(event.target===this)closeChangePw()">
-  <div class="changepw-box">
-    <div class="changepw-title">🔑 เปลี่ยนรหัสผ่าน</div>
-    <div class="changepw-field">
-      <label>รหัสผู้ดูแลระบบ</label>
-      <input type="password" id="changepw-admin" placeholder="รหัสผู้ดูแล">
+<!-- ══ Profile Edit Modal ══════════════════════════════════════════════════ -->
+<div id="pf-edit-modal" onclick="if(event.target===this)closePfEdit()">
+  <div class="pf-edit-box">
+    <div class="pf-edit-title" id="pf-edit-title">แก้ไขโปรไฟล์</div>
+    <div class="pf-edit-cur-row">
+      <div class="pf-edit-cur-av" id="pf-edit-cur-av"></div>
+      <div>
+        <label class="pf-upload-lbl" for="pf-photo-inp">📷 อัปโหลดรูป</label>
+        <input type="file" id="pf-photo-inp" accept="image/*" style="display:none" onchange="handlePfPhoto(this)">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">หรือเลือก Emoji ด้านล่าง</div>
+      </div>
     </div>
-    <div class="changepw-field">
-      <label>รหัสผ่านใหม่</label>
-      <input type="password" id="changepw-new" placeholder="รหัสผ่านใหม่">
+    <div class="pf-emoji-grid" id="pf-emoji-grid"></div>
+    <div class="pf-edit-field">
+      <label>ชื่อโปรไฟล์</label>
+      <input type="text" id="pf-edit-name" placeholder="ชื่อที่แสดง" maxlength="20">
     </div>
-    <div class="changepw-field">
-      <label>ยืนยันรหัสผ่านใหม่</label>
-      <input type="password" id="changepw-confirm" placeholder="ยืนยันรหัสผ่าน" onkeydown="if(event.key==='Enter')doChangePw()">
+    <label class="pf-pw-toggle">
+      <input type="checkbox" id="pf-has-pw" onchange="togglePfPwFields()">
+      <span>ตั้งรหัสผ่าน (ไม่บังคับ)</span>
+    </label>
+    <div id="pf-pw-fields" style="display:none;">
+      <div class="pf-edit-field">
+        <label>รหัสผ่านใหม่ (ตัวเลข 4 หลัก)</label>
+        <input type="password" id="pf-edit-pw" placeholder="0000" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
+      </div>
+      <div class="pf-edit-field">
+        <label>ยืนยันรหัสผ่าน</label>
+        <input type="password" id="pf-edit-pw2" placeholder="0000" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
+      </div>
     </div>
-    <div id="changepw-err" class="changepw-err"></div>
-    <div class="changepw-btns">
-      <button class="login-btn" style="background:var(--navy);color:#fff;" onclick="doChangePw()">เปลี่ยนรหัสผ่าน</button>
-      <button class="login-btn" style="background:#e2e8f0;color:var(--text);" onclick="closeChangePw()">ยกเลิก</button>
+    <div class="pf-edit-err" id="pf-edit-err"></div>
+    <div class="pf-edit-btns">
+      <button class="pf-edit-btn-save" onclick="savePfEdit()">💾 บันทึก</button>
+      <button class="pf-edit-btn-cancel" onclick="closePfEdit()">ยกเลิก</button>
     </div>
   </div>
 </div>
@@ -719,107 +787,217 @@ body {
 
 
 <script>
-// ══ Auth ══════════════════════════════════════════════════════════════════
-var ADMIN_CODE = '092615';
-var PW_KEY     = 'trr_pw_hash';
-var SES_KEY    = 'trr_session';
+// ══ Profile-based Auth (Netflix-style) ═══════════════════════════════════
+var PROFILES_KEY  = 'portal_profiles';
+var ACTIVE_PF_KEY = 'portal_active_profile';
+// Legacy compat: sub-pages still check trr_pw_hash===trr_session
+var PW_KEY        = 'trr_pw_hash';
+var SES_KEY       = 'trr_session';
+var LEGACY_TOKEN  = '__pf_v2__';
+
+var PF_EMOJIS = ['👷','🔧','🚛','⛽','👔','👩‍💼','🏢','💼','🎯','📊','🔑','⚙️','🌟','🎖️','🏆','👨‍💼','🚗','🛻','🧑‍🔧','👩‍🔧'];
+var DEFAULT_PROFILES = [
+  {id:'emp1',name:'พนักงาน 1',avatar:'👷',avatarImg:null,pwHash:null},
+  {id:'emp2',name:'พนักงาน 2',avatar:'🔧',avatarImg:null,pwHash:null},
+  {id:'emp3',name:'พนักงาน 3',avatar:'🚛',avatarImg:null,pwHash:null},
+  {id:'emp4',name:'พนักงาน 4',avatar:'⛽',avatarImg:null,pwHash:null},
+  {id:'exec',name:'ผู้บริหาร', avatar:'👔',avatarImg:null,pwHash:null}
+];
+var _pfEditId=null,_pfEditMode=false,_pfSelProfile=null,_pfEditAvatarImg=null;
 
 function hashPw(pw){
-  // simple deterministic hash (not cryptographic — local file use)
-  var s='TRR999:'+pw+':tararin';
-  var h=0;
+  var s='TRR999:'+pw+':tararin';var h=0;
   for(var i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;}
   return h.toString(16)+'::'+btoa(unescape(encodeURIComponent(s))).slice(0,24);
 }
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-function checkAuth(){
-  var pwHash=localStorage.getItem(PW_KEY);
-  var session=localStorage.getItem(SES_KEY);
-  if(!pwHash){
-    // First time — show setup form
-    document.getElementById('login-form').style.display='none';
-    document.getElementById('setup-form').style.display='block';
-    document.getElementById('login-overlay').style.display='flex';
-    return;
-  }
-  if(session===pwHash){
-    // Already logged in on this device
-    document.getElementById('login-overlay').style.display='none';
-    return;
-  }
-  // Need to login
-  document.getElementById('login-overlay').style.display='flex';
+function loadProfiles(){try{var r=localStorage.getItem(PROFILES_KEY);if(r){var p=JSON.parse(r);if(p&&p.length)return p;}}catch(e){}return null;}
+function saveProfiles(p){try{localStorage.setItem(PROFILES_KEY,JSON.stringify(p));}catch(e){}}
+function getProfiles(){var p=loadProfiles();if(!p){p=DEFAULT_PROFILES.map(function(d){return Object.assign({},d);});saveProfiles(p);}return p;}
+function getActiveProfile(){
+  var id=localStorage.getItem(ACTIVE_PF_KEY);if(!id)return null;
+  return getProfiles().find(function(p){return p.id===id;})||null;
 }
 
-function afterLogin(){
-  // Redirect back if came from a sub-page
-  var redir='';
-  try{redir=sessionStorage.getItem('trr_redirect')||'';}catch(e){}
-  if(redir&&redir.indexOf('index.html')===-1&&redir!==location.href){
-    try{sessionStorage.removeItem('trr_redirect');}catch(e){}
-    location.replace(redir);return;
-  }
-  document.getElementById('login-overlay').style.display='none';
+function avHtml(pf,size){
+  if(pf.avatarImg)return '<img src="'+pf.avatarImg+'" style="width:100%;height:100%;object-fit:cover;" alt="">';
+  return '<span style="font-size:'+(size*0.46)+'px;line-height:1">'+pf.avatar+'</span>';
 }
 
-function doLogin(){
-  var pw=(document.getElementById('login-pw').value||'').trim();
-  if(!pw){document.getElementById('login-err').textContent='กรุณาใส่รหัสผ่าน';return;}
-  var pwHash=localStorage.getItem(PW_KEY);
-  if(hashPw(pw)===pwHash){
-    localStorage.setItem(SES_KEY,pwHash);
-    document.getElementById('login-pw').value='';
-    document.getElementById('login-err').textContent='';
-    afterLogin();
+function renderProfilePicker(){
+  var profs=getProfiles();
+  document.getElementById('pf-grid').innerHTML=profs.map(function(pf){
+    return '<div class="pf-card" tabindex="0" id="pfc-'+pf.id+'" '
+      +'onclick="selectProfile(\''+pf.id+'\')" '
+      +'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectProfile(\''+pf.id+'\')}">'
+      +'<div class="pf-avatar-wrap">'
+      +'<div class="pf-avatar">'+avHtml(pf,108)+'</div>'
+      +'<div class="pf-edit-badge">✏️</div>'
+      +'</div>'
+      +'<div class="pf-name">'+escHtml(pf.name)+(pf.pwHash?' 🔒':'')+'</div>'
+      +'</div>';
+  }).join('');
+  _pfEditMode=false;
+  document.getElementById('pf-title-txt').textContent='ใครกำลังใช้งาน?';
+}
+
+function toggleEditMode(){
+  _pfEditMode=!_pfEditMode;
+  document.querySelectorAll('.pf-card').forEach(function(c){c.classList.toggle('pf-edit-mode',_pfEditMode);});
+  document.getElementById('pf-title-txt').textContent=_pfEditMode?'เลือกโปรไฟล์ที่ต้องการแก้ไข':'ใครกำลังใช้งาน?';
+}
+
+function selectProfile(id){
+  if(_pfEditMode){openPfEdit(id);return;}
+  var pf=getProfiles().find(function(p){return p.id===id;});
+  if(!pf)return;
+  if(pf.pwHash){_pfSelProfile=pf;showPwPrompt(pf);}
+  else{enterPortal(pf);}
+}
+
+function showPwPrompt(pf){
+  document.getElementById('pf-grid-box').style.display='none';
+  var box=document.getElementById('pf-pw-box');box.style.display='flex';
+  document.getElementById('pf-pw-av').innerHTML=avHtml(pf,80);
+  document.getElementById('pf-pw-name').textContent=pf.name;
+  document.getElementById('pf-pw-inp').value='';
+  document.getElementById('pf-pw-err').textContent='';
+  setTimeout(function(){document.getElementById('pf-pw-inp').focus();},80);
+}
+function showProfileGrid(){
+  document.getElementById('pf-pw-box').style.display='none';
+  document.getElementById('pf-grid-box').style.display='flex';
+  _pfSelProfile=null;
+}
+function verifyProfilePw(){
+  var pw=(document.getElementById('pf-pw-inp').value||'').trim();
+  if(!pw){document.getElementById('pf-pw-err').textContent='กรุณาใส่รหัสผ่าน';return;}
+  if(!_pfSelProfile)return;
+  if(hashPw(pw)===_pfSelProfile.pwHash){
+    document.getElementById('pf-pw-inp').value='';
+    document.getElementById('pf-pw-err').textContent='';
+    enterPortal(_pfSelProfile);
   } else {
-    document.getElementById('login-err').textContent='รหัสผ่านไม่ถูกต้อง';
-    document.getElementById('login-pw').value='';
-    document.getElementById('login-pw').focus();
+    document.getElementById('pf-pw-err').textContent='รหัสผ่านไม่ถูกต้อง';
+    document.getElementById('pf-pw-inp').value='';
+    document.getElementById('pf-pw-inp').focus();
   }
 }
 
-function doSetup(){
-  var pw=(document.getElementById('setup-pw').value||'').trim();
-  var pw2=(document.getElementById('setup-pw2').value||'').trim();
-  if(pw.length<4){document.getElementById('setup-err').textContent='รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร';return;}
-  if(pw!==pw2){document.getElementById('setup-err').textContent='รหัสผ่านไม่ตรงกัน';return;}
-  var h=hashPw(pw);
-  localStorage.setItem(PW_KEY,h);
-  localStorage.setItem(SES_KEY,h);
-  afterLogin();
+function enterPortal(pf){
+  localStorage.setItem(ACTIVE_PF_KEY,pf.id);
+  localStorage.setItem(PW_KEY,LEGACY_TOKEN);
+  localStorage.setItem(SES_KEY,LEGACY_TOKEN);
+  document.getElementById('profile-overlay').style.display='none';
+  updateHeaderProfile(pf);
+  var redir='';try{redir=sessionStorage.getItem('trr_redirect')||'';}catch(e){}
+  if(redir&&redir.indexOf('index.html')===-1&&redir!==location.href){
+    try{sessionStorage.removeItem('trr_redirect');}catch(e){}location.replace(redir);
+  }
 }
-
-function doLogout(){
+function updateHeaderProfile(pf){
+  var av=document.getElementById('hdr-pf-av');
+  var nm=document.getElementById('hdr-pf-name');
+  if(av)av.innerHTML=avHtml(pf,28);
+  if(nm)nm.textContent=pf.name;
+}
+function switchProfile(){
+  localStorage.removeItem(ACTIVE_PF_KEY);
   localStorage.removeItem(SES_KEY);
-  location.reload();
+  renderProfilePicker();
+  showProfileGrid();
+  document.getElementById('profile-overlay').style.display='flex';
+}
+function openCurrentPfEdit(){
+  var id=localStorage.getItem(ACTIVE_PF_KEY);
+  if(id)openPfEdit(id);
+}
+function checkAuth(){
+  var pf=getActiveProfile();
+  if(pf){
+    localStorage.setItem(PW_KEY,LEGACY_TOKEN);localStorage.setItem(SES_KEY,LEGACY_TOKEN);
+    document.getElementById('profile-overlay').style.display='none';
+    updateHeaderProfile(pf);return;
+  }
+  renderProfilePicker();
+  document.getElementById('profile-overlay').style.display='flex';
 }
 
-function openChangePw(){
-  document.getElementById('changepw-admin').value='';
-  document.getElementById('changepw-new').value='';
-  document.getElementById('changepw-confirm').value='';
-  document.getElementById('changepw-err').textContent='';
-  document.getElementById('changepw-modal').classList.add('show');
-  setTimeout(function(){document.getElementById('changepw-admin').focus();},80);
+// ── Profile Edit ──────────────────────────────────────────────────────────
+function openPfEdit(id){
+  var pf=getProfiles().find(function(p){return p.id===id;});
+  if(!pf)return;
+  _pfEditId=id;_pfEditAvatarImg=pf.avatarImg||null;
+  document.getElementById('pf-edit-cur-av').innerHTML=avHtml(pf,68);
+  // Emoji grid
+  document.getElementById('pf-emoji-grid').innerHTML=PF_EMOJIS.map(function(e){
+    return '<button class="pf-emoji-btn'+(e===pf.avatar&&!_pfEditAvatarImg?' active':'')+'" onclick="setPfEmoji(\''+e+'\')">'+e+'</button>';
+  }).join('');
+  document.getElementById('pf-edit-name').value=pf.name;
+  var hasPw=!!pf.pwHash;
+  document.getElementById('pf-has-pw').checked=hasPw;
+  document.getElementById('pf-pw-fields').style.display=hasPw?'block':'none';
+  document.getElementById('pf-edit-pw').value='';document.getElementById('pf-edit-pw2').value='';
+  document.getElementById('pf-edit-err').textContent='';
+  document.getElementById('pf-edit-title').textContent='แก้ไขโปรไฟล์ — '+pf.name;
+  document.getElementById('pf-edit-modal').classList.add('show');
 }
-function closeChangePw(){
-  document.getElementById('changepw-modal').classList.remove('show');
+function setPfEmoji(e){
+  _pfEditAvatarImg=null;
+  document.querySelectorAll('.pf-emoji-btn').forEach(function(b){b.classList.remove('active');if(b.textContent===e)b.classList.add('active');});
+  document.getElementById('pf-edit-cur-av').innerHTML='<span style="font-size:42px;line-height:1">'+e+'</span>';
 }
-
-function doChangePw(){
-  var admin=(document.getElementById('changepw-admin').value||'').trim();
-  var newPw=(document.getElementById('changepw-new').value||'').trim();
-  var confirm=(document.getElementById('changepw-confirm').value||'').trim();
-  var errEl=document.getElementById('changepw-err');
-  if(admin!==ADMIN_CODE){errEl.textContent='รหัสผู้ดูแลไม่ถูกต้อง';return;}
-  if(newPw.length<4){errEl.textContent='รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร';return;}
-  if(newPw!==confirm){errEl.textContent='รหัสผ่านใหม่ไม่ตรงกัน';return;}
-  var h=hashPw(newPw);
-  localStorage.setItem(PW_KEY,h);
-  localStorage.removeItem(SES_KEY); // force re-login on all devices
-  closeChangePw();
-  alert('เปลี่ยนรหัสผ่านสำเร็จ\nกรุณาเข้าสู่ระบบใหม่');
-  doLogout();
+function handlePfPhoto(inp){
+  if(!inp.files||!inp.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    _pfEditAvatarImg=ev.target.result;
+    document.getElementById('pf-edit-cur-av').innerHTML='<img src="'+_pfEditAvatarImg+'" style="width:100%;height:100%;object-fit:cover;">';
+    document.querySelectorAll('.pf-emoji-btn').forEach(function(b){b.classList.remove('active');});
+  };
+  reader.readAsDataURL(inp.files[0]);inp.value='';
+}
+function togglePfPwFields(){
+  var show=document.getElementById('pf-has-pw').checked;
+  document.getElementById('pf-pw-fields').style.display=show?'block':'none';
+  if(!show){document.getElementById('pf-edit-pw').value='';document.getElementById('pf-edit-pw2').value='';}
+}
+function savePfEdit(){
+  var errEl=document.getElementById('pf-edit-err');errEl.textContent='';
+  var name=(document.getElementById('pf-edit-name').value||'').trim();
+  if(!name){errEl.textContent='กรุณาใส่ชื่อ';return;}
+  var hasPw=document.getElementById('pf-has-pw').checked;
+  var pw=(document.getElementById('pf-edit-pw').value||'').trim();
+  var pw2=(document.getElementById('pf-edit-pw2').value||'').trim();
+  var profs=getProfiles();
+  var pf=profs.find(function(p){return p.id===_pfEditId;});
+  if(!pf){closePfEdit();return;}
+  pf.name=name;
+  var activeEmoji=null;
+  document.querySelectorAll('.pf-emoji-btn.active').forEach(function(b){activeEmoji=b.textContent;});
+  if(_pfEditAvatarImg){pf.avatarImg=_pfEditAvatarImg;}
+  else{pf.avatarImg=null;if(activeEmoji)pf.avatar=activeEmoji;}
+  if(!hasPw){pf.pwHash=null;}
+  else{
+    if(pw){
+      if(!/^\d{4}$/.test(pw)){errEl.textContent='รหัสผ่านต้องเป็นตัวเลข 4 หลักเท่านั้น';return;}
+      if(pw!==pw2){errEl.textContent='รหัสผ่านไม่ตรงกัน';return;}
+      pf.pwHash=hashPw(pw);
+    }
+    // no pw entered = keep existing
+  }
+  saveProfiles(profs);
+  // Update header if editing active profile
+  var activeId=localStorage.getItem(ACTIVE_PF_KEY);
+  if(activeId===_pfEditId)updateHeaderProfile(pf);
+  closePfEdit();
+  renderProfilePicker(); // always refresh so picker shows updated name/avatar
+}
+function closePfEdit(){
+  document.getElementById('pf-edit-modal').classList.remove('show');
+  _pfEditId=null;_pfEditAvatarImg=null;
+  document.getElementById('pf-photo-inp').value='';
 }
 
 // Run auth check on load

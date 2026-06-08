@@ -307,7 +307,7 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
   /* Board cards: single column on very small phones */
   .board-grid{grid-template-columns:1fr}
   /* Type filter chips: scrollable row */
-  #board-type-bar,#latest-type-bar{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  #board-type-chips,#latest-type-bar{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:4px}
   .type-chip{white-space:nowrap;flex-shrink:0}
   /* KPI row: 2 columns */
   .kpi-row{display:grid;grid-template-columns:1fr 1fr}
@@ -378,7 +378,7 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
     <div class="month-pills" id="sb-months"></div>
   </div>
   <div class="sb-foot">
-    <a href="../index.html" style="display:block;text-align:center;color:rgba(255,255,255,.45);font-size:11px;margin-bottom:6px;text-decoration:none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">← User Portal</a>
+    <a href="../index.html" style="display:flex;align-items:center;justify-content:center;gap:6px;color:rgba(255,255,255,.55);font-size:12px;font-weight:600;margin-bottom:8px;text-decoration:none;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);transition:background .15s,color .15s;min-height:44px;" onmouseover="this.style.background='rgba(245,166,35,.12)';this.style.color='#F5A623'" onmouseout="this.style.background='';this.style.color='rgba(255,255,255,.55)'">🏠 User Portal</a>
     <div id="sb-updated"></div>
     <button class="btn-sm" style="margin-top:6px;width:100%;text-align:center;" onclick="reloadAll()">🔄 รีโหลด</button>
   </div>
@@ -905,6 +905,7 @@ function saveStatus(){
     localStorage.setItem('fleet_status_date',todayStr()); // mark today
   }catch(e){}
 }
+var _resetTime=0; // epoch ms when daily reset last occurred
 function resetDailyStatus(){
   var stored=localStorage.getItem('fleet_status_date')||'';
   if(stored===todayStr())return; // same day — skip
@@ -915,6 +916,7 @@ function resetDailyStatus(){
       if(gasUrl)syncToGAS(p,'',noteMap[p]||''); // push reset to GAS so other devices see it
     }
   });
+  _resetTime=Date.now(); // mark when reset happened
   saveStatus();
 }
 function saveNotes() {try{localStorage.setItem('fleet_notes', JSON.stringify(noteMap)); }catch(e){}}
@@ -939,7 +941,6 @@ function setStatus(plate, val){
 }
 function setNote(plate, val){
   noteMap[plate]=val;saveNotes();
-  if(gasUrl)syncToGAS(plate,statusMap[plate]||'',val);
   if(gasUrl)syncToGAS(plate,statusMap[plate]||'',val);
 }
 
@@ -1010,10 +1011,11 @@ function loadConfigFromGAS(onDone){
   window[cb]=function(data){
     cleanup();
     if(data&&data.ok){
-      if(data.vehicleTypeMap){try{vehicleTypeMap=JSON.parse(data.vehicleTypeMap);localStorage.setItem('fleet_vehicle_type_map',data.vehicleTypeMap);}catch(e){}}
-      if(data.customTypes){try{customTypes=JSON.parse(data.customTypes);localStorage.setItem('fleet_custom_types',data.customTypes);}catch(e){}}
-      if(data.plateOrder){try{plateOrder=JSON.parse(data.plateOrder);localStorage.setItem('fleet_plate_order',data.plateOrder);}catch(e){}}
-      if(data.hiddenPlates){try{hiddenPlates=JSON.parse(data.hiddenPlates);localStorage.setItem('fleet_hidden_plates',data.hiddenPlates);}catch(e){}}
+      function safeParse(v){if(!v)return null;if(typeof v==='object')return v;try{return JSON.parse(v);}catch(e){return null;}}
+      var vtm=safeParse(data.vehicleTypeMap);if(vtm){vehicleTypeMap=vtm;try{localStorage.setItem('fleet_vehicle_type_map',JSON.stringify(vtm));}catch(e){}}
+      var ct=safeParse(data.customTypes);if(ct){customTypes=ct;try{localStorage.setItem('fleet_custom_types',JSON.stringify(ct));}catch(e){}}
+      var po=safeParse(data.plateOrder);if(po){plateOrder=po;try{localStorage.setItem('fleet_plate_order',JSON.stringify(po));}catch(e){}}
+      var hp=safeParse(data.hiddenPlates);if(hp){hiddenPlates=hp;try{localStorage.setItem('fleet_hidden_plates',JSON.stringify(hp));}catch(e){}}
     }
     if(onDone)onDone();
   };
@@ -1032,9 +1034,14 @@ function autoSyncStatusFromGAS(){
     cleanup();
     if(!data)return;
     var changed=false;
+    // If reset happened less than 90s ago, GAS may still have stale ready/busy → skip them
+    var justReset=(_resetTime>0&&(Date.now()-_resetTime)<90000);
     Object.keys(data).forEach(function(plate){
       var st=data[plate].status;
-      if(st){statusMap[plate]=st;changed=true;}
+      if(st){
+        if(justReset&&(st==='ready'||st==='busy')){/* skip stale GAS status after reset */}
+        else{statusMap[plate]=st;changed=true;}
+      }
       if(data[plate].note!==undefined){noteMap[plate]=data[plate].note;changed=true;}
     });
     if(changed){saveStatus();saveNotes();renderAll();renderBoard();}
@@ -1948,9 +1955,10 @@ function renderStmt(){
   // Per-plate aggregation
   var byPlate={};
   stmtTx.forEach(function(t){
-    if(!byPlate[t.np])byPlate[t.np]={plate:t.plate,np:t.np,litres:0,amount:0,fills:0,km:0,drivers:{},brand:t.brand||'',product:t.product||''};
+    if(!byPlate[t.np])byPlate[t.np]={plate:t.plate,np:t.np,litres:0,amount:0,fills:0,km:0,drivers:{},brand:t.brand||'',products:{}};
     byPlate[t.np].litres+=t.litres;byPlate[t.np].amount+=t.amount;byPlate[t.np].fills++;
     if(t.driver)byPlate[t.np].drivers[t.driver]=1;
+    if(t.product)byPlate[t.np].products[t.product]=1;
   });
 
   // Enrich with km from trips (same month)
@@ -1965,6 +1973,7 @@ function renderStmt(){
     p.kmL=p.litres>0&&p.km>0?p.km/p.litres:0;
     p.bKm=p.km>0?p.amount/p.km:0;
     p.driverList=Object.keys(p.drivers).filter(Boolean).join(', ');
+    p.productList=Object.keys(p.products).filter(Boolean).join(', ');
   });
 
   // Stations aggregation — keep location from first seen
@@ -2019,7 +2028,7 @@ function renderStmt(){
     +'<div id="stmt-tab-plate" class="stmt-section" style="display:'+(stmtActiveTab==='plate'?'block':'none')+';">'
     +'<div class="stmt-section-hdr">🚗 สรุปน้ำมันรายคัน — '+mlbl+'</div>'
     +'<div class="stmt-section-body"><div class="tbl-wrap"><table class="dt">'
-    +'<thead><tr><th>ทะเบียน</th>'+(hasRich?'<th>คนขับ</th><th>ยี่ห้อ</th>':'')+'<th class="num">ครั้ง</th><th class="num">ลิตร</th><th class="num">ยอด (฿)</th><th class="num">฿/ลิตร</th><th class="num">km (trips)</th><th class="num">km/ลิตร</th><th class="num">฿/km</th></tr></thead>'
+    +'<thead><tr><th>ทะเบียน</th>'+(hasRich?'<th>คนขับ</th><th>ยี่ห้อ</th><th>ประเภทน้ำมัน</th>':'')+'<th class="num">ครั้ง</th><th class="num">ลิตร</th><th class="num">ยอด (฿)</th><th class="num">฿/ลิตร</th><th class="num">km (trips)</th><th class="num">km/ลิตร</th><th class="num">฿/km</th></tr></thead>'
     +'<tbody>'+plateRows.map(function(p){
       var ppl=p.litres>0?(p.amount/p.litres).toFixed(2):'—';
       var kmL=p.kmL>0?p.kmL.toFixed(2):'—';
@@ -2029,7 +2038,7 @@ function renderStmt(){
       var noMatch=p.km===0;
       return '<tr style="cursor:pointer;" onclick="openStmtPlateDetail(\''+p.np+'\')">'
         +'<td><span class="plate">'+p.plate+'</span>'+(noMatch?'<span title="ไม่พบทะเบียนนี้ใน Trip Sheet — km/ลิตร คำนวณไม่ได้" style="margin-left:4px;font-size:10px;color:#b45309;cursor:help;">⚠️</span>':'')+'</td>'
-        +(hasRich?'<td style="font-size:11px;">'+(p.driverList||'—')+'</td><td style="font-size:11px;color:var(--text2);">'+(p.brand||'—')+'</td>':'')
+        +(hasRich?'<td style="font-size:11px;">'+(p.driverList||'—')+'</td><td style="font-size:11px;color:var(--text2);">'+(p.brand||'—')+'</td><td style="font-size:11px;color:#0369a1;">'+(p.productList||'—')+'</td>':'')
         +'<td class="num">'+p.fills+'</td>'
         +'<td class="num">'+p.litres.toLocaleString(undefined,{maximumFractionDigits:1})+'</td>'
         +'<td class="num">฿'+Math.round(p.amount).toLocaleString()+'</td>'
@@ -2492,12 +2501,13 @@ function openStmtPlateDetail(np){
     +'</div><button class="bdm-close" onclick="closeStmtDay()">✕</button></div>'
     +(hasRich?'<div style="font-size:11px;color:var(--text2);margin-bottom:10px;">คลิกสถานีเพื่อดูรายการที่สถานีนั้น</div>':'')
     +'<div class="tbl-wrap"><table class="dt" style="font-size:12px;">'
-    +'<thead><tr><th>วันที่</th><th>เวลา</th><th>สถานี</th>'+(hasRich?'<th>จังหวัด</th>':'')+'<th class="num">ลิตร</th><th class="num">฿/ลิตร</th><th class="num">ยอด (฿)</th></tr></thead>'
+    +'<thead><tr><th>วันที่</th><th>เวลา</th><th>ประเภทน้ำมัน</th><th>สถานี</th>'+(hasRich?'<th>จังหวัด</th>':'')+'<th class="num">ลิตร</th><th class="num">฿/ลิตร</th><th class="num">ยอด (฿)</th></tr></thead>'
     +'<tbody>'+txs.map(function(t){
       var es=t.station.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
       return '<tr style="cursor:pointer;" onclick="openStmtStnDetail(\''+es+'\')">'
-        +'<td>'+t.dateStr+'</td>'
+        +'<td><b>'+t.dateStr+'</b></td>'
         +'<td style="color:var(--text2);">'+t.time+'</td>'
+        +'<td style="font-size:11px;color:#0369a1;font-weight:600;">'+(t.product||'—')+'</td>'
         +'<td style="font-size:11px;">'+t.station+'</td>'
         +(hasRich?'<td style="font-size:11px;color:var(--text2);">'+t.province+'</td>':'')
         +'<td class="num">'+t.litres.toFixed(1)+'</td>'
@@ -2560,6 +2570,7 @@ function toggleSidebar(){document.getElementById('sidebar').classList.toggle('op
 function renderAll(){
   renderKPI();renderLatest();renderByPlate();renderByDriver();renderFuel();
   if(document.getElementById('page-analyze').classList.contains('active'))renderAnalyze();
+  if(document.getElementById('page-board').classList.contains('active'))renderBoard();
 }
 
 if(!String.prototype.padStart){String.prototype.padStart=function(len,f){var s=String(this);f=f||' ';while(s.length<len)s=f+s;return s;};}
@@ -2590,8 +2601,8 @@ var _resetJustHappened=(_preResetDate!==todayStr()); // true = new day, reset oc
 if(gasUrl){
   loadConfigFromGAS(function(){renderAll();});
   if(_resetJustHappened){
-    // Delay sync 12s so GAS receives reset-pushes first
-    setTimeout(function(){autoSyncStatusFromGAS();},12000);
+    // Delay sync 60s so GAS has time to process all reset-pushes (64 plates)
+    setTimeout(function(){autoSyncStatusFromGAS();},60000);
   } else {
     autoSyncStatusFromGAS();
   }
