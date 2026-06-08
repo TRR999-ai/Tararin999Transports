@@ -794,6 +794,61 @@ var ACTIVE_PF_KEY = 'portal_active_profile';
 var PW_KEY        = 'trr_pw_hash';
 var SES_KEY       = 'trr_session';
 var LEGACY_TOKEN  = '__pf_v2__';
+var PF_GAS_URL    = 'https://script.google.com/macros/s/AKfycby4cVxSxSzNuZUqSRmCTWf6dnGtsyQlW6mswPWx9ZHYr7a-s6sBLzhASXM51Mp2lSz1J/exec';
+
+// ── GAS profile sync ──────────────────────────────────────────────────────
+// Syncs: id, name, avatar (emoji), pwHash
+// NOT synced: avatarImg (base64 photo — too large for JSONP URL)
+function syncProfilesToGAS(profs){
+  var gasUrl=localStorage.getItem('fleet_gas_url')||PF_GAS_URL;
+  if(!gasUrl)return;
+  var slim=profs.map(function(p){return{id:p.id,name:p.name,avatar:p.avatar,pwHash:p.pwHash||null};});
+  var cb='gas_pfsave_'+Date.now();
+  var script=document.createElement('script');
+  var timer=setTimeout(function(){cleanup();},8000);
+  function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
+  window[cb]=function(){cleanup();};
+  script.onerror=function(){cleanup();};
+  script.src=gasUrl+'?callback='+cb+'&action=setConfig&key=portal_profiles&val='+encodeURIComponent(JSON.stringify(slim));
+  document.head.appendChild(script);
+}
+function loadProfilesFromGAS(onDone){
+  var gasUrl=localStorage.getItem('fleet_gas_url')||PF_GAS_URL;
+  if(!gasUrl){if(onDone)onDone();return;}
+  var cb='gas_pfload_'+Date.now();
+  var script=document.createElement('script');
+  var timer=setTimeout(function(){cleanup();if(onDone)onDone();},6000);
+  function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
+  window[cb]=function(data){
+    cleanup();
+    if(data&&data.ok&&data.portal_profiles){
+      try{
+        var remote=typeof data.portal_profiles==='object'?data.portal_profiles:JSON.parse(data.portal_profiles);
+        if(remote&&remote.length){
+          var local=getProfiles();
+          var changed=false;
+          remote.forEach(function(rp){
+            var lp=local.find(function(p){return p.id===rp.id;});
+            if(lp){
+              if(lp.name!==rp.name||(lp.avatar!==rp.avatar)||(lp.pwHash!==(rp.pwHash||null))){
+                lp.name=rp.name;lp.avatar=rp.avatar;lp.pwHash=rp.pwHash||null;
+                changed=true;
+              }
+            }
+          });
+          if(changed){
+            // save locally without re-pushing to GAS
+            try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}
+          }
+        }
+      }catch(e){}
+    }
+    if(onDone)onDone();
+  };
+  script.onerror=function(){cleanup();if(onDone)onDone();};
+  script.src=gasUrl+'?callback='+cb+'&action=getConfig';
+  document.head.appendChild(script);
+}
 
 var PF_EMOJIS = ['👷','🔧','🚛','⛽','👔','👩‍💼','🏢','💼','🎯','📊','🔑','⚙️','🌟','🎖️','🏆','👨‍💼','🚗','🛻','🧑‍🔧','👩‍🔧'];
 var DEFAULT_PROFILES = [
@@ -918,10 +973,18 @@ function checkAuth(){
   if(pf){
     localStorage.setItem(PW_KEY,LEGACY_TOKEN);localStorage.setItem(SES_KEY,LEGACY_TOKEN);
     document.getElementById('profile-overlay').style.display='none';
-    updateHeaderProfile(pf);return;
+    updateHeaderProfile(pf);
+    // Silently refresh profile data from GAS (name/emoji/pwHash may have changed on another device)
+    loadProfilesFromGAS(function(){
+      var fresh=getActiveProfile();
+      if(fresh)updateHeaderProfile(fresh);
+    });
+    return;
   }
+  // Show picker with local data immediately, then refresh from GAS
   renderProfilePicker();
   document.getElementById('profile-overlay').style.display='flex';
+  loadProfilesFromGAS(function(){renderProfilePicker();});
 }
 
 // ── Profile Edit ──────────────────────────────────────────────────────────
@@ -988,6 +1051,7 @@ function savePfEdit(){
     // no pw entered = keep existing
   }
   saveProfiles(profs);
+  syncProfilesToGAS(profs); // push name/emoji/pwHash to GAS for other devices
   // Update header if editing active profile
   var activeId=localStorage.getItem(ACTIVE_PF_KEY);
   if(activeId===_pfEditId)updateHeaderProfile(pf);
