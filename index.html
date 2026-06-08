@@ -968,14 +968,27 @@ function openCurrentPfEdit(){
   var id=localStorage.getItem(ACTIVE_PF_KEY);
   if(id)openPfEdit(id);
 }
+// Returns true if local profiles have any customization vs defaults
+function profilesAreCustomized(){
+  var local=getProfiles();
+  return DEFAULT_PROFILES.some(function(def){
+    var lp=local.find(function(p){return p.id===def.id;});
+    return lp&&(lp.name!==def.name||lp.avatar!==def.avatar||!!lp.pwHash);
+  });
+}
+
 function checkAuth(){
   var pf=getActiveProfile();
   if(pf){
     localStorage.setItem(PW_KEY,LEGACY_TOKEN);localStorage.setItem(SES_KEY,LEGACY_TOKEN);
     document.getElementById('profile-overlay').style.display='none';
     updateHeaderProfile(pf);
-    // Silently refresh profile data from GAS (name/emoji/pwHash may have changed on another device)
+    // Pull latest from GAS first, then push local only if we have customization
+    // This ensures device A (customized) keeps GAS up to date without device B (defaults) overwriting
     loadProfilesFromGAS(function(){
+      if(profilesAreCustomized()){
+        syncProfilesToGAS(getProfiles()); // push so other devices get the update
+      }
       var fresh=getActiveProfile();
       if(fresh)updateHeaderProfile(fresh);
     });
