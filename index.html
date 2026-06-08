@@ -801,6 +801,8 @@ var PF_GAS_URL    = 'https://script.google.com/macros/s/AKfycby4cVxSxSzNuZUqSRmC
 // Syncs: id, name, avatar (emoji), pwHash
 // NOT synced: avatarImg (base64 photo — too large for URL)
 var PF_VPLATE='__portal_pf_v1__';
+var PF_EDIT_TS_KEY='portal_pf_edit_ts';  // when user last edited profiles ON THIS device
+var PF_SYNC_TS_KEY='portal_pf_sync_ts';  // when we last pulled from GAS
 
 function syncProfilesToGAS(profs){
   var gasUrl=localStorage.getItem('fleet_gas_url')||PF_GAS_URL;
@@ -839,6 +841,8 @@ function loadProfilesFromGAS(onDone){
             }
           });
           if(changed)try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}
+          // Mark that we just synced from GAS — local is now up to date
+          try{localStorage.setItem(PF_SYNC_TS_KEY,Date.now().toString());}catch(e){}
         }
       }
     }catch(e){}
@@ -968,26 +972,21 @@ function openCurrentPfEdit(){
   var id=localStorage.getItem(ACTIVE_PF_KEY);
   if(id)openPfEdit(id);
 }
-// Returns true if local profiles have any customization vs defaults
-function profilesAreCustomized(){
-  var local=getProfiles();
-  return DEFAULT_PROFILES.some(function(def){
-    var lp=local.find(function(p){return p.id===def.id;});
-    return lp&&(lp.name!==def.name||lp.avatar!==def.avatar||!!lp.pwHash);
-  });
-}
-
 function checkAuth(){
   var pf=getActiveProfile();
   if(pf){
     localStorage.setItem(PW_KEY,LEGACY_TOKEN);localStorage.setItem(SES_KEY,LEGACY_TOKEN);
     document.getElementById('profile-overlay').style.display='none';
     updateHeaderProfile(pf);
-    // Pull latest from GAS first, then push local only if we have customization
-    // This ensures device A (customized) keeps GAS up to date without device B (defaults) overwriting
+    // Pull first, then only push if THIS device has unsent edits (editTs > syncTs)
+    // Prevents race condition where multiple devices overwrite each other
     loadProfilesFromGAS(function(){
-      if(profilesAreCustomized()){
-        syncProfilesToGAS(getProfiles()); // push so other devices get the update
+      var editTs=parseInt(localStorage.getItem(PF_EDIT_TS_KEY)||'0');
+      var syncTs=parseInt(localStorage.getItem(PF_SYNC_TS_KEY)||'0');
+      if(editTs>syncTs){
+        // User edited profiles on this device after the last GAS pull → push
+        syncProfilesToGAS(getProfiles());
+        try{localStorage.setItem(PF_SYNC_TS_KEY,Date.now().toString());}catch(e){}
       }
       var fresh=getActiveProfile();
       if(fresh)updateHeaderProfile(fresh);
@@ -1064,6 +1063,7 @@ function savePfEdit(){
     // no pw entered = keep existing
   }
   saveProfiles(profs);
+  try{localStorage.setItem(PF_EDIT_TS_KEY,Date.now().toString());}catch(e){} // mark explicit edit on this device
   syncProfilesToGAS(profs); // push name/emoji/pwHash to GAS for other devices
   // Update header if editing active profile
   var activeId=localStorage.getItem(ACTIVE_PF_KEY);
