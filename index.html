@@ -702,6 +702,7 @@ body {
       <div class="pf-brand-name">TARARIN 999</div>
     </div>
     <div class="pf-title" id="pf-title-txt">ใครกำลังใช้งาน?</div>
+    <div id="pf-sync-status" style="font-size:11px;color:rgba(255,255,255,0.45);min-height:16px;margin-bottom:6px;text-align:center;"></div>
     <div class="pf-grid" id="pf-grid"></div>
   </div>
   <!-- Password prompt -->
@@ -818,12 +819,14 @@ function syncProfilesToGAS(profs){
   script.src=gasUrl+'?callback='+cb+'&action=set&plate='+encodeURIComponent(PF_VPLATE)+'&status=&note='+encodeURIComponent(JSON.stringify(slim));
   document.head.appendChild(script);
 }
+function _pfSyncMsg(msg){var el=document.getElementById('pf-sync-status');if(el)el.textContent=msg;}
 function loadProfilesFromGAS(onDone){
   var gasUrl=localStorage.getItem('fleet_gas_url')||PF_GAS_URL;
   if(!gasUrl){if(onDone)onDone();return;}
+  _pfSyncMsg('🔄 กำลัง sync โปรไฟล์...');
   var cb='gas_pfload_'+Date.now();
   var script=document.createElement('script');
-  var timer=setTimeout(function(){cleanup();if(onDone)onDone();},8000);
+  var timer=setTimeout(function(){cleanup();_pfSyncMsg('⚠️ sync timeout');if(onDone)onDone();},8000);
   function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
   window[cb]=function(data){
     cleanup();
@@ -843,13 +846,22 @@ function loadProfilesFromGAS(onDone){
               lp.name=rp.name;lp.avatar=rp.avatar;lp.pwHash=rp.pwHash||null;changed=true;
             }
           });
-          if(changed)try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}
+          if(changed){
+            try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}
+            _pfSyncMsg('✅ sync แล้ว');
+          } else {
+            _pfSyncMsg('✅ ข้อมูลตรงกัน');
+          }
+        } else {
+          _pfSyncMsg('');
         }
+      } else {
+        _pfSyncMsg('⚠️ ไม่พบข้อมูลใน GAS');
       }
-    }catch(e){}
+    }catch(e){_pfSyncMsg('⚠️ parse error');}
     if(onDone)onDone();
   };
-  script.onerror=function(){cleanup();if(onDone)onDone();};
+  script.onerror=function(){cleanup();_pfSyncMsg('⚠️ GAS connect failed');if(onDone)onDone();};
   // getall returns ALL rows from Fleet_Status sheet including virtual plates
   script.src=gasUrl+'?callback='+cb+'&action=getall';
   document.head.appendChild(script);
