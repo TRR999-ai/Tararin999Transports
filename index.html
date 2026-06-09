@@ -1085,14 +1085,14 @@ function checkAuth(){
     localStorage.setItem(PW_KEY,LEGACY_TOKEN);localStorage.setItem(SES_KEY,LEGACY_TOKEN);
     document.getElementById('profile-overlay').style.display='none';
     updateHeaderProfile(pf);
-    // Pull first, then only push if THIS device has unsent edits (editTs > syncTs)
-    // Prevents race condition where multiple devices overwrite each other
-    loadProfilesFromGAS(function(){
+    // Pull from Firebase first, then push back if local edits are newer
+    fbLoadProfiles(function(fbProfs){
+      fbMergeProfiles(fbProfs);
       var editTs=parseInt(localStorage.getItem(PF_EDIT_TS_KEY)||'0');
       var syncTs=parseInt(localStorage.getItem(PF_SYNC_TS_KEY)||'0');
       if(editTs>syncTs){
-        // User edited profiles on this device after the last GAS pull → push
-        syncProfilesToGAS(getProfiles());
+        // Local edits not yet in Firebase → push all profiles
+        getProfiles().forEach(function(p){fbSaveProfile(p);});
         try{localStorage.setItem(PF_SYNC_TS_KEY,Date.now().toString());}catch(e){}
       }
       var fresh=getActiveProfile();
@@ -1100,10 +1100,9 @@ function checkAuth(){
     });
     return;
   }
-  // Show picker with local data immediately, then refresh from GAS + Firebase
+  // Show picker with local data immediately, then refresh from Firebase
   renderProfilePicker();
   document.getElementById('profile-overlay').style.display='flex';
-  loadProfilesFromGAS(function(){renderProfilePicker();});
   fbLoadProfiles(function(fbProfs){if(fbMergeProfiles(fbProfs))renderProfilePicker();});
 }
 
@@ -1188,8 +1187,7 @@ function savePfEdit(){
   }
   saveProfiles(profs);
   try{localStorage.setItem(PF_EDIT_TS_KEY,Date.now().toString());}catch(e){} // mark explicit edit on this device
-  syncProfilesToGAS(profs); // push to GAS for other devices
-  fbSaveProfile(pf);        // push to Firestore (faster + supports full avatarImg)
+  fbSaveProfile(pf);        // push to Firestore (primary sync)
   // Update header if editing active profile
   var activeId=localStorage.getItem(ACTIVE_PF_KEY);
   if(activeId===_pfEditId)updateHeaderProfile(pf);
