@@ -859,7 +859,7 @@ var PF_SYNC_TS_KEY='portal_pf_sync_ts';  // when we last pulled from GAS
 function syncProfilesToGAS(profs){
   var gasUrl=localStorage.getItem('fleet_gas_url')||PF_GAS_URL;
   if(!gasUrl)return;
-  var slim=profs.map(function(p){return{id:p.id,name:p.name,avatar:p.avatar,pwHash:p.pwHash||null,avatarImg:p.avatarImg||null};});
+  var slim=profs.map(function(p){return{id:p.id,name:p.name,avatar:p.avatar,pwHash:p.pwHash||null};});
   var cb='gas_pfsave_'+Date.now();
   var script=document.createElement('script');
   var timer=setTimeout(function(){cleanup();},8000);
@@ -1139,7 +1139,7 @@ function handlePfPhoto(inp){
   if(!inp.files||!inp.files[0])return;
   var reader=new FileReader();
   reader.onload=function(ev){
-    _resizeThumbnail(ev.target.result,64,0.3,function(thumb){
+    _resizeThumbnail(ev.target.result,200,0.8,function(thumb){
       _pfEditAvatarImg=thumb;
       document.getElementById('pf-edit-cur-av').innerHTML='<img src="'+thumb+'" style="width:100%;height:100%;object-fit:cover;">';
       document.querySelectorAll('.pf-emoji-btn').forEach(function(b){b.classList.remove('active');});
