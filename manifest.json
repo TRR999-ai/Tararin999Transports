@@ -1,0 +1,17 @@
+{
+  "name": "ธรารินทร์ 999 ขนส่ง",
+  "short_name": "TRR999",
+  "description": "ระบบจัดการรถขนส่ง ธรารินทร์ 999",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1B2770",
+  "theme_color": "#1B2770",
+  "icons": [
+    {
+      "src": "TRR999logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
