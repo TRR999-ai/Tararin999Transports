@@ -712,6 +712,13 @@ function gpsError(msg){
 function renderEmpToday(){
   if(!_curProfile)return;
   var today=todayStr();
+  // Pull from Firebase first (cross-device sync), re-render after merge
+  fbLoadRecordsByDate(today,function(fbRecs){fbMergeToLocal(fbRecs);_renderEmpToday();});
+  _renderEmpToday(); // render immediately from local while waiting
+}
+function _renderEmpToday(){
+  if(!_curProfile)return;
+  var today=todayStr();
   var records=loadRecords().filter(function(r){return r.pid===_curProfile.id&&r.date===today;});
   // Last record
   var lastIn=null,lastOut=null;
