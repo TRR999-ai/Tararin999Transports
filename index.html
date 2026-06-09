@@ -878,8 +878,11 @@ function _pfMerge(remote){
   var local=getProfiles(),changed=false;
   remote.forEach(function(rp){
     var lp=local.find(function(p){return p.id===rp.id;});
-    if(lp&&(lp.name!==rp.name||lp.avatar!==rp.avatar||lp.pwHash!==(rp.pwHash||null)||(rp.avatarImg||null)!==(lp.avatarImg||null))){
-      lp.name=rp.name;lp.avatar=rp.avatar;lp.pwHash=rp.pwHash||null;lp.avatarImg=rp.avatarImg||null;changed=true;
+    if(lp&&(lp.name!==rp.name||lp.avatar!==rp.avatar||lp.pwHash!==(rp.pwHash||null))){
+      lp.name=rp.name;lp.avatar=rp.avatar;lp.pwHash=rp.pwHash||null;
+      // Only overwrite avatarImg if GAS actually sent one — never clear with null
+      if(rp.avatarImg)lp.avatarImg=rp.avatarImg;
+      changed=true;
     }
   });
   if(changed)try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}
