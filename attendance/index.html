@@ -320,6 +320,10 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
 </head>
 <body>
 
+<!-- ── Firebase SDK ───────────────────────────── -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <!-- ── Auth check ─────────────────────────────── -->
 <script>(function(){var pw=localStorage.getItem('trr_pw_hash'),ses=localStorage.getItem('trr_session');if(pw&&ses===pw)return;try{sessionStorage.setItem('trr_redirect',location.href);}catch(e){}location.replace('../index.html');})();</script>
 
@@ -533,6 +537,56 @@ var ACTIVE_KEY  = 'portal_active_profile';
 var DEFAULT_OFFICE = {lat:14.1937779,lon:100.6023297,name:'บริษัท ธรารินทร์ 999 ขนส่ง',radius:5};
 var DEFAULT_LATE   = '08:00';
 
+// ─── Firebase ─────────────────────────────────────────────
+var _db = null;
+(function(){
+  try{
+    var cfg={
+      apiKey:"AIzaSyAQbnhjkyVuRIpe4UfOzCyXyAo6TB2Tlok",
+      authDomain:"tararin999.firebaseapp.com",
+      projectId:"tararin999",
+      storageBucket:"tararin999.firebasestorage.app",
+      messagingSenderId:"167015953995",
+      appId:"1:167015953995:web:9a1efe5ce392a78886ffce"
+    };
+    firebase.initializeApp(cfg);
+    _db=firebase.firestore();
+  }catch(e){console.warn('Firebase init failed',e);}
+})();
+
+function fbSaveRecord(rec){
+  if(!_db)return;
+  _db.collection('attendance').doc(rec.id).set(rec).catch(function(){});
+}
+function fbLoadRecordsByDate(date,cb){
+  if(!_db){cb([]);return;}
+  _db.collection('attendance').where('date','==',date)
+    .orderBy('ts','asc').get()
+    .then(function(snap){
+      var out=[];snap.forEach(function(d){out.push(d.data());});cb(out);
+    }).catch(function(){cb([]);});
+}
+function fbLoadRecordsByMonth(month,cb){
+  // month = 'YYYY-MM'
+  if(!_db){cb([]);return;}
+  var start=month+'-01',end=month+'-32';
+  _db.collection('attendance')
+    .where('date','>=',start).where('date','<=',end)
+    .orderBy('date','asc').orderBy('ts','asc').get()
+    .then(function(snap){
+      var out=[];snap.forEach(function(d){out.push(d.data());});cb(out);
+    }).catch(function(){cb([]);});
+}
+// Merge Firestore records into localStorage (union by id)
+function fbMergeToLocal(fbRecords){
+  if(!fbRecords.length)return;
+  var local=loadRecords();
+  var localIds=new Set(local.map(function(r){return r.id;}));
+  var added=false;
+  fbRecords.forEach(function(r){if(!localIds.has(r.id)){local.push(r);added=true;}});
+  if(added)saveRecords(local);
+}
+
 // ─── utils ───────────────────────────────────────────────────
 function pad2(n){return String(n).padStart(2,'0');}
 function todayStr(){var d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
@@ -566,7 +620,7 @@ function showToast(msg,ms){
 // ─── data ──────────────────────────────────────────────────
 function loadRecords(){try{return JSON.parse(localStorage.getItem(RECORDS_KEY)||'[]');}catch(e){return[];}}
 function saveRecords(r){try{localStorage.setItem(RECORDS_KEY,JSON.stringify(r));}catch(e){}}
-function addRecord(rec){var r=loadRecords();r.push(rec);saveRecords(r);}
+function addRecord(rec){var r=loadRecords();r.push(rec);saveRecords(r);fbSaveRecord(rec);}
 function loadOffice(){try{return JSON.parse(localStorage.getItem(OFFICE_KEY))||DEFAULT_OFFICE;}catch(e){return DEFAULT_OFFICE;}}
 function saveOffice(o){try{localStorage.setItem(OFFICE_KEY,JSON.stringify(o));}catch(e){}}
 function loadLateAfter(){return localStorage.getItem(LATE_KEY)||DEFAULT_LATE;}
@@ -845,6 +899,12 @@ function getEmpProfiles(){
 
 function renderToday(){
   var today=todayStr();
+  // Pull from Firestore first (merge into local), then re-render
+  fbLoadRecordsByDate(today,function(fbRecs){fbMergeToLocal(fbRecs);_renderToday();});
+  _renderToday(); // render immediately from local while waiting
+}
+function _renderToday(){
+  var today=todayStr();
   var records=loadRecords().filter(function(r){return r.date===today;});
   var emps=getEmpProfiles();
   // KPI
@@ -900,6 +960,10 @@ function renderToday(){
 function renderHistory(){
   var date=document.getElementById('hist-date').value||todayStr();
   document.getElementById('mgr-date-label').textContent=fmtThaiDate(date);
+  fbLoadRecordsByDate(date,function(fbRecs){fbMergeToLocal(fbRecs);_renderHistoryForDate(date);});
+  _renderHistoryForDate(date);
+}
+function _renderHistoryForDate(date){
   var records=loadRecords().filter(function(r){return r.date===date;}).sort(function(a,b){return a.ts-b.ts;});
   document.getElementById('hist-log').innerHTML=records.map(function(r){
     return '<tr><td>'+r.pname+'</td>'
@@ -916,6 +980,10 @@ function histNextDay(){var d=new Date(document.getElementById('hist-date').value
 function renderReport(){
   var month=document.getElementById('report-month').value;
   if(!month)return;
+  fbLoadRecordsByMonth(month,function(fbRecs){fbMergeToLocal(fbRecs);_renderReportForMonth(month);});
+  _renderReportForMonth(month);
+}
+function _renderReportForMonth(month){
   var records=loadRecords().filter(function(r){return r.date.startsWith(month);});
   var emps=getEmpProfiles();
   var lateAfter=loadLateAfter();

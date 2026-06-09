@@ -527,6 +527,9 @@ body {
   .pf-pw-inp{font-size:16px!important;}
 }
 </style>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div id="sb-overlay" onclick="toggleSidebar()"></div>
@@ -799,6 +802,53 @@ var PF_GAS_URL    = 'https://script.google.com/macros/s/AKfycby4cVxSxzNuZUqSRmCT
 // Fallback: read Fleet_Status sheet via gviz/tq (docs.google.com) when GAS is blocked
 var PF_SHEET_ID   = '1HC2aGOvAUx-s82kBi2cMU-8U3k4POiqn7IXYeWr-C4c';
 
+// ── Firebase init ─────────────────────────────────────────────────────────
+var _pfDb=null;
+(function(){
+  try{
+    var cfg={
+      apiKey:"AIzaSyAQbnhjkyVuRIpe4UfOzCyXyAo6TB2Tlok",
+      authDomain:"tararin999.firebaseapp.com",
+      projectId:"tararin999",
+      storageBucket:"tararin999.firebasestorage.app",
+      messagingSenderId:"167015953995",
+      appId:"1:167015953995:web:9a1efe5ce392a78886ffce"
+    };
+    // Reuse existing app if attendance page already initialized it
+    var app;
+    try{app=firebase.app();}catch(e){app=firebase.initializeApp(cfg);}
+    _pfDb=firebase.firestore(app);
+  }catch(e){console.warn('Firebase init (portal) failed',e);}
+})();
+function fbSaveProfile(pf){
+  if(!_pfDb)return;
+  _pfDb.collection('profiles').doc(pf.id).set({
+    id:pf.id,name:pf.name,avatar:pf.avatar,
+    avatarImg:pf.avatarImg||null,pwHash:pf.pwHash||null,
+    updatedAt:Date.now()
+  },{merge:true}).catch(function(){});
+}
+function fbLoadProfiles(cb){
+  if(!_pfDb){cb([]);return;}
+  _pfDb.collection('profiles').get()
+    .then(function(snap){var out=[];snap.forEach(function(d){out.push(d.data());});cb(out);})
+    .catch(function(){cb([]);});
+}
+function fbMergeProfiles(fbProfs){
+  if(!fbProfs.length)return false;
+  var local=getProfiles(),changed=false;
+  fbProfs.forEach(function(rp){
+    var lp=local.find(function(p){return p.id===rp.id;});
+    if(!lp)return;
+    var newImg=rp.avatarImg||null,newName=rp.name,newAvatar=rp.avatar,newPw=rp.pwHash||null;
+    if(lp.name!==newName||lp.avatar!==newAvatar||lp.pwHash!==newPw||(lp.avatarImg||null)!==newImg){
+      lp.name=newName;lp.avatar=newAvatar;lp.pwHash=newPw;lp.avatarImg=newImg;changed=true;
+    }
+  });
+  if(changed)try{localStorage.setItem(PROFILES_KEY,JSON.stringify(local));}catch(e){}
+  return changed;
+}
+
 // ── GAS profile sync ──────────────────────────────────────────────────────
 // Uses action=set/getall with virtual plate "__pf__" (guaranteed to work, no GAS changes needed)
 // Syncs: id, name, avatar (emoji), pwHash, avatarImg (resized to 64x64 JPEG q0.3 ~1-3KB)
@@ -1040,10 +1090,11 @@ function checkAuth(){
     });
     return;
   }
-  // Show picker with local data immediately, then refresh from GAS
+  // Show picker with local data immediately, then refresh from GAS + Firebase
   renderProfilePicker();
   document.getElementById('profile-overlay').style.display='flex';
   loadProfilesFromGAS(function(){renderProfilePicker();});
+  fbLoadProfiles(function(fbProfs){if(fbMergeProfiles(fbProfs))renderProfilePicker();});
 }
 
 // ── Profile Edit ──────────────────────────────────────────────────────────
@@ -1127,7 +1178,8 @@ function savePfEdit(){
   }
   saveProfiles(profs);
   try{localStorage.setItem(PF_EDIT_TS_KEY,Date.now().toString());}catch(e){} // mark explicit edit on this device
-  syncProfilesToGAS(profs); // push name/emoji/pwHash to GAS for other devices
+  syncProfilesToGAS(profs); // push to GAS for other devices
+  fbSaveProfile(pf);        // push to Firestore (faster + supports full avatarImg)
   // Update header if editing active profile
   var activeId=localStorage.getItem(ACTIVE_PF_KEY);
   if(activeId===_pfEditId)updateHeaderProfile(pf);
