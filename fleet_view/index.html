@@ -7,6 +7,8 @@
 <link rel="icon" type="image/png" href="../TRR999logo.png">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root{
   --navy:#1e3a5f;--navy2:#2a4f7c;
@@ -919,6 +921,7 @@ function resetDailyStatus(){
     if(statusMap[p]==='ready'||statusMap[p]==='busy'){
       delete statusMap[p];
       if(gasUrl)syncToGAS(p,'',noteMap[p]||''); // push reset to GAS so other devices see it
+      fbSetFleetStatus(p,'',noteMap[p]||''); // push reset to Firebase
     }
   });
   _resetTime=Date.now(); // mark when reset happened
@@ -944,11 +947,13 @@ function setStatus(plate, val){
   }
   renderStatusBar();
   if(gasUrl)syncToGAS(plate,val,noteMap[plate]||'');
+  fbSetFleetStatus(plate,val,noteMap[plate]||'');
   if(document.getElementById('page-board').classList.contains('active'))renderBoard();
 }
 function setNote(plate, val){
   noteMap[plate]=val;saveNotes();
   if(gasUrl)syncToGAS(plate,statusMap[plate]||'',val);
+  fbSetFleetStatus(plate,statusMap[plate]||'',val);
 }
 
 function renderStatusBar(){
@@ -1116,6 +1121,70 @@ function autoSyncStatusFromGAS(){
   };
   script.onerror=function(){cleanup();};
   script.src=url;document.head.appendChild(script);
+}
+
+// ═══════════════════════════════════════════
+// Firebase Fleet Status (real-time onSnapshot)
+// ═══════════════════════════════════════════
+var _db=null;
+var _fbFleetReady=false;
+(function(){
+  try{
+    var cfg={apiKey:"AIzaSyAQbnhjkyVuRIpe4UfOzCyXyAo6TB2Tlok",authDomain:"tararin999.firebaseapp.com",projectId:"tararin999",storageBucket:"tararin999.firebasestorage.app",messagingSenderId:"167015953995",appId:"1:167015953995:web:9a1efe5ce392a78886ffce"};
+    var app;try{app=firebase.app();}catch(e){app=firebase.initializeApp(cfg);}
+    _db=firebase.firestore(app);
+  }catch(e){console.warn('Firebase init (fleet) failed',e);}
+})();
+
+function fbSetFleetStatus(plate,status,note){
+  if(!_db)return;
+  _db.collection('fleet_status').doc(plate).set({status:status||'',note:note||'',updatedAt:Date.now()},{merge:true}).catch(function(){});
+}
+
+function initFleetStatusListener(){
+  if(!_db)return;
+  _db.collection('fleet_status').onSnapshot(function(snap){
+    var now=Date.now();
+    if(!_fbFleetReady){
+      // Initial load — apply all, with guards for daily reset and recent local edit
+      var justResetInit=(_resetTime>0&&(now-_resetTime)<90000);
+      snap.forEach(function(doc){
+        var plate=doc.id;
+        if(plate.charAt(0)==='_')return; // skip virtual plates
+        var data=doc.data();
+        var st=data.status||'';
+        if(justResetInit&&(st==='ready'||st==='busy'))return; // skip stale status after daily reset
+        var localAge=now-(statusSetAt[plate]||0);
+        if(statusSetAt[plate]&&localAge<1800000)return; // trust recent local edit
+        statusMap[plate]=st;
+        noteMap[plate]=data.note||'';
+      });
+      saveStatus();saveNotes();renderAll();
+      if(document.getElementById('page-board').classList.contains('active'))renderBoard();
+      _fbFleetReady=true;
+      setSyncStatus('ok','Firebase ✓ real-time');
+      return;
+    }
+    // Real-time updates from other devices
+    var changed=false;
+    var justReset=(_resetTime>0&&(now-_resetTime)<90000);
+    snap.docChanges().forEach(function(change){
+      if(change.doc.metadata.hasPendingWrites)return; // skip own writes (not yet confirmed by server)
+      var plate=change.doc.id;
+      if(plate.charAt(0)==='_')return;
+      var data=change.doc.data();
+      var st=data.status||'';
+      if(justReset&&(st==='ready'||st==='busy'))return; // skip stale after daily reset
+      var localAge=now-(statusSetAt[plate]||0);
+      var recentlySet=(statusSetAt[plate]&&localAge<1800000);
+      var syncPending=!!_pendingGasSync[plate];
+      if(recentlySet||syncPending)return; // trust local change
+      statusMap[plate]=st;
+      noteMap[plate]=data.note||'';
+      changed=true;
+    });
+    if(changed){saveStatus();saveNotes();renderAll();if(document.getElementById('page-board').classList.contains('active'))renderBoard();}
+  },function(err){console.warn('fleet_status snapshot error',err);setSyncStatus('err','Firebase error');});
 }
 
 function importFromGAS(){
@@ -2671,8 +2740,8 @@ setInterval(function(){
       _executeSyncToGAS(plate,p.status,p.note);
     });
   }
-  // Auto-sync status from GAS every 60s
-  if(gasUrl)autoSyncStatusFromGAS();
+  // Auto-sync status from GAS every 60s (fallback when Firebase unavailable)
+  if(gasUrl&&!_db)autoSyncStatusFromGAS();
 },60000);
 
 // ── Init ──
@@ -2682,8 +2751,12 @@ var _resetJustHappened=(_preResetDate!==todayStr()); // true = new day, reset oc
 
 if(gasUrl){
   loadConfigFromGAS(function(){renderAll();});
+}
+// Firebase real-time listener (primary sync)
+initFleetStatusListener();
+// GAS auto-sync as fallback (only if Firebase not available)
+if(!_db){
   if(_resetJustHappened){
-    // Delay sync 60s so GAS has time to process all reset-pushes (64 plates)
     setTimeout(function(){autoSyncStatusFromGAS();},60000);
   } else {
     autoSyncStatusFromGAS();
