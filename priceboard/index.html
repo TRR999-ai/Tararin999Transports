@@ -828,5 +828,9 @@ document.getElementById('data-date').textContent =
   new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
 onUpdate();
 </script>
+<script>
+/* ── Idle timeout: redirect to portal after 4h inactivity ── */
+(function(){var t=4*60*60*1000,i;function r(){clearTimeout(i);i=setTimeout(function(){location.replace('/');},t);}['click','touchstart','keydown','mousemove','scroll'].forEach(function(e){document.addEventListener(e,r,{passive:true});});r();})();
+</script>
 </body>
 </html>
