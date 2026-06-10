@@ -591,12 +591,19 @@ function loadFromSheet() {
       _sheetLoading = false;
       if (!res.ok || !res.data) { _syncDot('err'); showToast('❌ โหลดข้อมูลไม่สำเร็จ'); return; }
       var newDb = {'6wheel':[], 'trailer':[]};
+      // Build lookup from current db to preserve local phone/site/color if sheet has none
+      var localPhoneMap = {};
+      ['6wheel','trailer'].forEach(function(t){(db[t]||[]).forEach(function(d){if(d.name)localPhoneMap[d.name]={phone:d.phone||'',site:d.site||'',color:d.color||''};});});
       res.data.forEach(function(d) {
         var type = d.type||'6wheel';
         if(type!=='6wheel'&&type!=='trailer')type='6wheel';
         if (!newDb[type]) newDb[type]=[];
         var driver = {};
         ['plate','province','name','name2','phone','site','color'].forEach(function(f){ driver[f]=d[f]||''; });
+        // Fallback to local phone if sheet returned empty
+        if (!driver.phone && localPhoneMap[driver.name]) driver.phone = localPhoneMap[driver.name].phone;
+        if (!driver.site  && localPhoneMap[driver.name]) driver.site  = localPhoneMap[driver.name].site;
+        if (!driver.color && localPhoneMap[driver.name]) driver.color = localPhoneMap[driver.name].color;
         newDb[type].push(driver);
       });
       db = newDb;
