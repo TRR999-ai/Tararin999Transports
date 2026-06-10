@@ -982,7 +982,7 @@ function loadProfiles(){try{var r=localStorage.getItem(PROFILES_KEY);if(r){var p
 function saveProfiles(p){try{localStorage.setItem(PROFILES_KEY,JSON.stringify(p));}catch(e){}}
 function getProfiles(){var p=loadProfiles();if(!p){p=DEFAULT_PROFILES.map(function(d){return Object.assign({},d);});saveProfiles(p);}return p;}
 function getActiveProfile(){
-  var id=localStorage.getItem(ACTIVE_PF_KEY);if(!id)return null;
+  var id=sessionStorage.getItem(ACTIVE_PF_KEY);if(!id)return null;
   return getProfiles().find(function(p){return p.id===id;})||null;
 }
 
@@ -1052,7 +1052,7 @@ function verifyProfilePw(){
 }
 
 function enterPortal(pf){
-  localStorage.setItem(ACTIVE_PF_KEY,pf.id);
+  sessionStorage.setItem(ACTIVE_PF_KEY,pf.id);
   localStorage.setItem(PW_KEY,LEGACY_TOKEN);
   localStorage.setItem(SES_KEY,LEGACY_TOKEN);
   document.getElementById('profile-overlay').style.display='none';
@@ -1069,14 +1069,14 @@ function updateHeaderProfile(pf){
   if(nm)nm.textContent=pf.name;
 }
 function switchProfile(){
-  localStorage.removeItem(ACTIVE_PF_KEY);
+  sessionStorage.removeItem(ACTIVE_PF_KEY);
   localStorage.removeItem(SES_KEY);
   renderProfilePicker();
   showProfileGrid();
   document.getElementById('profile-overlay').style.display='flex';
 }
 function openCurrentPfEdit(){
-  var id=localStorage.getItem(ACTIVE_PF_KEY);
+  var id=sessionStorage.getItem(ACTIVE_PF_KEY);
   if(id)openPfEdit(id);
 }
 function checkAuth(){
@@ -1189,7 +1189,7 @@ function savePfEdit(){
   try{localStorage.setItem(PF_EDIT_TS_KEY,Date.now().toString());}catch(e){} // mark explicit edit on this device
   fbSaveProfile(pf);        // push to Firestore (primary sync)
   // Update header if editing active profile
-  var activeId=localStorage.getItem(ACTIVE_PF_KEY);
+  var activeId=sessionStorage.getItem(ACTIVE_PF_KEY);
   if(activeId===_pfEditId)updateHeaderProfile(pf);
   closePfEdit();
   renderProfilePicker(); // always refresh so picker shows updated name/avatar
