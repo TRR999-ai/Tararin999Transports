@@ -146,6 +146,15 @@ textarea:focus { outline: none; border-color: #F5A623; }
 .tab.active-6wheel  { background: #EEF2FF; color: #1B2770; border-bottom-color: #F5A623; }
 .tab.active-trailer { background: #fff3e0; color: #e65100; border-bottom-color: #e65100; }
 
+#sitePills { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+.site-pill {
+  padding:5px 12px; border-radius:20px; border:1.5px solid #ddd;
+  background:#fff; cursor:pointer; font-size:12px; font-family:inherit;
+  white-space:nowrap; transition:opacity .15s;
+}
+.site-pill:hover { opacity:.8; }
+.pill-count { font-weight:700; margin-left:3px; }
+
 .dtable { width: 100%; border-collapse: collapse; font-size: 14px; }
 .dtable th {
   background: #f5f5f5; padding: 9px 10px; text-align: left;
@@ -426,6 +435,8 @@ textarea:focus { outline: none; border-color: #F5A623; }
       <button class="tab" id="tabTR" onclick="switchTab('trailer')">&#x1F69A; เทรลเลอร์</button>
     </div>
 
+    <div id="sitePills"></div>
+
     <div class="add-row">
       <div class="form-group" style="flex:2; min-width:150px;">
         <label>ชื่อ-นามสกุล</label>
@@ -604,6 +615,8 @@ function loadFromSheet() {
         if (!driver.phone && localPhoneMap[driver.name]) driver.phone = localPhoneMap[driver.name].phone;
         if (!driver.site  && localPhoneMap[driver.name]) driver.site  = localPhoneMap[driver.name].site;
         if (!driver.color && localPhoneMap[driver.name]) driver.color = localPhoneMap[driver.name].color;
+        var suppressed = loadSuppressed();
+        if (driver.plate && suppressed.indexOf(driver.plate) !== -1) return;
         newDb[type].push(driver);
       });
       db = newDb;
@@ -660,8 +673,26 @@ function siteColor(site) {
 // ═══════════════════════════════════════════════
 var trips          = [];
 var tid            = 0;
-var currentTab     = '6wheel';
+var currentTab        = '6wheel';
+var currentSiteFilter = '';   // '' = all, '__none__' = ไม่ระบุ, else site string
 var toastTimer;
+
+// ── Suppressed drivers (hidden/deleted — survive sheet reload) ─────────────
+var SUPPRESS_KEY = 'drv_suppressed';
+function loadSuppressed() { try { return JSON.parse(localStorage.getItem(SUPPRESS_KEY) || '[]'); } catch(e) { return []; } }
+function saveSuppressed(arr) { try { localStorage.setItem(SUPPRESS_KEY, JSON.stringify(arr)); } catch(e) {} }
+function suppressDriver(plate) {
+  if (!plate) return;
+  var arr = loadSuppressed();
+  if (arr.indexOf(plate) === -1) { arr.push(plate); saveSuppressed(arr); }
+}
+function hideDriver(idx) {
+  var d = db[currentTab][idx];
+  suppressDriver(d.plate);
+  db[currentTab].splice(idx, 1);
+  saveDB(); renderDriverTable();
+  showToast('🙈 ซ่อน "' + (d.name || d.plate) + '" แล้ว');
+}
 var selectedCoKey  = '';   // current company key
 
 // ═══════════════════════════════════════════════
@@ -1569,8 +1600,56 @@ function openDriverModal() {
 function closeDriverModal() { document.getElementById('driverModal').classList.remove('open'); }
 function switchTab(type) {
   currentTab = type;
+  currentSiteFilter = '';
   document.getElementById('tab6w').className = 'tab' + (type === '6wheel'  ? ' active-6wheel'  : '');
   document.getElementById('tabTR').className = 'tab' + (type === 'trailer' ? ' active-trailer' : '');
+  renderDriverTable();
+}
+
+var _PILL_COLORS = ['#1565c0','#2e7d32','#e65100','#6a1b9a','#c62828','#00695c','#f57f17','#37474f','#0277bd','#558b2f'];
+
+function renderSitePills() {
+  var list = db[currentTab] || [];
+  var siteOrder = [], siteCnt = {}, noneCnt = 0;
+  for (var i = 0; i < list.length; i++) {
+    var s = (list[i].site || '').trim();
+    if (s) {
+      if (!siteCnt[s]) { siteOrder.push(s); siteCnt[s] = 0; }
+      siteCnt[s]++;
+    } else { noneCnt++; }
+  }
+  // deduplicate (preserve order)
+  var seen = {}, sites = [];
+  siteOrder.forEach(function(s){ if(!seen[s]){seen[s]=true;sites.push(s);} });
+
+  if (!sites.length && !noneCnt) { document.getElementById('sitePills').innerHTML = ''; return; }
+
+  var html = '';
+  var allActive = currentSiteFilter === '';
+  html += '<button class="site-pill" onclick="setSiteFilter(\'\')" style="' +
+    (allActive ? 'background:#1B2770;color:#fff;border-color:#1B2770;' : 'color:#1B2770;border-color:#1B2770;') + '">' +
+    '🚛 ทุกประเภท <span class="pill-count">' + list.length + '</span></button>';
+
+  sites.forEach(function(s, idx) {
+    var c = _PILL_COLORS[idx % _PILL_COLORS.length];
+    var active = currentSiteFilter === s;
+    html += '<button class="site-pill" onclick="setSiteFilter(' + JSON.stringify(s) + ')" style="' +
+      (active ? 'background:'+c+';color:#fff;border-color:'+c+';' : 'color:'+c+';border-color:'+c+';') + '">' +
+      '🚛 ' + esc(s) + ' <span class="pill-count">' + siteCnt[s] + '</span></button>';
+  });
+
+  if (noneCnt) {
+    var noneActive = currentSiteFilter === '__none__';
+    html += '<button class="site-pill" onclick="setSiteFilter(\'__none__\')" style="' +
+      (noneActive ? 'background:#757575;color:#fff;border-color:#757575;' : 'color:#757575;border-color:#bbb;') + '">' +
+      '📋 ไม่ระบุ <span class="pill-count">' + noneCnt + '</span></button>';
+  }
+
+  document.getElementById('sitePills').innerHTML = html;
+}
+
+function setSiteFilter(site) {
+  currentSiteFilter = site;
   renderDriverTable();
 }
 function effectiveColor(d) {
@@ -1647,18 +1726,24 @@ function renderDriverTable() {
             'font-family:inherit;font-size:13px;box-sizing:border-box;';
   var handleStyle = 'cursor:grab;color:#aaa;font-size:20px;padding:2px 6px;user-select:none;' +
                     'line-height:1;display:inline-block;';
+  renderSitePills();
+  var displayNum = 0;
   if (!list.length) {
     body = '<tr><td colspan="8" style="text-align:center;color:#999;padding:20px;">ยังไม่มีข้อมูล</td></tr>';
   } else {
     for (var i = 0; i < list.length; i++) {
       var d     = list[i];
+      var dSite = (d.site || '').trim();
+      if (currentSiteFilter === '__none__' && dSite !== '') continue;
+      if (currentSiteFilter !== '' && currentSiteFilter !== '__none__' && dSite !== currentSiteFilter) continue;
+      displayNum++;
       var site  = d.site  || '';
       var color = effectiveColor(d);
       body += '<tr data-idx="' + i + '" style="border-left:5px solid ' + color + ';">' +
         '<td style="white-space:nowrap;padding:2px 4px;">' +
           '<span class="drag-handle" data-idx="' + i + '"' +
             ' style="' + handleStyle + '" title="ลากเพื่อจัดลำดับ">⠿</span>' +
-          '<span style="color:#999;font-size:12px;">' + (i+1) + '</span></td>' +
+          '<span style="color:#999;font-size:12px;">' + displayNum + '</span></td>' +
         '<td style="white-space:nowrap;">' +
           '<strong>' + esc(d.plate) + '</strong>' +
           '<div style="font-size:11px;color:#999;">' + esc(d.province) + '</div></td>' +
@@ -1681,8 +1766,14 @@ function renderDriverTable() {
               ' oninput="refreshSiteColor(this,\'' + currentTab + '\',' + i + ')"' +
               ' onchange="updateDriver(\'' + currentTab + '\',' + i + ',\'site\',this.value)" />' +
           '</div></td>' +
-        '<td><button class="btn btn-red btn-sm" onclick="deleteDriver(' + i + ')">ลบ</button></td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button class="btn btn-sm" style="background:#f57c00;color:#fff;margin-right:4px;" onclick="hideDriver(' + i + ')" title="ซ่อน — ไม่แสดงแม้โหลดจาก Sheet ใหม่">ซ่อน</button>' +
+          '<button class="btn btn-red btn-sm" onclick="deleteDriver(' + i + ')">ลบ</button>' +
+        '</td>' +
         '</tr>';
+    }
+    if (!displayNum) {
+      body = '<tr><td colspan="8" style="text-align:center;color:#999;padding:20px;">ไม่มีข้อมูลในกลุ่มนี้</td></tr>';
     }
   }
   document.getElementById('driverBody').innerHTML = body;
@@ -1796,6 +1887,7 @@ function deleteDriver(idx) {
   var d = db[currentTab][idx];
   var label = d.name ? d.name : d.plate;
   if (!confirm('ลบ "' + label + '" ออก?')) return;
+  suppressDriver(d.plate);
   db[currentTab].splice(idx, 1); saveDB(); renderDriverTable();
 }
 function sortBySite() {
