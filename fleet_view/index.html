@@ -24,9 +24,10 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
 
 /* ── Sidebar ── */
 #sidebar{position:fixed;left:0;top:0;width:var(--sidebar-w);height:100vh;background:var(--navy);color:#fff;display:flex;flex-direction:column;z-index:100;overflow-y:auto;}
-.sb-logo{padding:18px 18px 12px;border-bottom:1px solid rgba(255,255,255,.1);}
-.sb-logo-t{font-size:14px;font-weight:800;color:var(--gold);}
-.sb-logo-s{font-size:10px;color:rgba(255,255,255,.38);margin-top:2px;}
+.sb-logo{padding:14px 18px 12px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:center;gap:6px;}
+.sb-logo-img{width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);}
+.sb-logo-t{font-size:12px;font-weight:800;color:var(--gold);text-align:center;}
+.sb-logo-s{font-size:9px;color:rgba(255,255,255,.38);margin-top:1px;text-align:center;}
 .sb-sec{padding:10px 0 4px;}
 .sb-sec-hdr{font-size:9px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.3);padding:0 18px 5px;text-transform:uppercase;}
 .nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 18px;background:none;border:none;color:rgba(255,255,255,.72);font-size:13px;cursor:pointer;text-align:left;transition:background .15s,color .15s;}
@@ -360,7 +361,8 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
 
 <div id="sidebar">
   <div class="sb-logo">
-    <div class="sb-logo-t">🚚 Fleet Dashboard</div>
+    <img class="sb-logo-img" src="../TRR999logo.png" alt="TRR">
+    <div class="sb-logo-t">Fleet Dashboard</div>
     <div class="sb-logo-s">Google Sheets Live</div>
   </div>
   <div class="sb-sec">
