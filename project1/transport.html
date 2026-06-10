@@ -593,6 +593,7 @@ function loadFromSheet() {
       var newDb = {'6wheel':[], 'trailer':[]};
       res.data.forEach(function(d) {
         var type = d.type||'6wheel';
+        if(type!=='6wheel'&&type!=='trailer')type='6wheel';
         if (!newDb[type]) newDb[type]=[];
         var driver = {};
         ['plate','province','name','name2','phone','site','color'].forEach(function(f){ driver[f]=d[f]||''; });
