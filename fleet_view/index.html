@@ -357,8 +357,15 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
 .stmt-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
 .stmt-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:.15s;}
 .stmt-tab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
-html.in-iframe #sidebar,html.in-iframe #qnav{display:none!important}
-html.in-iframe #main{margin-left:0!important;width:100%!important}
+html.in-iframe body{display:flex!important;flex-direction:column!important;height:100vh!important;overflow:hidden!important}
+html.in-iframe #sidebar{position:static!important;width:100%!important;height:auto!important;flex-direction:row!important;flex-wrap:wrap!important;overflow-y:visible!important;flex-shrink:0!important;z-index:unset!important}
+html.in-iframe .sb-logo,html.in-iframe .sb-foot,html.in-iframe #sb-overlay,html.in-iframe #qnav{display:none!important}
+html.in-iframe .sb-sec{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;padding:2px 4px!important;gap:2px!important}
+html.in-iframe .sb-sec-hdr,html.in-iframe .month-pills{display:none!important}
+html.in-iframe .nav-btn{display:inline-flex!important;align-items:center!important;width:auto!important;padding:7px 12px!important;font-size:12px!important;border-bottom:3px solid transparent!important}
+html.in-iframe .nav-btn:hover{border-bottom-color:rgba(245,166,35,0.5)!important}
+html.in-iframe .nav-btn.active{background:rgba(245,166,35,0.18)!important;color:var(--gold2)!important;border-bottom-color:var(--gold)!important}
+html.in-iframe #main{margin-left:0!important;min-height:0!important;flex:1!important;overflow:hidden!important}
 </style>
 <script>if(window.self!==window.top)document.documentElement.classList.add('in-iframe');</script>
 </head>

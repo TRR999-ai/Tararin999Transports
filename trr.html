@@ -739,8 +739,14 @@ input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--navy); c
   /* Settings fields */
   .settings-block input,.settings-block select{font-size:16px!important}
 }
-html.in-iframe #sidebar,html.in-iframe #qnav{display:none!important}
-html.in-iframe #main{margin-left:0!important;width:100%!important}
+html.in-iframe body{flex-direction:column!important}
+html.in-iframe #sidebar{width:100%!important;height:auto!important;flex-direction:row!important;background:var(--navy-dark)!important;border-right:none!important;border-bottom:2px solid var(--gold)!important}
+html.in-iframe #sidebar-top,html.in-iframe #nav-spacer,html.in-iframe #fuel-box,html.in-iframe #sidebar-ver,html.in-iframe #sidebar>a,html.in-iframe #qnav{display:none!important}
+html.in-iframe #nav{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;padding:2px 6px!important;gap:2px!important;width:100%!important}
+html.in-iframe .nav-btn{display:inline-flex!important;align-items:center!important;width:auto!important;border-left:none!important;border-bottom:3px solid transparent!important;padding:8px 14px!important;font-size:12px!important;background:transparent!important;color:rgba(255,255,255,0.65)!important}
+html.in-iframe .nav-btn:hover{background:rgba(255,255,255,0.08)!important;color:#fff!important;border-bottom-color:rgba(245,166,35,0.5)!important;border-left-color:transparent!important}
+html.in-iframe .nav-btn.active{background:rgba(245,166,35,0.12)!important;color:var(--gold)!important;font-weight:700!important;border-bottom-color:var(--gold)!important;border-left-color:transparent!important}
+html.in-iframe #main{flex:1!important;height:0!important;margin-left:0!important;width:100%!important}
 </style>
 <script>if(window.self!==window.top)document.documentElement.classList.add('in-iframe');</script>
 </head>
