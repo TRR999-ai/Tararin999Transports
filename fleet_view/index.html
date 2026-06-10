@@ -716,6 +716,7 @@ var statusFilter = '';
 var plateOrder      = []; // custom plate order (array of plate strings)
 var hiddenPlates    = {}; // {plate: true}
 var statusSetAt     = {}; // {plate: timestamp} — when status was last set locally
+var _fbTimer        = {}; // debounce timers per plate for Firebase writes
 var _pendingGasSync = {}; // {plate: {status,note}} — failed syncs waiting to retry
 var boardTypeFilter  = ''; // '', 'fuel', 'hub', 'khon', or custom type id
 var boardStatusFilter= ''; // '', 'ready', 'busy', 'leave', '_none'
@@ -958,13 +959,15 @@ function setStatus(plate, val){
   }
   renderStatusBar();
   if(gasUrl)syncToGAS(plate,val,noteMap[plate]||'');
-  fbSetFleetStatus(plate,val,noteMap[plate]||'');
+  clearTimeout(_fbTimer[plate]);
+  _fbTimer[plate]=setTimeout(function(){fbSetFleetStatus(plate,statusMap[plate]||'',noteMap[plate]||'');},800);
   if(document.getElementById('page-board').classList.contains('active'))renderBoard();
 }
 function setNote(plate, val){
   noteMap[plate]=val;saveNotes();
   if(gasUrl)syncToGAS(plate,statusMap[plate]||'',val);
-  fbSetFleetStatus(plate,statusMap[plate]||'',val);
+  clearTimeout(_fbTimer[plate]);
+  _fbTimer[plate]=setTimeout(function(){fbSetFleetStatus(plate,statusMap[plate]||'',noteMap[plate]||'');},800);
 }
 
 function renderStatusBar(){

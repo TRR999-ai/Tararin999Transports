@@ -551,12 +551,35 @@ var _db = null;
     };
     firebase.initializeApp(cfg);
     _db=firebase.firestore();
+    setTimeout(flushQueue,2000);
   }catch(e){console.warn('Firebase init failed',e);}
 })();
 
+var QUEUE_KEY='att_offline_queue';
+function loadQueue(){try{return JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]');}catch(e){return[];}}
+function saveQueue(q){try{localStorage.setItem(QUEUE_KEY,JSON.stringify(q));}catch(e){}}
+function enqueueRecord(rec){var q=loadQueue();if(!q.find(function(r){return r.id===rec.id;})){q.push(rec);saveQueue(q);}}
+function flushQueue(){
+  if(!_db||!navigator.onLine)return;
+  var q=loadQueue();if(!q.length)return;
+  var promises=q.map(function(rec){
+    return _db.collection('attendance').doc(rec.id).set(rec).then(function(){return null;}).catch(function(){return rec;});
+  });
+  Promise.all(promises).then(function(results){
+    var failed=results.filter(function(r){return r!==null;});
+    saveQueue(failed);
+    if(!failed.length)showToast('✅ sync '+q.length+' รายการสำเร็จ');
+  });
+}
+window.addEventListener('online',function(){showToast('🌐 เชื่อมต่อแล้ว — กำลัง sync...');setTimeout(flushQueue,1000);});
+
 function fbSaveRecord(rec){
-  if(!_db)return;
-  _db.collection('attendance').doc(rec.id).set(rec).catch(function(e){showToast('⚠️ sync ล้มเหลว — บันทึกไว้ใน device แล้ว');console.warn('[Attendance] write error',e);});
+  if(!_db||!navigator.onLine){enqueueRecord(rec);return;}
+  _db.collection('attendance').doc(rec.id).set(rec).catch(function(e){
+    showToast('⚠️ sync ล้มเหลว — บันทึกไว้ใน queue');
+    enqueueRecord(rec);
+    console.warn('[Attendance] write error',e);
+  });
 }
 function fbLoadRecordsByDate(date,cb){
   if(!_db){cb([]);return;}
