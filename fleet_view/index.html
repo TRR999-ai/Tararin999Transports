@@ -1149,7 +1149,7 @@ var _fbFleetReady=false;
 
 function fbSetFleetStatus(plate,status,note){
   if(!_db)return;
-  _db.collection('fleet_status').doc(plate).set({status:status||'',note:note||'',updatedAt:Date.now()},{merge:true}).catch(function(){});
+  _db.collection('fleet_status').doc(plate).set({status:status||'',note:note||'',updatedAt:Date.now()},{merge:true}).catch(function(e){setSyncStatus('err','Firebase write failed');console.warn('[Fleet] write error',e);});
 }
 
 function initFleetStatusListener(){

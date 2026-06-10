@@ -556,7 +556,7 @@ var _db = null;
 
 function fbSaveRecord(rec){
   if(!_db)return;
-  _db.collection('attendance').doc(rec.id).set(rec).catch(function(){});
+  _db.collection('attendance').doc(rec.id).set(rec).catch(function(e){showToast('⚠️ sync ล้มเหลว — บันทึกไว้ใน device แล้ว');console.warn('[Attendance] write error',e);});
 }
 function fbLoadRecordsByDate(date,cb){
   if(!_db){cb([]);return;}
@@ -619,7 +619,7 @@ function showToast(msg,ms){
 
 // ─── data ──────────────────────────────────────────────────
 function loadRecords(){try{return JSON.parse(localStorage.getItem(RECORDS_KEY)||'[]');}catch(e){return[];}}
-function saveRecords(r){try{localStorage.setItem(RECORDS_KEY,JSON.stringify(r));}catch(e){}}
+function saveRecords(r){try{localStorage.setItem(RECORDS_KEY,JSON.stringify(r));}catch(e){showToast('⚠️ localStorage เต็ม — บันทึกไม่ได้');console.warn('[Attendance] localStorage error',e);}}
 function addRecord(rec){var r=loadRecords();r.push(rec);saveRecords(r);fbSaveRecord(rec);}
 function loadOffice(){try{return JSON.parse(localStorage.getItem(OFFICE_KEY))||DEFAULT_OFFICE;}catch(e){return DEFAULT_OFFICE;}}
 function saveOffice(o){try{localStorage.setItem(OFFICE_KEY,JSON.stringify(o));}catch(e){}}

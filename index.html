@@ -539,6 +539,7 @@ body {
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+<div id="toast" style="position:fixed;bottom:24px;right:18px;background:#333;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:99999;display:none;max-width:280px;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none;"></div>
 <div id="sb-overlay" onclick="toggleSidebar()"></div>
 
 <!-- ══ Sidebar ══════════════════════════════════════════════════════════════ -->
@@ -810,7 +811,7 @@ var PF_GAS_URL    = 'https://script.google.com/macros/s/AKfycby4cVxSxzNuZUqSRmCT
 var PF_SHEET_ID   = '1HC2aGOvAUx-s82kBi2cMU-8U3k4POiqn7IXYeWr-C4c';
 
 // ── Firebase init ─────────────────────────────────────────────────────────
-var _pfDb=null;
+var _pfDb=null,_pfSyncing=false;
 (function(){
   try{
     var cfg={
@@ -827,13 +828,18 @@ var _pfDb=null;
     _pfDb=firebase.firestore(app);
   }catch(e){console.warn('Firebase init (portal) failed',e);}
 })();
+function showToast(msg,ms){
+  var el=document.getElementById('toast');if(!el)return;
+  el.textContent=msg;el.style.display='block';
+  clearTimeout(el._t);el._t=setTimeout(function(){el.style.display='none';},ms||3000);
+}
 function fbSaveProfile(pf){
   if(!_pfDb)return;
   _pfDb.collection('profiles').doc(pf.id).set({
     id:pf.id,name:pf.name,avatar:pf.avatar,
     avatarImg:pf.avatarImg||null,pwHash:pf.pwHash||null,
     updatedAt:Date.now()
-  },{merge:true}).catch(function(){});
+  },{merge:true}).catch(function(e){showToast('⚠️ sync profile ล้มเหลว');console.warn('[Portal] fbSaveProfile error',e);});
 }
 function fbLoadProfiles(cb){
   if(!_pfDb){cb([]);return;}
@@ -979,7 +985,7 @@ function hashPw(pw){
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 function loadProfiles(){try{var r=localStorage.getItem(PROFILES_KEY);if(r){var p=JSON.parse(r);if(p&&p.length)return p;}}catch(e){}return null;}
-function saveProfiles(p){try{localStorage.setItem(PROFILES_KEY,JSON.stringify(p));}catch(e){}}
+function saveProfiles(p){try{localStorage.setItem(PROFILES_KEY,JSON.stringify(p));}catch(e){showToast('⚠️ localStorage เต็ม — บันทึกไม่ได้');console.warn('[Portal] saveProfiles error',e);}}
 function getProfiles(){var p=loadProfiles();if(!p){p=DEFAULT_PROFILES.map(function(d){return Object.assign({},d);});saveProfiles(p);}return p;}
 function getActiveProfile(){
   var id=sessionStorage.getItem(ACTIVE_PF_KEY);if(!id)return null;
@@ -1086,18 +1092,21 @@ function checkAuth(){
     document.getElementById('profile-overlay').style.display='none';
     updateHeaderProfile(pf);
     // Pull from Firebase first, then push back if local edits are newer
-    fbLoadProfiles(function(fbProfs){
-      fbMergeProfiles(fbProfs);
-      var editTs=parseInt(localStorage.getItem(PF_EDIT_TS_KEY)||'0');
-      var syncTs=parseInt(localStorage.getItem(PF_SYNC_TS_KEY)||'0');
-      if(editTs>syncTs){
-        // Local edits not yet in Firebase → push all profiles
-        getProfiles().forEach(function(p){fbSaveProfile(p);});
-        try{localStorage.setItem(PF_SYNC_TS_KEY,Date.now().toString());}catch(e){}
-      }
-      var fresh=getActiveProfile();
-      if(fresh)updateHeaderProfile(fresh);
-    });
+    if(!_pfSyncing){
+      _pfSyncing=true;
+      fbLoadProfiles(function(fbProfs){
+        fbMergeProfiles(fbProfs);
+        var editTs=parseInt(localStorage.getItem(PF_EDIT_TS_KEY)||'0');
+        var syncTs=parseInt(localStorage.getItem(PF_SYNC_TS_KEY)||'0');
+        if(editTs>syncTs){
+          getProfiles().forEach(function(p){fbSaveProfile(p);});
+          try{localStorage.setItem(PF_SYNC_TS_KEY,Date.now().toString());}catch(e){}
+        }
+        var fresh=getActiveProfile();
+        if(fresh)updateHeaderProfile(fresh);
+        _pfSyncing=false;
+      });
+    }
     return;
   }
   // Show picker with local data immediately, then refresh from Firebase
