@@ -176,7 +176,7 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
 .board-summary{display:flex;gap:8px;flex-wrap:wrap;}
 .bs-chip{padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .1s,outline .1s;}
 .bs-chip:hover{opacity:.85;}
-.bs-chip.active{outline:2.5px solid var(--navy);outline-offset:1px;}
+.bs-chip.active{box-shadow:0 0 0 2.5px var(--navy);}
 .bs-chip.c-ready{background:#dcfce7;color:#15803d;}
 .bs-chip.c-busy {background:#fee2e2;color:#991b1b;}
 .bs-chip.c-leave{background:#fef9c3;color:#854d0e;}
@@ -244,7 +244,7 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
 
 /* ── Custom Type chips (dynamic color via inline style) ── */
 .type-chip-dyn{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .1s;display:inline-flex;align-items:center;gap:4px;}
-.type-chip-dyn.active{outline:2.5px solid var(--navy);outline-offset:1px;}
+.type-chip-dyn.active{box-shadow:0 0 0 2.5px var(--navy);}
 .type-chip-dyn:hover{opacity:.82;}
 /* Type manager rows */
 .type-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);}
@@ -446,7 +446,7 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
         </div>
         <div class="board-summary" id="board-summary"></div>
       </div>
-      <div id="board-type-chips" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;"></div>
+      <div id="board-type-chips" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;padding:3px 2px;"></div>
       <div class="board-grid" id="board-grid"></div>
     </div>
   </div>
