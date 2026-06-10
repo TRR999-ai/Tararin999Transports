@@ -233,7 +233,7 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
     overflow-y:auto;-webkit-overflow-scrolling:touch;
     box-shadow:4px 0 24px rgba(0,0,0,.4);
   }
-  #mgr-sidebar.open{transform:translateX(0);}
+  #mgr-sidebar.open{transform:translateX(0);z-index:9100;}
   #mgr-main{width:100%;flex:1;}
   .mgr-topbar .sb-toggle{display:flex;}
   .mgr-body{padding:14px;}
@@ -372,7 +372,7 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
      MANAGER VIEW
 ═══════════════════════════════════════════ -->
 <div id="view-manager">
-  <div id="mgr-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:none;" onclick="closeMgrSidebar()"></div>
+  <div id="mgr-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9050;display:none;" onclick="closeMgrSidebar()"></div>
   <aside id="mgr-sidebar">
     <div class="mgr-sb-top">
       <div class="mgr-sb-logo"><img src="../TRR999logo.png" alt="TRR999" onerror="this.style.display='none'"></div>
