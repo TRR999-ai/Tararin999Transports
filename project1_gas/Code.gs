@@ -1,10 +1,11 @@
 // ─── TRR Transport — Driver Data GAS (สำหรับ project1/transport.html) ────────
 //
-// วิธี deploy:
-//   1. script.google.com → New project → วางโค้ดนี้
-//   2. Deploy → New deployment → Web app
+// วิธี deploy (container-bound — ต้องเปิดจากใน sheet):
+//   1. เปิด Google Sheet "รายชื่อคนขับ"
+//   2. Extensions → Apps Script → วางโค้ดนี้ → Save
+//   3. Deploy → New deployment → Web app
 //      Execute as : Me  |  Who has access : Anyone
-//   3. Copy URL → วางใน transport.html บรรทัด DRIVER_GAS_URL = '...URL...'
+//   4. Copy URL → วางใน transport.html บรรทัด DRIVER_GAS_URL = '...URL...'
 //
 // แหล่งข้อมูล:
 //   GET  — อ่านจาก "รายชื่อคนขับ" tab (master sheet)
@@ -17,14 +18,13 @@
 //   D: เด็กรถ(ถ้ามี)   E-K: ข้อมูลอื่น (ไม่ใช้)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const MASTER_SHEET_ID = '1HC2aGOvAUx-s82kBi2cMU-8U3k4POiqn7lXYeWr-C4c';
-const DRIVERS_TAB     = 'รายชื่อคนขับ';
-const PHONES_TAB      = 'transport_phones';   // สร้างอัตโนมัติถ้ายังไม่มี
+const DRIVERS_TAB = 'รายชื่อคนขับ';
+const PHONES_TAB  = 'transport_phones';   // สร้างอัตโนมัติถ้ายังไม่มี
 
 // ── GET: return driver list ──────────────────────────────────────────────────
 function doGet(e) {
   try {
-    const ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
 
     // 1. Read master driver list
     const driverSh = ss.getSheetByName(DRIVERS_TAB);
@@ -73,7 +73,7 @@ function doPost(e) {
     const body    = JSON.parse(e.postData.contents);
     const drivers = body.drivers || [];
 
-    const ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     let phoneSh = ss.getSheetByName(PHONES_TAB);
     if (!phoneSh) {
       phoneSh = ss.insertSheet(PHONES_TAB);
