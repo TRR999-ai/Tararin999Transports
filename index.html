@@ -167,15 +167,42 @@ body {
 /* ── Content area ── */
 #content {
   flex: 1;
-  overflow: auto;
+  height: 100vh;
   position: relative;
-  /* Subtle grid background */
+  overflow: hidden;
+}
+#portal-home {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
   background:
     linear-gradient(rgba(27,39,112,0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(27,39,112,0.04) 1px, transparent 1px),
     #E9EDF5;
   background-size: 44px 44px;
 }
+#page-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: none;
+}
+#frame-loader {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: #f0f2f5;
+  z-index: 5;
+  color: var(--muted);
+  font-size: 14px;
+  gap: 8px;
+  pointer-events: none;
+}
+#frame-loader.show { display: flex; }
 
 /* Background geometric shapes */
 .bg-shape {
@@ -553,38 +580,38 @@ body {
   </div>
 
   <nav class="sb-nav">
-    <div class="nav-item active">
+    <div class="nav-item active" data-page="home" onclick="navHome()">
       <span class="nav-icon">🏠</span>
       <span>Portal</span>
     </div>
-    <a class="nav-item" href="./project1/transport.html">
+    <div class="nav-item" data-page="./project1/transport.html" onclick="navTo('./project1/transport.html','งานขนส่ง')">
       <span class="nav-icon">🚚</span>
       <span>งานขนส่ง</span>
-    </a>
-    <a class="nav-item" href="./project2/index.html">
+    </div>
+    <div class="nav-item" data-page="./project2/index.html" onclick="navTo('./project2/index.html','Fleet Card')">
       <span class="nav-icon">💳</span>
       <span>Fleet Card</span>
-    </a>
-    <a class="nav-item" href="./trr.html">
+    </div>
+    <div class="nav-item" data-page="./trr.html" onclick="navTo('./trr.html','ต้นทุนน้ำมัน')">
       <span class="nav-icon">⛽</span>
       <span>ต้นทุนน้ำมัน</span>
-    </a>
-    <a class="nav-item" href="./priceboard/index.html">
+    </div>
+    <div class="nav-item" data-page="./priceboard/index.html" onclick="navTo('./priceboard/index.html','กระดานราคา')">
       <span class="nav-icon">💰</span>
       <span>กระดานราคา</span>
-    </a>
-    <a class="nav-item" href="./fleet_view/index.html">
+    </div>
+    <div class="nav-item" data-page="./fleet_view/index.html" onclick="navTo('./fleet_view/index.html','Fleet View')">
       <span class="nav-icon">🚦</span>
       <span>Fleet View</span>
-    </a>
-    <a class="nav-item" href="./attendance/index.html">
+    </div>
+    <div class="nav-item" data-page="./attendance/index.html" onclick="navTo('./attendance/index.html','เช็คชื่อเข้างาน')">
       <span class="nav-icon">🕐</span>
       <span>เช็คชื่อเข้างาน</span>
-    </a>
-    <a class="nav-item" href="./help.html">
+    </div>
+    <div class="nav-item" data-page="./help.html" onclick="navTo('./help.html','คู่มือการใช้งาน')">
       <span class="nav-icon">📖</span>
       <span>คู่มือการใช้งาน</span>
-    </a>
+    </div>
   </nav>
 
   <div class="sb-footer">© 2026 TARARIN 999</div>
@@ -610,6 +637,7 @@ body {
   </header>
 
   <div id="content">
+    <div id="portal-home">
     <!-- Background shapes (mimic diagonal geometric design) -->
     <div class="bg-shape bg-shape-1"></div>
     <div class="bg-shape bg-shape-3"></div>
@@ -621,67 +649,67 @@ body {
       <div class="cards-row">
 
         <!-- ── งานขนส่ง ── -->
-        <a class="portal-card" href="./project1/transport.html">
+        <div class="portal-card" onclick="navTo('./project1/transport.html','งานขนส่ง')">
           <div class="card-icon-area">
             <div class="card-icon-circle">🚚</div>
           </div>
           <div class="card-title">ระบบจัดการ<br>งานขนส่ง</div>
           <div class="card-sub-bar">TRANSPORT</div>
-        </a>
+        </div>
 
         <!-- ── Fleet Card ── -->
-        <a class="portal-card" href="./project2/index.html">
+        <div class="portal-card" onclick="navTo('./project2/index.html','Fleet Card')">
           <div class="card-icon-area">
             <div class="card-icon-circle">💳</div>
           </div>
           <div class="card-title">Fleet Card<br>Batch Update</div>
           <div class="card-sub-bar">CARRIER WEB</div>
-        </a>
+        </div>
 
         <!-- ── TRR Fuel ── -->
-        <a class="portal-card" href="./trr.html">
+        <div class="portal-card" onclick="navTo('./trr.html','ต้นทุนน้ำมัน')">
           <div class="card-icon-area">
             <div class="card-icon-circle">⛽</div>
           </div>
           <div class="card-title">ต้นทุนน้ำมัน<br>TRR Transport</div>
           <div class="card-sub-bar">FUEL MANAGER</div>
-        </a>
+        </div>
 
         <!-- ── Price Board ── -->
-        <a class="portal-card" href="./priceboard/index.html">
+        <div class="portal-card" onclick="navTo('./priceboard/index.html','กระดานราคา')">
           <div class="card-icon-area">
             <div class="card-icon-circle">💰</div>
           </div>
           <div class="card-title">กระดานราคา<br>ขนส่ง 6 ล้อ</div>
           <div class="card-sub-bar">PRICE BOARD</div>
-        </a>
+        </div>
 
         <!-- ── Fleet View ── -->
-        <a class="portal-card" href="./fleet_view/index.html">
+        <div class="portal-card" onclick="navTo('./fleet_view/index.html','Fleet View')">
           <div class="card-icon-area">
             <div class="card-icon-circle">🚦</div>
           </div>
           <div class="card-title">Fleet<br>Dashboard</div>
           <div class="card-sub-bar">FLEET VIEW</div>
-        </a>
+        </div>
 
         <!-- ── Attendance ── -->
-        <a class="portal-card" href="./attendance/index.html">
+        <div class="portal-card" onclick="navTo('./attendance/index.html','เช็คชื่อเข้างาน')">
           <div class="card-icon-area">
             <div class="card-icon-circle">🕐</div>
           </div>
           <div class="card-title">เช็คชื่อ<br>เข้าทำงาน</div>
           <div class="card-sub-bar">ATTENDANCE</div>
-        </a>
+        </div>
 
         <!-- ── Help ── -->
-        <a class="portal-card" href="./help.html">
+        <div class="portal-card" onclick="navTo('./help.html','คู่มือการใช้งาน')">
           <div class="card-icon-area">
             <div class="card-icon-circle">📖</div>
           </div>
           <div class="card-title">คู่มือ<br>การใช้งาน</div>
           <div class="card-sub-bar">USER GUIDE</div>
-        </a>
+        </div>
 
       </div>
 
@@ -702,6 +730,9 @@ body {
 
       <p class="portal-footer">©2026 บริษัท ธรารินทร์ 999 ขนส่ง จำกัด — TARARIN 999 TRANSPORT CO.,LTD.</p>
     </div>
+    </div><!-- /#portal-home -->
+    <div id="frame-loader"><span style="font-size:22px">⏳</span>&nbsp;กำลังโหลด...</div>
+    <iframe id="page-frame" title="TRR Portal Frame"></iframe>
   </div>
 
 </div>
@@ -1059,6 +1090,40 @@ function verifyProfilePw(){
   }
 }
 
+// ── iframe navigation ──────────────────────────────────────────────────────
+function navTo(page, title) {
+  var frame  = document.getElementById('page-frame');
+  var loader = document.getElementById('frame-loader');
+  var home   = document.getElementById('portal-home');
+  loader.classList.add('show');
+  home.style.display = 'none';
+  frame.style.display = 'block';
+  document.querySelector('.tb-title').textContent = title || 'TRR Portal';
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  var match = document.querySelector('.nav-item[data-page="'+page+'"]');
+  if (match) match.classList.add('active');
+  if (window.innerWidth <= 899) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sb-overlay').classList.remove('show');
+  }
+  frame.onload = function(){ loader.classList.remove('show'); };
+  frame.src = page;
+}
+function navHome() {
+  var frame = document.getElementById('page-frame');
+  frame.style.display = 'none';
+  frame.src = 'about:blank';
+  document.getElementById('portal-home').style.display = '';
+  document.querySelector('.tb-title').textContent = 'User Portal';
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  var homeItem = document.querySelector('.nav-item[data-page="home"]');
+  if (homeItem) homeItem.classList.add('active');
+  if (window.innerWidth <= 899) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sb-overlay').classList.remove('show');
+  }
+}
+
 function enterPortal(pf){
   sessionStorage.setItem(ACTIVE_PF_KEY,pf.id);
   localStorage.setItem(PW_KEY,LEGACY_TOKEN);
@@ -1067,7 +1132,8 @@ function enterPortal(pf){
   updateHeaderProfile(pf);
   var redir='';try{redir=sessionStorage.getItem('trr_redirect')||'';}catch(e){}
   if(redir&&redir.indexOf('index.html')===-1&&redir!==location.href){
-    try{sessionStorage.removeItem('trr_redirect');}catch(e){}location.replace(redir);
+    try{sessionStorage.removeItem('trr_redirect');}catch(e){}
+    navTo(redir,'');
   }
 }
 function updateHeaderProfile(pf){

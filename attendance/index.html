@@ -317,7 +317,9 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
 /* Toast */
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);z-index:2000;background:#1e293b;color:#fff;padding:12px 22px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;transition:transform .3s,opacity .3s;white-space:nowrap;}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+html.in-iframe .mgr-topbar,html.in-iframe #qnav{display:none!important}
 </style>
+<script>if(window.self!==window.top)document.documentElement.classList.add('in-iframe');</script>
 </head>
 <body>
 

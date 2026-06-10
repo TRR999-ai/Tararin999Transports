@@ -357,7 +357,10 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
 .stmt-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
 .stmt-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:.15s;}
 .stmt-tab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+html.in-iframe #sidebar,html.in-iframe #qnav{display:none!important}
+html.in-iframe #main{margin-left:0!important;width:100%!important}
 </style>
+<script>if(window.self!==window.top)document.documentElement.classList.add('in-iframe');</script>
 </head>
 <body>
 <script>(function(){var pw=localStorage.getItem('trr_pw_hash'),ses=localStorage.getItem('trr_session');if(pw&&ses===pw)return;try{sessionStorage.setItem('trr_redirect',location.href);}catch(e){}location.replace('../index.html');})();</script>

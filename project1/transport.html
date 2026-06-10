@@ -274,8 +274,9 @@ textarea:focus { outline: none; border-color: #F5A623; }
   .modal{width:100%;max-width:100%;border-radius:12px 12px 0 0;margin-top:auto;padding:16px}
   .overlay{align-items:flex-end}
 }
-
+html.in-iframe header,html.in-iframe #qnav{display:none!important}
 </style>
+<script>if(window.self!==window.top)document.documentElement.classList.add('in-iframe');</script>
 </head>
 <body>
 <script>(function(){var pw=localStorage.getItem('trr_pw_hash'),ses=localStorage.getItem('trr_session');if(pw&&ses===pw)return;try{sessionStorage.setItem('trr_redirect',location.href);}catch(e){}location.replace('../index.html');})();</script>

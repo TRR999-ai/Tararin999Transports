@@ -108,7 +108,9 @@
     @media(max-width:899px){ #header{padding:8px 12px} #stats-bar{display:none} #toolbar{top:51px;padding:7px 10px} }
     @media(max-width:639px){ #header{flex-wrap:wrap;gap:6px}.header-info h1{font-size:13px} #table-wrap{margin:4px 4px 0;max-height:none;overflow:visible} #export-bar{flex-wrap:wrap;gap:6px} #status-msg{font-size:11px} #export-btn{width:100%;padding:9px;font-size:13px} .add-form-grid{grid-template-columns:1fr} }
     @media(max-width:480px){ input,select,textarea{font-size:16px!important} #export-bar{flex-direction:column;align-items:stretch} .add-form-grid input,.add-form-grid select{min-height:40px} #table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch} }
+    html.in-iframe #header,html.in-iframe #qnav{display:none!important}
   </style>
+<script>if(window.self!==window.top)document.documentElement.classList.add('in-iframe');</script>
 </head>
 <body>
 <script>(function(){var pw=localStorage.getItem('trr_pw_hash'),ses=localStorage.getItem('trr_session');if(pw&&ses===pw)return;try{sessionStorage.setItem('trr_redirect',location.href);}catch(e){}location.replace('../index.html');})();</script>
