@@ -300,7 +300,12 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
   .kpi-card{padding:12px;min-width:90px;}
   .page-body{padding:10px 8px;}
   .search{width:120px;}
-  .charts-row,.board-summary,.board-controls{flex-direction:column;}
+  .charts-row,.board-controls{flex-direction:column;}
+  .board-header{flex-direction:column;align-items:center;text-align:center;gap:10px;}
+  .board-summary{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;max-width:320px;}
+  .board-summary .bs-chip{text-align:center;}
+  .board-clock{font-size:20px;}
+  #board-type-chips{justify-content:center;}
   .trip-grid,.board-grid{grid-template-columns:1fr 1fr;}
   .bar-sub{display:none;}
 }
