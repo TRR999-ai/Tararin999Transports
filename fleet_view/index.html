@@ -1618,7 +1618,7 @@ function openBoardDetail(plate){
   }
   var ni=document.getElementById('bdm-note-inp');
   ni.value=noteMap[plate]||'';ni.dataset.plate=plate;
-  var trips=allTrips.filter(function(x){return x.plate===plate;}).sort(function(a,b){return b.date-a.date;}).slice(0,2);
+  var trips=allTrips.filter(function(x){return x.plate===plate;}).sort(function(a,b){return b.date-a.date;}).slice(0,3);
   document.getElementById('bdm-trips').innerHTML=trips.length?trips.map(function(tr,i){
     return '<div class="bdm-trip">'
       +'<div class="bdm-trip-date">'+tr.dateStr+'&nbsp;'+badgeRoute(tr.route)+'</div>'
@@ -2823,7 +2823,7 @@ updateStmtSheetBtn();
     <div class="bdm-status-btns" id="bdm-status-btns"></div>
     <div id="bdm-type-wrap"></div>
     <textarea class="bdm-note-inp" id="bdm-note-inp" placeholder="📝 Note..." rows="2" oninput="autoResize(this)"></textarea>
-    <div class="bdm-trip-hdr">2 งานล่าสุด</div>
+    <div class="bdm-trip-hdr">3 งานล่าสุด</div>
     <div id="bdm-trips"></div>
   </div>
 </div>
