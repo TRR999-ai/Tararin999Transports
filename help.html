@@ -557,6 +557,7 @@ window.addEventListener('scroll',function(){
 <!-- ── Quick Nav FAB ── -->
 <style>
 #qnav{position:fixed;bottom:20px;left:18px;z-index:9000;font-family:'Segoe UI',Arial,sans-serif;}
+@media(min-width:769px){#qnav{left:258px;}}
 #qnav-pop{display:none;position:absolute;bottom:50px;left:0;background:#1a2770;border-radius:14px;padding:6px;box-shadow:0 8px 32px rgba(0,0,0,.5);width:172px;border:1px solid rgba(255,255,255,.08);}
 #qnav-pop.show{display:block;animation:qnin .14s ease;}
 @keyframes qnin{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
