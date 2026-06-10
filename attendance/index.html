@@ -584,22 +584,23 @@ function fbSaveRecord(rec){
 }
 function fbLoadRecordsByDate(date,cb){
   if(!_db){cb([]);return;}
-  _db.collection('attendance').where('date','==',date)
-    .orderBy('ts','asc').get()
+  _db.collection('attendance').where('date','==',date).get()
     .then(function(snap){
-      var out=[];snap.forEach(function(d){out.push(d.data());});cb(out);
-    }).catch(function(){cb([]);});
+      var out=[];snap.forEach(function(d){out.push(d.data());});
+      out.sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+      cb(out);
+    }).catch(function(e){console.warn('[Attendance] fbLoadByDate error',e);cb([]);});
 }
 function fbLoadRecordsByMonth(month,cb){
-  // month = 'YYYY-MM'
   if(!_db){cb([]);return;}
   var start=month+'-01',end=month+'-32';
   _db.collection('attendance')
-    .where('date','>=',start).where('date','<=',end)
-    .orderBy('date','asc').orderBy('ts','asc').get()
+    .where('date','>=',start).where('date','<=',end).get()
     .then(function(snap){
-      var out=[];snap.forEach(function(d){out.push(d.data());});cb(out);
-    }).catch(function(){cb([]);});
+      var out=[];snap.forEach(function(d){out.push(d.data());});
+      out.sort(function(a,b){return a.date===b.date?(a.ts||0)-(b.ts||0):a.date<b.date?-1:1;});
+      cb(out);
+    }).catch(function(e){console.warn('[Attendance] fbLoadByMonth error',e);cb([]);});
 }
 // Merge Firestore records into localStorage (union by id)
 function fbMergeToLocal(fbRecords){
