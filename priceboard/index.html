@@ -18,7 +18,8 @@
   --text:#2D3748;--muted:#64748B;
   --green:#16a34a;--red:#DC2626;--blue:#2563eb;
 }
-body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color:var(--text);background:var(--bg);min-height:100vh}
+body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color:var(--text);background:var(--bg);min-height:100vh;animation:pgFade .22s ease;}
+@keyframes pgFade{from{opacity:0}to{opacity:1}}
 
 /* ── Topbar ── */
 #topbar{background:var(--navy);border-bottom:3px solid var(--gold);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:200}

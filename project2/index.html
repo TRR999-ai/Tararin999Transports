@@ -14,7 +14,8 @@
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Sarabun','Noto Sans Thai',Arial,sans-serif; font-size: 14px; background: #f0f2f5; min-height: 100vh; display: flex; flex-direction: column; }
+    body { font-family: 'Sarabun','Noto Sans Thai',Arial,sans-serif; font-size: 14px; background: #f0f2f5; min-height: 100vh; display: flex; flex-direction: column; animation: pgFade .22s ease; }
+    @keyframes pgFade{from{opacity:0}to{opacity:1}}
 
     /* ─── Header ─── */
     #header { background: #1B2770; border-bottom: 3px solid #F5A623; color: #fff; padding: 10px 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 8px rgba(0,0,0,.3); }

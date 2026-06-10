@@ -11,16 +11,17 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root{
-  --navy:#1e3a5f;--navy2:#2a4f7c;
-  --gold:#c9a227;--gold2:#f0c040;
-  --sidebar-w:224px;
+  --navy:#1B2770;--navy2:#2233A0;--navy-dark:#141D5C;
+  --gold:#F5A623;--gold2:#FBBF24;
+  --sidebar-w:200px;
   --bg:#f0f2f5;--card:#fff;
-  --text:#1a1a2e;--text2:#5a6478;
-  --border:#e0e4ec;
-  --green:#1a7a40;--red:#b03020;
+  --text:#2D3748;--text2:#64748B;
+  --border:#E2E8F0;
+  --green:#16a34a;--red:#dc2626;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);}
+body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;background:var(--bg);color:var(--text);animation:pgFade .22s ease;}
+@keyframes pgFade{from{opacity:0}to{opacity:1}}
 
 /* ── Sidebar ── */
 #sidebar{position:fixed;left:0;top:0;width:var(--sidebar-w);height:100vh;background:var(--navy);color:#fff;display:flex;flex-direction:column;z-index:100;overflow-y:auto;}
@@ -32,12 +33,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
 .sb-sec-hdr{font-size:9px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.3);padding:0 18px 5px;text-transform:uppercase;}
 .nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 18px;background:none;border:none;color:rgba(255,255,255,.72);font-size:13px;cursor:pointer;text-align:left;transition:background .15s,color .15s;}
 .nav-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
-.nav-btn.active{background:rgba(201,162,39,.18);color:var(--gold2);}
+.nav-btn.active{background:rgba(245,166,35,.18);color:var(--gold2);}
 .nav-btn .ic{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
 .month-pills{padding:4px 10px 8px;display:flex;flex-direction:column;gap:3px;}
 .m-pill{display:block;width:100%;padding:5px 10px;background:rgba(255,255,255,.06);border:none;border-radius:6px;color:rgba(255,255,255,.65);font-size:12px;cursor:pointer;text-align:left;transition:background .15s,color .15s;}
 .m-pill:hover{background:rgba(255,255,255,.12);color:#fff;}
-.m-pill.active{background:rgba(201,162,39,.25);color:var(--gold2);font-weight:700;}
+.m-pill.active{background:rgba(245,166,35,.25);color:var(--gold2);font-weight:700;}
 .sb-foot{margin-top:auto;padding:10px 18px;font-size:10px;color:rgba(255,255,255,.25);border-top:1px solid rgba(255,255,255,.06);}
 #sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9050;display:none;}
 #sb-overlay.show{display:block;}
@@ -96,7 +97,7 @@ table.dt th.sort{cursor:pointer;}
 table.dt th.sort:hover{color:var(--navy);}
 table.dt td{padding:9px 13px;border-bottom:1px solid var(--border);vertical-align:middle;}
 table.dt tr:hover td{background:rgba(30,58,95,.025);}
-table.dt tr.exp-row td{background:rgba(201,162,39,.06);}
+table.dt tr.exp-row td{background:rgba(245,166,35,.06);}
 .no-data{padding:28px;text-align:center;color:var(--text2);font-size:13px;}
 table.sub{width:100%;border-collapse:collapse;font-size:12px;}
 table.sub td{padding:7px 13px;border-bottom:1px solid rgba(0,0,0,.04);}
@@ -334,7 +335,7 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
 }
 /* ── Statement Page ── */
 .stmt-upload-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;border:2.5px dashed var(--border);border-radius:14px;padding:60px 24px;margin:40px auto;max-width:460px;cursor:pointer;transition:border-color .2s,background .2s;}
-.stmt-upload-zone:hover{border-color:var(--gold);background:rgba(201,162,39,.04);}
+.stmt-upload-zone:hover{border-color:var(--gold);background:rgba(245,166,35,.04);}
 .stmt-upload-zone .upload-icon{font-size:44px;margin-bottom:14px;}
 .stmt-upload-zone .upload-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px;}
 .stmt-upload-zone .upload-sub{font-size:12px;color:var(--text2);}
@@ -352,7 +353,7 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
 .anom-badge{background:#fff3cd;color:#856404;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;}
 .eff-bar{height:6px;border-radius:3px;background:var(--border);margin-top:4px;}
 .eff-bar-fill{height:100%;border-radius:3px;background:var(--green);}
-.file-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(201,162,39,.12);color:var(--navy);border-radius:20px;padding:3px 12px 3px 8px;font-size:11px;font-weight:600;}
+.file-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(245,166,35,.12);color:var(--navy);border-radius:20px;padding:3px 12px 3px 8px;font-size:11px;font-weight:600;}
 .stmt-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
 .stmt-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:.15s;}
 .stmt-tab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
@@ -1333,7 +1334,7 @@ function renderMonthTable(){
     var plates={},drivers={};
     mFuel.forEach(function(t){plates[t.plate]=1;if(t.driver)drivers[t.driver]=1;});
     var active=selectedMonth===ym;
-    return '<tr style="'+(active?'background:rgba(201,162,39,.08);':'')+'cursor:pointer;" onclick="setMonth(\''+(active?'':ym)+'\',null)">'
+    return '<tr style="'+(active?'background:rgba(245,166,35,.08);':'')+'cursor:pointer;" onclick="setMonth(\''+(active?'':ym)+'\',null)">'
       +'<td><b>'+monthLabel(ym)+'</b></td><td class="num">'+mAll.length.toLocaleString()+'</td>'
       +'<td class="num">'+km.toLocaleString(undefined,{maximumFractionDigits:0})+'</td>'
       +'<td class="num">'+(cost>0?'฿'+cost.toLocaleString(undefined,{maximumFractionDigits:0}):'—')+'</td>'
@@ -1349,15 +1350,15 @@ function renderCharts(fuel,bp,bd){
   allTrips.filter(function(t){return t.type==='fuel';}).forEach(function(t){var k=tripMonth(t);mMap[k]=(mMap[k]||0)+t.total;});
   var months=Object.keys(mMap).sort();
   destroyChart('monthly');
-  charts.monthly=new Chart(document.getElementById('ch-monthly'),{type:'bar',data:{labels:months.map(monthLabel),datasets:[{label:'บาท',data:months.map(function(m){return mMap[m];}),backgroundColor:months.map(function(m){return m===selectedMonth?'#c9a227':'#1e3a5f';}),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return (v/1000).toFixed(0)+'K';}}}}}});
+  charts.monthly=new Chart(document.getElementById('ch-monthly'),{type:'bar',data:{labels:months.map(monthLabel),datasets:[{label:'บาท',data:months.map(function(m){return mMap[m];}),backgroundColor:months.map(function(m){return m===selectedMonth?'#F5A623':'#1e3a5f';}),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return (v/1000).toFixed(0)+'K';}}}}}});
   var rMap={};getTrips().forEach(function(t){var r=(t.route||'อื่นๆ').trim()||'อื่นๆ';rMap[r]=(rMap[r]||0)+1;});
   var topR=Object.entries(rMap).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
-  var pal=['#1e3a5f','#c9a227','#2a4f7c','#1a7a40','#b03020','#7f8c8d','#2980b9','#8e44ad'];
+  var pal=['#1B2770','#F5A623','#2233A0','#16a34a','#dc2626','#7f8c8d','#2980b9','#8e44ad'];
   destroyChart('route');
   charts.route=new Chart(document.getElementById('ch-route'),{type:'doughnut',data:{labels:topR.map(function(x){return x[0];}),datasets:[{data:topR.map(function(x){return x[1];}),backgroundColor:pal}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:12}}}}});
   var topPlates=Object.values(bp).filter(function(p){return p.total>0;}).sort(function(a,b){return b.total-a.total;}).slice(0,10);
   destroyChart('topPlate');
-  charts.topPlate=new Chart(document.getElementById('ch-top-plate'),{type:'bar',data:{labels:topPlates.map(function(p){return p.plate;}),datasets:[{data:topPlates.map(function(p){return p.total;}),backgroundColor:'#c9a227',borderRadius:3}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:function(v){return (v/1000).toFixed(0)+'K';}}}}}});
+  charts.topPlate=new Chart(document.getElementById('ch-top-plate'),{type:'bar',data:{labels:topPlates.map(function(p){return p.plate;}),datasets:[{data:topPlates.map(function(p){return p.total;}),backgroundColor:'#F5A623',borderRadius:3}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:function(v){return (v/1000).toFixed(0)+'K';}}}}}});
   var topDrv=Object.values(bd).filter(function(d){return d.km>0;}).sort(function(a,b){return b.km-a.km;}).slice(0,10);
   destroyChart('topDriver');
   charts.topDriver=new Chart(document.getElementById('ch-top-driver'),{type:'bar',data:{labels:topDrv.map(function(d){return d.driver.split(' ')[0];}),datasets:[{data:topDrv.map(function(d){return d.km;}),backgroundColor:'#2a4f7c',borderRadius:3}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}}}});
@@ -1900,7 +1901,7 @@ function renderTopRoutes(){
       type:'bar',
       data:{
         labels:top.map(function(r){return r.route.length>20?r.route.slice(0,20)+'…':r.route;}),
-        datasets:[{data:top.map(function(r){return r.cost;}),backgroundColor:'#c9a227',borderRadius:3}]
+        datasets:[{data:top.map(function(r){return r.cost;}),backgroundColor:'#F5A623',borderRadius:3}]
       },
       options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{callback:function(v){return(v/1000).toFixed(0)+'K';}}}}}
     });
@@ -1957,7 +1958,7 @@ function renderPlateTrend(){
         datasets:[
           {label:'ค่าน้ำมัน (฿)',data:months.map(function(ym){return mData[ym].cost;}),backgroundColor:'rgba(30,58,95,.65)',borderRadius:3,yAxisID:'y1'},
           {label:'฿/km',data:months.map(function(ym){return mData[ym].km>0?(mData[ym].cost/mData[ym].km):null;}),
-           type:'line',borderColor:'#c9a227',backgroundColor:'rgba(201,162,39,.1)',tension:.3,fill:true,pointRadius:4,pointBackgroundColor:'#c9a227',yAxisID:'y2'}
+           type:'line',borderColor:'#F5A623',backgroundColor:'rgba(245,166,35,.1)',tension:.3,fill:true,pointRadius:4,pointBackgroundColor:'#F5A623',yAxisID:'y2'}
         ]
       },
       options:{responsive:true,plugins:{legend:{position:'top'}},scales:{
@@ -2309,7 +2310,7 @@ function renderStmtProvChart(provs){
   var canvas=document.getElementById('ch-stmt-prov');if(!canvas)return;
   if(stmtChartInst.prov)stmtChartInst.prov.destroy();
   var top=provs.slice(0,10);
-  var colors=['#1e3a5f','#2a4f7c','#3a6fa8','#4d8bc9','#6aa3d5','#8bbde0','#c9a227','#f0c040','#f5d06e','#f9e09a'];
+  var colors=['#1e3a5f','#2a4f7c','#3a6fa8','#4d8bc9','#6aa3d5','#8bbde0','#F5A623','#f0c040','#f5d06e','#f9e09a'];
   var _provs=top;
   stmtChartInst.prov=new Chart(canvas,{
     type:'doughnut',
@@ -2340,7 +2341,7 @@ function renderStmtDailyChart(keys,byDay){
     data:{
       labels:keys.map(function(k){var p=k.split('-');return p[2]+'/'+p[1];}),
       datasets:[
-        {label:'ยอด (฿)',data:keys.map(function(k){return byDay[k].amount;}),backgroundColor:'rgba(201,162,39,.75)',hoverBackgroundColor:'rgba(201,162,39,1)',borderRadius:3,yAxisID:'y'},
+        {label:'ยอด (฿)',data:keys.map(function(k){return byDay[k].amount;}),backgroundColor:'rgba(245,166,35,.75)',hoverBackgroundColor:'rgba(245,166,35,1)',borderRadius:3,yAxisID:'y'},
         {label:'ลิตร',data:keys.map(function(k){return byDay[k].litres;}),type:'line',borderColor:'rgba(30,58,95,.9)',backgroundColor:'transparent',pointRadius:2,tension:.3,yAxisID:'y2'}
       ]
     },
