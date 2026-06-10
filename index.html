@@ -1131,6 +1131,11 @@ function enterPortal(pf){
   localStorage.setItem(SES_KEY,LEGACY_TOKEN);
   document.getElementById('profile-overlay').style.display='none';
   updateHeaderProfile(pf);
+  // Reload iframe if it's currently showing a page (profile changed → stale content)
+  var frame=document.getElementById('page-frame');
+  if(frame&&frame.style.display!=='none'&&frame.src&&frame.src.indexOf('about:blank')===-1){
+    var cur=frame.src;frame.src='about:blank';frame.src=cur;
+  }
   var redir='';try{redir=sessionStorage.getItem('trr_redirect')||'';}catch(e){}
   if(redir&&redir.indexOf('index.html')===-1&&redir!==location.href){
     try{sessionStorage.removeItem('trr_redirect');}catch(e){}
