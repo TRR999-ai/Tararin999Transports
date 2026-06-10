@@ -307,8 +307,13 @@ table.sub tr.sub-hdr td{background:var(--bg);font-weight:700;font-size:11px;colo
 @media(max-width:480px){
   /* iOS zoom prevention */
   input,select,textarea{font-size:16px!important}
-  /* Board cards: single column on very small phones */
-  .board-grid{grid-template-columns:1fr}
+  /* Board cards: 2 columns, compact */
+  .board-grid{grid-template-columns:1fr 1fr}
+  .board-card{padding:10px 8px}
+  .board-plate{font-size:15px}
+  .board-st-lbl{font-size:11px;padding:2px 8px}
+  .board-driver{font-size:12px}
+  .board-trip-brief{font-size:9px}
   /* Type filter chips: scrollable row */
   #board-type-chips,#latest-type-bar{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:4px}
   .type-chip{white-space:nowrap;flex-shrink:0}
