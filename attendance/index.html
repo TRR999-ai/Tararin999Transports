@@ -319,7 +319,7 @@ body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;colo
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 html.in-iframe #view-manager{flex-direction:column!important}
 html.in-iframe #mgr-sidebar{width:100%!important;height:auto!important;flex-direction:row!important;background:var(--navy-dark)!important}
-html.in-iframe .mgr-sb-top,html.in-iframe .mgr-sb-foot,html.in-iframe .mgr-topbar,html.in-iframe .emp-back,html.in-iframe #qnav{display:none!important}
+html.in-iframe .mgr-sb-top,html.in-iframe .mgr-sb-foot,html.in-iframe .mgr-topbar,html.in-iframe .emp-back,html.in-iframe #mgr-overlay,html.in-iframe #qnav{display:none!important}
 html.in-iframe .mgr-nav{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;padding:2px 6px!important;gap:2px!important;flex:unset!important}
 html.in-iframe .mgr-nav-btn{width:auto!important;display:inline-flex!important;padding:8px 14px!important;font-size:12px!important;min-height:unset!important;border-bottom:3px solid transparent!important}
 html.in-iframe .mgr-nav-btn:hover{border-bottom-color:rgba(245,166,35,0.5)!important}
@@ -916,6 +916,7 @@ function showMgrPage(id,btn){
   if(id==='settings')loadOfficeToSettings();
 }
 function toggleMgrSidebar(){
+  if(window.self!==window.top)return;
   var sb=document.getElementById('mgr-sidebar');
   var ov=document.getElementById('mgr-overlay');
   sb.classList.toggle('open');
