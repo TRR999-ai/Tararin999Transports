@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "project4",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "7890", "--directory", "C:\\Users\\chait\\OneDrive\\Desktop\\CLAUDE\\project4"],
+      "port": 7890
+    }
+  ]
+}
