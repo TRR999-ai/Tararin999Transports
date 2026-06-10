@@ -1126,6 +1126,7 @@ function navHome() {
 
 function enterPortal(pf){
   sessionStorage.setItem(ACTIVE_PF_KEY,pf.id);
+  localStorage.setItem(ACTIVE_PF_KEY,pf.id);
   localStorage.setItem(PW_KEY,LEGACY_TOKEN);
   localStorage.setItem(SES_KEY,LEGACY_TOKEN);
   document.getElementById('profile-overlay').style.display='none';
@@ -1144,6 +1145,7 @@ function updateHeaderProfile(pf){
 }
 function switchProfile(){
   sessionStorage.removeItem(ACTIVE_PF_KEY);
+  localStorage.removeItem(ACTIVE_PF_KEY);
   localStorage.removeItem(SES_KEY);
   renderProfilePicker();
   showProfileGrid();
@@ -1156,6 +1158,7 @@ function openCurrentPfEdit(){
 function checkAuth(){
   var pf=getActiveProfile();
   if(pf){
+    localStorage.setItem(ACTIVE_PF_KEY,pf.id);
     localStorage.setItem(PW_KEY,LEGACY_TOKEN);localStorage.setItem(SES_KEY,LEGACY_TOKEN);
     document.getElementById('profile-overlay').style.display='none';
     updateHeaderProfile(pf);
