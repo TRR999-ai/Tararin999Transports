@@ -78,7 +78,7 @@ body{
   background:var(--sb-item-active);color:var(--sb-text-active);
   border-left-color:var(--sb-accent);font-weight:600;
 }
-.nav-icon{font-size:16px;flex-shrink:0}
+.nav-icon{font-size:16px;flex-shrink:0;display:inline-flex;align-items:center;}
 
 .sb-footer{
   padding:12px 14px;border-top:1px solid var(--glass-border-sm);
@@ -524,35 +524,35 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
 
   <nav class="sb-nav">
     <div class="nav-item active" data-page="home" onclick="navHome()">
-      <span class="nav-icon">🏠</span>
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
       <span>Portal</span>
     </div>
     <div class="nav-item" data-page="./project1/transport.html" onclick="navTo('./project1/transport.html','งานขนส่ง')">
-      <span class="nav-icon">🚚</span>
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
       <span>งานขนส่ง</span>
     </div>
     <div class="nav-item" data-page="./project2/index.html" onclick="navTo('./project2/index.html','Fleet Card')">
-      <span class="nav-icon">💳</span>
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
       <span>Fleet Card</span>
     </div>
     <div class="nav-item" data-page="./trr.html" onclick="navTo('./trr.html','ต้นทุนน้ำมัน')">
-      <span class="nav-icon">⛽</span>
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span>
       <span>ต้นทุนน้ำมัน</span>
     </div>
     <div class="nav-item" data-page="./priceboard/index.html" onclick="navTo('./priceboard/index.html','กระดานราคา')">
-      <span class="nav-icon">💰</span>
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
       <span>กระดานราคา</span>
     </div>
     <div class="nav-item" data-page="./fleet_view/index.html" onclick="navTo('./fleet_view/index.html','Fleet View')">
-      <span class="nav-icon">🚦</span>
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
       <span>Fleet View</span>
     </div>
     <div class="nav-item" data-page="./attendance/index.html" onclick="navTo('./attendance/index.html','เช็คชื่อเข้างาน')">
-      <span class="nav-icon">🕐</span>
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
       <span>เช็คชื่อเข้างาน</span>
     </div>
     <div class="nav-item" data-page="./help.html" onclick="navTo('./help.html','คู่มือการใช้งาน')">
-      <span class="nav-icon">📖</span>
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
       <span>คู่มือการใช้งาน</span>
     </div>
   </nav>
@@ -574,8 +574,8 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
         <div class="pf-badge-av" id="hdr-pf-av"></div>
         <span class="pf-badge-name" id="hdr-pf-name">—</span>
       </div>
-      <button class="pf-switch-btn" onclick="openCurrentPfEdit()">✏️ แก้ไขโปรไฟล์</button>
-      <button class="pf-switch-btn" onclick="switchProfile()">🔄 เปลี่ยนโปรไฟล์</button>
+      <button class="pf-switch-btn" onclick="openCurrentPfEdit()">แก้ไขโปรไฟล์</button>
+      <button class="pf-switch-btn" onclick="switchProfile()">เปลี่ยนโปรไฟล์</button>
     </div>
   </header>
 
@@ -593,7 +593,7 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
         <!-- ── งานขนส่ง ── -->
         <div class="portal-card" onclick="navTo('./project1/transport.html','งานขนส่ง')">
           <div class="card-icon-area">
-            <div class="card-icon-circle">🚚</div>
+            <div class="card-icon-circle"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
           </div>
           <div class="card-title">ระบบจัดการ<br>งานขนส่ง</div>
           <div class="card-sub-bar">TRANSPORT</div>
@@ -602,7 +602,7 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
         <!-- ── Fleet Card ── -->
         <div class="portal-card" onclick="navTo('./project2/index.html','Fleet Card')">
           <div class="card-icon-area">
-            <div class="card-icon-circle">💳</div>
+            <div class="card-icon-circle"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
           </div>
           <div class="card-title">Fleet Card<br>Batch Update</div>
           <div class="card-sub-bar">CARRIER WEB</div>
@@ -611,7 +611,7 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
         <!-- ── TRR Fuel ── -->
         <div class="portal-card" onclick="navTo('./trr.html','ต้นทุนน้ำมัน')">
           <div class="card-icon-area">
-            <div class="card-icon-circle">⛽</div>
+            <div class="card-icon-circle"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>
           </div>
           <div class="card-title">ต้นทุนน้ำมัน<br>TRR Transport</div>
           <div class="card-sub-bar">FUEL MANAGER</div>
@@ -620,7 +620,7 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
         <!-- ── Price Board ── -->
         <div class="portal-card" onclick="navTo('./priceboard/index.html','กระดานราคา')">
           <div class="card-icon-area">
-            <div class="card-icon-circle">💰</div>
+            <div class="card-icon-circle"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
           </div>
           <div class="card-title">กระดานราคา<br>ขนส่ง 6 ล้อ</div>
           <div class="card-sub-bar">PRICE BOARD</div>
@@ -629,7 +629,7 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
         <!-- ── Fleet View ── -->
         <div class="portal-card" onclick="navTo('./fleet_view/index.html','Fleet View')">
           <div class="card-icon-area">
-            <div class="card-icon-circle">🚦</div>
+            <div class="card-icon-circle"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
           </div>
           <div class="card-title">Fleet<br>Dashboard</div>
           <div class="card-sub-bar">FLEET VIEW</div>
@@ -638,7 +638,7 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
         <!-- ── Attendance ── -->
         <div class="portal-card" onclick="navTo('./attendance/index.html','เช็คชื่อเข้างาน')">
           <div class="card-icon-area">
-            <div class="card-icon-circle">🕐</div>
+            <div class="card-icon-circle"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
           </div>
           <div class="card-title">เช็คชื่อ<br>เข้าทำงาน</div>
           <div class="card-sub-bar">ATTENDANCE</div>
@@ -647,7 +647,7 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
         <!-- ── Help ── -->
         <div class="portal-card" onclick="navTo('./help.html','คู่มือการใช้งาน')">
           <div class="card-icon-area">
-            <div class="card-icon-circle">📖</div>
+            <div class="card-icon-circle"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
           </div>
           <div class="card-title">คู่มือ<br>การใช้งาน</div>
           <div class="card-sub-bar">USER GUIDE</div>
@@ -664,16 +664,16 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
         <div class="brand-tagline">ธรารินทร์ 999 ขนส่ง จำกัด — ส่งความสำเร็จ สู่ธุรกิจคุณ</div>
         <button class="brand-contact-btn" onclick="document.getElementById('contact-overlay').classList.add('show')">CONTACT US</button>
         <div class="brand-icons">
-          <a class="brand-icon-btn" title="โทรศัพท์" href="tel:0857613929">📞</a>
-          <a class="brand-icon-btn" title="Email" href="mailto:Pu_kanittha2529@hotmail.co.th">✉️</a>
-          <div class="brand-icon-btn" title="ที่อยู่" onclick="document.getElementById('contact-overlay').classList.add('show')">🏢</div>
+          <a class="brand-icon-btn" title="โทรศัพท์" href="tel:0857613929"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.9 14.18a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.81 3.5h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 11a16 16 0 0 0 4.91 4.91l1.86-1.96a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>
+          <a class="brand-icon-btn" title="Email" href="mailto:Pu_kanittha2529@hotmail.co.th"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>
+          <div class="brand-icon-btn" title="ที่อยู่" onclick="document.getElementById('contact-overlay').classList.add('show')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
         </div>
       </div>
 
       <p class="portal-footer">©2026 บริษัท ธรารินทร์ 999 ขนส่ง จำกัด — TARARIN 999 TRANSPORT CO.,LTD.</p>
     </div>
     </div><!-- /#portal-home -->
-    <div id="frame-loader"><span style="font-size:22px">⏳</span>&nbsp;กำลังโหลด...</div>
+    <div id="frame-loader">กำลังโหลด...</div>
     <iframe id="page-frame" title="TRR Portal Frame"></iframe>
   </div>
 
@@ -745,23 +745,23 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
 <div id="contact-overlay" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="contact-box">
     <button class="contact-close" onclick="document.getElementById('contact-overlay').classList.remove('show')">×</button>
-    <h2>📞 ติดต่อสมัครงาน</h2>
+    <h2>ติดต่อสมัครงาน</h2>
     <div class="contact-row">
-      <span class="ci">📞</span>
+      <span class="ci"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.9 14.18a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.81 3.5h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 11a16 16 0 0 0 4.91 4.91l1.86-1.96a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
       <div>
         <strong>โทรศัพท์</strong>
         <a href="tel:0857613929" class="contact-link">085-761-3929</a> คุณธรา
       </div>
     </div>
     <div class="contact-row">
-      <span class="ci">📩</span>
+      <span class="ci"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
       <div>
         <strong>อีเมล</strong>
         <a href="mailto:Pu_kanittha2529@hotmail.co.th" class="contact-link">Pu_kanittha2529@hotmail.co.th</a>
       </div>
     </div>
     <div class="contact-row">
-      <span class="ci">🏢</span>
+      <span class="ci"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span>
       <div>
         <strong>สำนักงาน</strong>
         บริษัท ธรารินทร์ 999 ขนส่ง จำกัด<br>
@@ -773,16 +773,19 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
 </div>
 
 <!-- Dark mode toggle FAB -->
-<button id="dark-toggle" aria-label="Toggle dark mode">🌙</button>
+<button id="dark-toggle" aria-label="Toggle dark mode"></button>
 
 <script>
 // ── Dark mode toggle ─────────────────────────────────────────────────────
 (function(){
+  var M='<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  var S='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="6.34" y1="17.66" x2="4.22" y2="19.78"/><line x1="19.78" y1="4.22" x2="17.66" y2="6.34"/></svg>';
   var key='trr_dark_mode';
   function apply(dark){
     document.documentElement.classList.toggle('dark',dark);
     var btn=document.getElementById('dark-toggle');
-    if(btn)btn.textContent=dark?'☀️':'🌙';
+    if(btn)btn.innerHTML=dark?S:M;
+    try{var f=document.getElementById('page-frame');if(f&&f.contentWindow)f.contentWindow.postMessage({type:'trr_dark_mode',dark:dark},'*');}catch(e){}
   }
   apply(localStorage.getItem(key)==='1');
   document.addEventListener('DOMContentLoaded',function(){
@@ -792,6 +795,7 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
       apply(dark);localStorage.setItem(key,dark?'1':'0');
     });
   });
+  window.addEventListener('storage',function(e){if(e.key===key)apply(e.newValue==='1');});
 })();
 </script>
 

@@ -819,7 +819,7 @@ html.in-iframe #main{flex:1!important;height:0!important;margin-left:0!important
     <div id="logo-wrap">
       <img src="TRR999logo.png" alt="logo"
            onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-      <span class="logo-fallback">⛽</span>
+      <span class="logo-fallback"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span>
     </div>
     <div id="app-company">TARARIN 999</div>
     <div id="app-sub">TRANSPORT CO.,LTD.</div>
@@ -828,22 +828,22 @@ html.in-iframe #main{flex:1!important;height:0!important;margin-left:0!important
   </div>
 
   <nav id="nav">
-    <button class="nav-btn active" onclick="navigate(0)">📊&nbsp;&nbsp;ตารางระยะทาง</button>
-    <button class="nav-btn"        onclick="navigate(1)">🏠&nbsp;&nbsp;แดชบอร์ด</button>
-    <button class="nav-btn"        onclick="navigate(2)">📍&nbsp;&nbsp;จัดการข้อมูล</button>
-    <button class="nav-btn"        onclick="navigate(3)">🧮&nbsp;&nbsp;คำนวณต้นทุน</button>
-    <button class="nav-btn"        onclick="navigate(4)">⚙️&nbsp;&nbsp;ตั้งค่า / Admin</button>
+    <button class="nav-btn active" onclick="navigate(0)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>&nbsp;&nbsp;ตารางระยะทาง</button>
+    <button class="nav-btn"        onclick="navigate(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>&nbsp;&nbsp;แดชบอร์ด</button>
+    <button class="nav-btn"        onclick="navigate(2)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>&nbsp;&nbsp;จัดการข้อมูล</button>
+    <button class="nav-btn"        onclick="navigate(3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>&nbsp;&nbsp;คำนวณต้นทุน</button>
+    <button class="nav-btn"        onclick="navigate(4)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>&nbsp;&nbsp;ตั้งค่า / Admin</button>
   </nav>
   <div style="padding:10px 10px 0;">
     <a href="./index.html" style="display:flex;align-items:center;gap:8px;padding:9px 14px;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.3);border-radius:8px;color:var(--gold);font-size:12px;font-weight:700;text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='rgba(245,166,35,0.2)'" onmouseout="this.style.background='rgba(245,166,35,0.1)'">
-      ⬅️&nbsp; กลับหน้าแรก
+      ← กลับหน้าแรก
     </a>
   </div>
 
   <div id="nav-spacer"></div>
 
   <div id="fuel-box">
-    <div class="fuel-title">⛽&nbsp;&nbsp;ราคาน้ำมันวันนี้</div>
+    <div class="fuel-title">ราคาน้ำมันวันนี้</div>
     <div id="fuel-price-display">40.00</div>
     <div class="fuel-unit">บาท / ลิตร</div>
   </div>
@@ -858,7 +858,7 @@ html.in-iframe #main{flex:1!important;height:0!important;margin-left:0!important
   <!-- ── Page 0: ตารางระยะทาง ─────────────────────────────────────────── -->
   <div class="page active" id="page-0">
     <div class="page-bar">
-      <span class="page-title">📊&nbsp;&nbsp;ตารางระยะทาง</span>
+      <span class="page-title">ตารางระยะทาง</span>
     </div>
     <div class="page-body">
       <!-- Row 1: origin + truck -->
@@ -919,34 +919,34 @@ html.in-iframe #main{flex:1!important;height:0!important;margin-left:0!important
   <!-- ── Page 1: แดชบอร์ด ──────────────────────────────────────────────── -->
   <div class="page" id="page-1">
     <div class="page-bar">
-      <span class="page-title">🏠&nbsp;&nbsp;แดชบอร์ด</span>
+      <span class="page-title">แดชบอร์ด</span>
     </div>
     <div class="page-body">
       <!-- Fuel hero -->
       <div id="fuel-hero">
         <div class="hero-left">
-          <div class="hero-title">⛽&nbsp;&nbsp;ราคาน้ำมันวันนี้</div>
+          <div class="hero-title">ราคาน้ำมันวันนี้</div>
           <div class="hero-hint">ปรับราคาแล้วกด 'บันทึก' เพื่ออัปเดตทุกการคำนวณ</div>
         </div>
         <input type="number" id="fuel-input" step="0.01" min="1" max="999" value="40">
         <button class="btn btn-gold" style="min-height:46px;font-size:12pt;" onclick="dashSaveFuel()">
-          💾&nbsp;&nbsp;บันทึก
+          บันทึก
         </button>
       </div>
       <!-- Stat cards -->
       <div class="stat-row">
-        <div class="stat-card"><div class="stat-icon">🏢</div><div class="stat-val" id="s-origins">0</div><div class="stat-label">ต้นทาง</div></div>
-        <div class="stat-card"><div class="stat-icon">🏭</div><div class="stat-val" id="s-dests">0</div><div class="stat-label">ปลายทาง</div></div>
-        <div class="stat-card"><div class="stat-icon">🏠</div><div class="stat-val" id="s-depots">0</div><div class="stat-label">ที่พักรถ</div></div>
-        <div class="stat-card"><div class="stat-icon">📏</div><div class="stat-val" id="s-dists">0</div><div class="stat-label">คู่ระยะทาง</div></div>
-        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-val" id="s-calcs-today">0</div><div class="stat-label">คำนวณวันนี้</div></div>
+        <div class="stat-card"><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div><div class="stat-val" id="s-origins">0</div><div class="stat-label">ต้นทาง</div></div>
+        <div class="stat-card"><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="stat-val" id="s-dests">0</div><div class="stat-label">ปลายทาง</div></div>
+        <div class="stat-card"><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg></div><div class="stat-val" id="s-depots">0</div><div class="stat-label">ที่พักรถ</div></div>
+        <div class="stat-card"><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><div class="stat-val" id="s-dists">0</div><div class="stat-label">คู่ระยะทาง</div></div>
+        <div class="stat-card"><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="stat-val" id="s-calcs-today">0</div><div class="stat-label">คำนวณวันนี้</div></div>
       </div>
       <!-- Recent calcs -->
       <div class="flex-row mb-8" style="justify-content:space-between;">
-        <h3 class="section-title" style="margin:0;">📋&nbsp;&nbsp;การคำนวณล่าสุด</h3>
+        <h3 class="section-title" style="margin:0;">การคำนวณล่าสุด</h3>
         <div class="flex-row" style="gap:8px;">
-          <button class="btn btn-gold btn-sm" onclick="navigate(3)">🧮&nbsp;&nbsp;ไปคำนวณ</button>
-          <button class="btn btn-red  btn-sm" onclick="dashClearHistory()">🗑&nbsp;&nbsp;ล้างประวัติ</button>
+          <button class="btn btn-gold btn-sm" onclick="navigate(3)">ไปคำนวณ</button>
+          <button class="btn btn-red  btn-sm" onclick="dashClearHistory()">ล้างประวัติ</button>
         </div>
       </div>
       <div class="tbl-wrap">
@@ -967,20 +967,20 @@ html.in-iframe #main{flex:1!important;height:0!important;margin-left:0!important
   <!-- ── Page 2: จัดการข้อมูล ─────────────────────────────────────────── -->
   <div class="page" id="page-2">
     <div class="page-bar">
-      <span class="page-title">📍&nbsp;&nbsp;จัดการข้อมูล</span>
+      <span class="page-title">จัดการข้อมูล</span>
     </div>
     <div class="page-body">
       <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('loc')">🏢 สถานที่</button>
-        <button class="tab-btn"        onclick="switchTab('dist')">📏 ระยะทาง</button>
-        <button class="tab-btn"        onclick="switchTab('bh')">↩️ Backhaul</button>
+        <button class="tab-btn active" onclick="switchTab('loc')">สถานที่</button>
+        <button class="tab-btn"        onclick="switchTab('dist')">ระยะทาง</button>
+        <button class="tab-btn"        onclick="switchTab('bh')">Backhaul</button>
       </div>
       <div class="tab-content">
         <!-- Tab: สถานที่ -->
         <div class="tab-pane active" id="tab-loc">
           <div class="flex-row mb-12" style="justify-content:space-between;">
             <h3 class="section-title" style="margin:0;">สถานที่ทั้งหมด</h3>
-            <button class="btn btn-navy btn-sm" onclick="openAddLocation()">➕ เพิ่มสถานที่</button>
+            <button class="btn btn-navy btn-sm" onclick="openAddLocation()">+ เพิ่มสถานที่</button>
           </div>
           <div class="filters mb-12">
             <div class="filter-group">
@@ -1017,7 +1017,7 @@ html.in-iframe #main{flex:1!important;height:0!important;margin-left:0!important
         <div class="tab-pane" id="tab-dist">
           <div class="flex-row mb-12" style="justify-content:space-between;">
             <h3 class="section-title" style="margin:0;">ระยะทางทั้งหมด</h3>
-            <button class="btn btn-navy btn-sm" onclick="openAddDistance()">➕ เพิ่มระยะทาง</button>
+            <button class="btn btn-navy btn-sm" onclick="openAddDistance()">+ เพิ่มระยะทาง</button>
           </div>
           <div class="tbl-wrap">
             <table>
@@ -1037,10 +1037,10 @@ html.in-iframe #main{flex:1!important;height:0!important;margin-left:0!important
         <div class="tab-pane" id="tab-bh">
           <div class="flex-row mb-12" style="justify-content:space-between;">
             <h3 class="section-title" style="margin:0;">ระยะทาง Backhaul</h3>
-            <button class="btn btn-navy btn-sm" onclick="openAddBackhaul()">➕ เพิ่ม Backhaul</button>
+            <button class="btn btn-navy btn-sm" onclick="openAddBackhaul()">+ เพิ่ม Backhaul</button>
           </div>
           <div style="background:#FFFBEB;border:1px solid rgba(245,166,35,0.4);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#B45309;">
-            ⚠️ ระยะทาง Backhaul = ปลายทาง → จุดสิ้นสุด (รวมระยะทางแวะรับแป้งที่จุดขึ้นแป้งแล้ว)
+            ระยะทาง Backhaul = ปลายทาง → จุดสิ้นสุด (รวมระยะทางแวะรับแป้งที่จุดขึ้นแป้งแล้ว)
           </div>
           <div class="tbl-wrap">
             <table>
@@ -1064,8 +1064,8 @@ html.in-iframe #main{flex:1!important;height:0!important;margin-left:0!important
   <!-- ── Page 3: คำนวณต้นทุน ───────────────────────────────────────────── -->
   <div class="page" id="page-3">
     <div class="page-bar">
-      <span class="page-title">🧮&nbsp;&nbsp;คำนวณต้นทุนน้ำมัน</span>
-      <span class="fuel-badge" id="calc-fuel-badge">⛽ 40.00 บาท/ลิตร</span>
+      <span class="page-title">คำนวณต้นทุนน้ำมัน</span>
+      <span class="fuel-badge" id="calc-fuel-badge">40.00 บาท/ลิตร</span>
     </div>
     <div class="page-body" id="calc-body">
       <!-- Built by JS -->
@@ -1075,7 +1075,7 @@ html.in-iframe #main{flex:1!important;height:0!important;margin-left:0!important
   <!-- ── Page 4: ตั้งค่า ──────────────────────────────────────────────── -->
   <div class="page" id="page-4">
     <div class="page-bar">
-      <span class="page-title">⚙️&nbsp;&nbsp;ตั้งค่า / Admin</span>
+      <span class="page-title">ตั้งค่า / Admin</span>
     </div>
     <div class="page-body">
 
@@ -2793,22 +2793,7 @@ function toggleSidebar() {
 <script>(function(){var fab=document.getElementById('qnav-fab'),pop=document.getElementById('qnav-pop');var svg='<svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><rect x="0" y="0" width="7" height="7" rx="1.5"/><rect x="11" y="0" width="7" height="7" rx="1.5"/><rect x="0" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>';fab.addEventListener('click',function(){var s=pop.classList.toggle('show');fab.innerHTML=s?'<span style="font-size:16px;line-height:1;">✕</span>':svg;});document.addEventListener('click',function(e){if(!document.getElementById('qnav').contains(e.target)){pop.classList.remove('show');fab.innerHTML=svg;}},true);})();</script>
 
 <!-- Dark mode toggle FAB -->
-<button id="dark-toggle" aria-label="Toggle dark mode">🌙</button>
-<script>
-(function(){
-  var key='trr_dark_mode';
-  function apply(dark){
-    document.documentElement.classList.toggle('dark',dark);
-    var btn=document.getElementById('dark-toggle');
-    if(btn)btn.textContent=dark?'☀️':'🌙';
-  }
-  apply(localStorage.getItem(key)==='1');
-  var btn=document.getElementById('dark-toggle');
-  if(btn)btn.addEventListener('click',function(){
-    var dark=!document.documentElement.classList.contains('dark');
-    apply(dark);localStorage.setItem(key,dark?'1':'0');
-  });
-})();
-</script>
+<button id="dark-toggle" title="Toggle dark/light mode"></button>
+<script>(function(){var M='<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';var S='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="6.34" y1="17.66" x2="4.22" y2="19.78"/><line x1="19.78" y1="4.22" x2="17.66" y2="6.34"/></svg>';var btn=document.getElementById('dark-toggle');function apply(d){document.documentElement.classList.toggle('dark',d);if(btn)btn.innerHTML=d?S:M;}apply(localStorage.getItem('trr_dark_mode')==='1');if(btn)btn.addEventListener('click',function(){var d=!document.documentElement.classList.contains('dark');localStorage.setItem('trr_dark_mode',d?'1':'0');apply(d);try{window.parent.postMessage({type:'trr_dark_mode',dark:d},'*');}catch(e){}});window.addEventListener('storage',function(e){if(e.key==='trr_dark_mode')apply(e.newValue==='1');});window.addEventListener('message',function(e){if(e.data&&e.data.type==='trr_dark_mode')apply(e.data.dark);});})();</script>
 </body>
 </html>
