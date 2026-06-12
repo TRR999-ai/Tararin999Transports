@@ -99,8 +99,6 @@
 .stmt-tab:hover {
   background: var(--glass-bg) !important;
   border-color: var(--glass-border) !important;
-  backdrop-filter: var(--blur-xs) !important;
-  -webkit-backdrop-filter: var(--blur-xs) !important;
 }
 .nav-btn.active,
 .stmt-tab.active {
@@ -121,8 +119,6 @@ textarea {
   color:         var(--text)              !important;
   font-family:   inherit                  !important;
   transition:    border-color .18s, box-shadow .18s, background .18s !important;
-  backdrop-filter: var(--blur-xs)         !important;
-  -webkit-backdrop-filter: var(--blur-xs) !important;
 }
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):focus,
 select:focus,
