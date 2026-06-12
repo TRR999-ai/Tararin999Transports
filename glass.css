@@ -116,6 +116,9 @@ html.dark {
   --badge-text:   #93c5fd;
 }
 
+/* ── Global box-sizing ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
 /* ── Scrollbar (glass) ──────────────────────────────────────────── */
 ::-webkit-scrollbar              { width:5px; height:5px; }
 ::-webkit-scrollbar-track        { background:transparent; }

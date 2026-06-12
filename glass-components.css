@@ -1,0 +1,150 @@
+/* ═══════════════════════════════════════════════════════════════════
+   GLASS COMPONENTS — Button, Input, Select overrides
+   Loaded AFTER page styles; uses !important only for glass visuals
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Pill radius on every .btn ───────────────────────────────────── */
+.btn {
+  border-radius: var(--r-pill) !important;
+}
+.btn-sm {
+  border-radius: var(--r-pill) !important;
+}
+
+/* ── Neutral glass .btn (no color modifier) ──────────────────────── */
+.btn:not(.btn-navy):not(.btn-blue):not(.btn-primary):not(.btn-green):not(.btn-red):not(.btn-gold):not(.btn-orange):not(.btn-soft):not(.att-btn) {
+  background:         var(--glass-bg)          !important;
+  backdrop-filter:    var(--blur-xs)           !important;
+  -webkit-backdrop-filter: var(--blur-xs)      !important;
+  border:             1px solid var(--glass-border) !important;
+  box-shadow:         var(--glass-inset), var(--glass-shadow) !important;
+  color:              var(--text)              !important;
+}
+
+/* ── Primary / blue glass button ─────────────────────────────────── */
+.btn.btn-navy,
+.btn.btn-blue,
+.btn.btn-primary:not(.mgr-nav-btn):not(.att-btn) {
+  background:    linear-gradient(135deg, var(--primary2), var(--accent)) !important;
+  color:         #fff !important;
+  border:        1px solid rgba(255,255,255,0.28) !important;
+  box-shadow:    0 4px 18px rgba(59,130,246,0.38), var(--glass-inset) !important;
+  backdrop-filter: none !important;
+}
+
+/* ── Green glass button ──────────────────────────────────────────── */
+.btn.btn-green {
+  background:    linear-gradient(135deg, #15803d, #22c55e) !important;
+  color:         #fff !important;
+  border:        1px solid rgba(255,255,255,0.28) !important;
+  box-shadow:    0 4px 16px rgba(22,163,74,0.32), var(--glass-inset) !important;
+  backdrop-filter: none !important;
+}
+
+/* ── Red glass button ────────────────────────────────────────────── */
+.btn.btn-red {
+  background:    linear-gradient(135deg, #b91c1c, #ef4444) !important;
+  color:         #fff !important;
+  border:        1px solid rgba(255,255,255,0.22) !important;
+  box-shadow:    0 4px 16px rgba(220,38,38,0.32), var(--glass-inset) !important;
+  backdrop-filter: none !important;
+}
+
+/* ── Gold/orange glass button ────────────────────────────────────── */
+.btn.btn-gold,
+.btn.btn-orange {
+  background:    linear-gradient(135deg, #b45309, #f59e0b) !important;
+  color:         #fff !important;
+  border:        1px solid rgba(255,255,255,0.22) !important;
+  box-shadow:    0 4px 16px rgba(245,158,11,0.32), var(--glass-inset) !important;
+  backdrop-filter: none !important;
+}
+
+/* ── Soft/outline glass button ───────────────────────────────────── */
+.btn.btn-soft,
+.btn.btn-outline,
+.btn.btn-ghost {
+  background:    var(--glass-bg-subtle) !important;
+  backdrop-filter: var(--blur-xs)       !important;
+  -webkit-backdrop-filter: var(--blur-xs) !important;
+  border:        1.5px solid var(--glass-border-sm) !important;
+  box-shadow:    var(--glass-inset)      !important;
+  color:         var(--text)             !important;
+}
+
+/* ── Hover effect on all .btn ────────────────────────────────────── */
+.btn:hover:not(:disabled) {
+  transform:  translateY(-1px) !important;
+  filter:     brightness(1.08) !important;
+}
+.btn:active:not(:disabled) {
+  transform:  translateY(0)    !important;
+  filter:     brightness(0.96) !important;
+}
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.45 !important;
+  cursor:  not-allowed !important;
+  transform: none !important;
+}
+
+/* ── nav-btn pills (fleet_view tabs) ─────────────────────────────── */
+.nav-btn,
+.stmt-tab {
+  border-radius: var(--r-pill) !important;
+  border: 1px solid transparent !important;
+  transition: var(--t-md) !important;
+}
+.nav-btn:hover,
+.stmt-tab:hover {
+  background: var(--glass-bg) !important;
+  border-color: var(--glass-border) !important;
+  backdrop-filter: var(--blur-xs) !important;
+  -webkit-backdrop-filter: var(--blur-xs) !important;
+}
+.nav-btn.active,
+.stmt-tab.active {
+  background: var(--glass-bg-strong) !important;
+  border-color: var(--glass-border)  !important;
+  backdrop-filter: var(--blur-xs)    !important;
+  -webkit-backdrop-filter: var(--blur-xs) !important;
+  box-shadow: var(--glass-inset), var(--glass-shadow) !important;
+}
+
+/* ── Glass input / select / textarea ────────────────────────────── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+select,
+textarea {
+  background:    var(--input-bg)           !important;
+  border:        1.5px solid var(--input-border) !important;
+  border-radius: var(--r-md)              !important;
+  color:         var(--text)              !important;
+  font-family:   inherit                  !important;
+  transition:    border-color .18s, box-shadow .18s, background .18s !important;
+  backdrop-filter: var(--blur-xs)         !important;
+  -webkit-backdrop-filter: var(--blur-xs) !important;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--input-focus)             !important;
+  box-shadow:   0 0 0 3px rgba(59,130,246,0.18) !important;
+  background:   var(--glass-bg-strong)          !important;
+  outline:      none                            !important;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted) !important;
+}
+
+/* ── att-btn (attendance big action buttons) ─────────────────────── */
+.att-btn {
+  border-radius: var(--r-pill) !important;
+  box-shadow: var(--glass-inset), var(--glass-shadow) !important;
+  border: 1px solid rgba(255,255,255,0.25) !important;
+}
+
+/* ── Dark mode button hover ──────────────────────────────────────── */
+html.dark .btn:not(.btn-navy):not(.btn-blue):not(.btn-primary):not(.btn-green):not(.btn-red):not(.btn-gold):not(.btn-orange) {
+  color: var(--text) !important;
+}
