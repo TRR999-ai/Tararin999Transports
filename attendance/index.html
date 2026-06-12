@@ -141,6 +141,24 @@ body{font-family:'Prompt','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color
 .log-time{font-size:14px;font-weight:700;color:#fff;}
 .log-dist{font-size:11px;color:rgba(255,255,255,.35);margin-left:auto;}
 
+/* ── Light mode overrides for employee view ── */
+html:not(.dark) #view-employee{background:linear-gradient(160deg,var(--bg-from) 0%,var(--bg-mid) 45%,var(--bg-to) 100%);}
+html:not(.dark) .emp-topbar{background:var(--glass-bg-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--glass-border);}
+html:not(.dark) .emp-back{color:var(--text2);border-color:var(--glass-border);}
+html:not(.dark) .emp-back:hover{color:var(--text);border-color:var(--accent);}
+html:not(.dark) .emp-av-name{color:var(--text);}
+html:not(.dark) .emp-clock{color:var(--text);}
+html:not(.dark) .emp-date-str{color:var(--muted);}
+html:not(.dark) .emp-today-card{background:var(--glass-bg-card);border:1px solid var(--glass-border);}
+html:not(.dark) .emp-today-status{color:var(--text);}
+html:not(.dark) .emp-today-times{color:var(--muted);}
+html:not(.dark) .emp-log-title{color:var(--muted);}
+html:not(.dark) .log-row{background:var(--glass-bg);border:1px solid var(--glass-border-sm);}
+html:not(.dark) .log-time{color:var(--text);}
+html:not(.dark) .log-dist{color:var(--muted);}
+html:not(.dark) .gps-checking{background:rgba(59,130,246,.08);color:var(--muted);}
+html:not(.dark) .gps-checking .gps-dot{background:var(--muted);}
+
 /* ═══════════════════════════════════════════
    MANAGER VIEW — dashboard layout
 ═══════════════════════════════════════════ */
@@ -1146,6 +1164,8 @@ function closeConfirm(){document.getElementById('confirm-modal').classList.remov
 <script>
 /* ── Idle timeout: redirect to portal after 4h inactivity ── */
 (function(){var t=4*60*60*1000,i;function r(){clearTimeout(i);i=setTimeout(function(){location.replace('/');},t);}['click','touchstart','keydown','mousemove','scroll'].forEach(function(e){document.addEventListener(e,r,{passive:true});});r();})();
+/* ── Dark mode sync from parent portal ── */
+window.addEventListener('message',function(e){if(e.data&&e.data.type==='trr_dark_mode'){if(e.data.dark){document.documentElement.classList.add('dark');localStorage.setItem('trr_dark_mode','1');}else{document.documentElement.classList.remove('dark');localStorage.setItem('trr_dark_mode','0');}}});
 </script>
 
 <!-- ── Quick Nav FAB ── -->
