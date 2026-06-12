@@ -44,7 +44,8 @@ body{
   border-right:1px solid var(--glass-border);
   box-shadow:var(--glass-shadow);
   display:flex;flex-direction:column;
-  transition:background var(--t-md),border-color var(--t-md);
+  overflow:hidden;
+  transition:width .25s cubic-bezier(.4,0,.2,1),background var(--t-md),border-color var(--t-md);
   position:relative;z-index:10;
 }
 .sb-logo{
@@ -62,8 +63,8 @@ body{
 }
 .sb-icon:hover{box-shadow:0 0 0 6px rgba(59,130,246,0.25)}
 .sb-icon img{width:100%;height:100%;object-fit:cover}
-.sb-name{font-size:12.5px;font-weight:700;color:var(--accent2);letter-spacing:1.2px;text-align:center}
-.sb-sub{font-size:8.5px;color:var(--muted);letter-spacing:.8px;text-align:center;line-height:1.5}
+.sb-name{font-size:12.5px;font-weight:700;color:var(--accent2);letter-spacing:1.2px;text-align:center;white-space:nowrap}
+.sb-sub{font-size:8.5px;color:var(--muted);letter-spacing:.8px;text-align:center;line-height:1.5;white-space:nowrap}
 
 .sb-nav{flex:1;padding:8px 0;overflow-y:auto}
 .nav-item{
@@ -82,7 +83,37 @@ body{
 
 .sb-footer{
   padding:12px 14px;border-top:1px solid var(--glass-border-sm);
-  font-size:10px;color:var(--muted);text-align:center;
+  font-size:10px;color:var(--muted);text-align:center;white-space:nowrap;
+}
+
+/* ── Nav section labels ── */
+.nav-section-label{
+  font-size:9px;font-weight:700;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;
+  padding:14px 18px 4px;white-space:nowrap;
+}
+.nav-label{white-space:nowrap}
+
+/* ── Sidebar collapsed (desktop only) ── */
+@media(min-width:900px){
+  #sidebar.sb-collapsed{width:60px}
+  #sidebar.sb-collapsed .sb-name,
+  #sidebar.sb-collapsed .sb-sub,
+  #sidebar.sb-collapsed .sb-footer,
+  #sidebar.sb-collapsed .nav-label,
+  #sidebar.sb-collapsed .nav-section-label{display:none}
+  #sidebar.sb-collapsed .nav-item{
+    justify-content:center;padding:10px 0;gap:0;
+    border-left:none;margin:1px 6px;border-radius:var(--r-sm);
+  }
+  #sidebar.sb-collapsed .nav-item.active{
+    background:var(--sb-item-active);color:var(--sb-text-active);
+  }
+  #sidebar.sb-collapsed .nav-item:hover{background:var(--sb-item-hover)}
+  #sidebar.sb-collapsed .nav-icon{font-size:17px}
+  #sidebar.sb-collapsed .sb-logo{padding:18px 0 14px;cursor:pointer;transition:background var(--t);}
+  #sidebar.sb-collapsed .sb-logo:hover{background:var(--sb-item-hover)}
+  #sidebar.sb-collapsed .sb-icon{width:38px;height:38px}
 }
 
 /* ══ Main ═════════════════════════════════════════════════════════════════ */
@@ -517,44 +548,49 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
 
 <!-- ══ Sidebar ══════════════════════════════════════════════════════════════ -->
 <aside id="sidebar">
-  <div class="sb-logo">
+  <div class="sb-logo" onclick="if(window.innerWidth>899)toggleSidebar()" title="คลิกเพื่อขยาย/ย่อ">
     <div class="sb-icon"><img src="./TRR999logo.png" alt="TRR999"></div>
     <div class="sb-name">TARARIN 999</div>
     <div class="sb-sub">TRANSPORT CO.,LTD.<br>ธรารินทร์ 999 ขนส่ง จำกัด</div>
   </div>
 
   <nav class="sb-nav">
-    <div class="nav-item active" data-page="home" onclick="navHome()">
+    <div class="nav-section-label">MAIN</div>
+    <div class="nav-item active" data-page="home" title="Portal" onclick="navHome()">
       <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-      <span>Portal</span>
+      <span class="nav-label">Portal</span>
     </div>
-    <div class="nav-item" data-page="./project1/transport.html" onclick="navTo('./project1/transport.html','งานขนส่ง')">
+    <div class="nav-item" data-page="./project1/transport.html" title="งานขนส่ง" onclick="navTo('./project1/transport.html','งานขนส่ง')">
       <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
-      <span>งานขนส่ง</span>
+      <span class="nav-label">งานขนส่ง</span>
     </div>
-    <div class="nav-item" data-page="./project2/index.html" onclick="navTo('./project2/index.html','Fleet Card')">
+    <div class="nav-item" data-page="./project2/index.html" title="Fleet Card" onclick="navTo('./project2/index.html','Fleet Card')">
       <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
-      <span>Fleet Card</span>
+      <span class="nav-label">Fleet Card</span>
     </div>
-    <div class="nav-item" data-page="./trr.html" onclick="navTo('./trr.html','ต้นทุนน้ำมัน')">
+    <div class="nav-item" data-page="./trr.html" title="ต้นทุนน้ำมัน" onclick="navTo('./trr.html','ต้นทุนน้ำมัน')">
       <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span>
-      <span>ต้นทุนน้ำมัน</span>
+      <span class="nav-label">ต้นทุนน้ำมัน</span>
     </div>
-    <div class="nav-item" data-page="./priceboard/index.html" onclick="navTo('./priceboard/index.html','กระดานราคา')">
+
+    <div class="nav-section-label">ANALYTICS</div>
+    <div class="nav-item" data-page="./priceboard/index.html" title="กระดานราคา" onclick="navTo('./priceboard/index.html','กระดานราคา')">
       <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
-      <span>กระดานราคา</span>
+      <span class="nav-label">กระดานราคา</span>
     </div>
-    <div class="nav-item" data-page="./fleet_view/index.html" onclick="navTo('./fleet_view/index.html','Fleet View')">
+    <div class="nav-item" data-page="./fleet_view/index.html" title="Fleet View" onclick="navTo('./fleet_view/index.html','Fleet View')">
       <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
-      <span>Fleet View</span>
+      <span class="nav-label">Fleet View</span>
     </div>
-    <div class="nav-item" data-page="./attendance/index.html" onclick="navTo('./attendance/index.html','เช็คชื่อเข้างาน')">
+
+    <div class="nav-section-label">SUPPORT</div>
+    <div class="nav-item" data-page="./attendance/index.html" title="เช็คชื่อเข้างาน" onclick="navTo('./attendance/index.html','เช็คชื่อเข้างาน')">
       <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-      <span>เช็คชื่อเข้างาน</span>
+      <span class="nav-label">เช็คชื่อเข้างาน</span>
     </div>
-    <div class="nav-item" data-page="./help.html" onclick="navTo('./help.html','คู่มือการใช้งาน')">
+    <div class="nav-item" data-page="./help.html" title="คู่มือการใช้งาน" onclick="navTo('./help.html','คู่มือการใช้งาน')">
       <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
-      <span>คู่มือการใช้งาน</span>
+      <span class="nav-label">คู่มือการใช้งาน</span>
     </div>
   </nav>
 
@@ -1259,9 +1295,21 @@ checkAuth();
 
 // ══ Sidebar ═══════════════════════════════════════════════════════════════
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sb-overlay').classList.toggle('show');
+  if (window.innerWidth > 899) {
+    var sb = document.getElementById('sidebar');
+    var collapsed = sb.classList.toggle('sb-collapsed');
+    localStorage.setItem('trr_sb_collapsed', collapsed ? '1' : '0');
+  } else {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sb-overlay').classList.toggle('show');
+  }
 }
+// Init sidebar collapse state on desktop
+(function(){
+  if (window.innerWidth > 899 && localStorage.getItem('trr_sb_collapsed') === '1') {
+    document.getElementById('sidebar').classList.add('sb-collapsed');
+  }
+})();
 document.querySelectorAll('.nav-item').forEach(function(el) {
   el.addEventListener('click', function() {
     if (window.innerWidth <= 899) {
