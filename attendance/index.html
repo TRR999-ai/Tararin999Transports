@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>เช็คชื่อเข้างาน — TARARIN 999</title>
 <link rel="icon" type="image/png" href="../TRR999logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');</script>
 <link rel="stylesheet" href="../glass.css">
 <style>
@@ -17,7 +17,7 @@
   --text2:var(--muted);
 }
 html.dark{--border:var(--glass-border);}
-body{font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color:var(--text);overflow:hidden;height:100vh;-webkit-text-size-adjust:100%;animation:pgFade .22s ease;background:linear-gradient(140deg,var(--bg-from) 0%,var(--bg-mid) 50%,var(--bg-to) 100%);background-attachment:fixed;}
+body{font-family:'Prompt','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color:var(--text);overflow:hidden;height:100vh;-webkit-text-size-adjust:100%;animation:pgFade .22s ease;background:linear-gradient(140deg,var(--bg-from) 0%,var(--bg-mid) 50%,var(--bg-to) 100%);background-attachment:fixed;}
 @keyframes pgFade{from{opacity:0}to{opacity:1}}
 
 /* ═══════════════════════════════════════════
@@ -1116,7 +1116,7 @@ function exportAttendance(){
   a.download='attendance_'+todayStr()+'.json';a.click();
 }
 function clearAllAttendance(){
-  showConfirm(''),'ล้างข้อมูลทั้งหมด?','ข้อมูลการเช็คชื่อทั้งหมดจะถูกลบถาวร ไม่สามารถกู้คืนได้',function(){
+  showConfirm('','ล้างข้อมูลทั้งหมด?','ข้อมูลการเช็คชื่อทั้งหมดจะถูกลบถาวร ไม่สามารถกู้คืนได้',function(){
     localStorage.removeItem(RECORDS_KEY);renderToday();showToast('ล้างข้อมูลแล้ว');
   });
 }

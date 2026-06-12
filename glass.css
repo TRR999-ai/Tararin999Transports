@@ -130,7 +130,7 @@ html.dark {
   background: linear-gradient(140deg, var(--bg-from) 0%, var(--bg-mid) 50%, var(--bg-to) 100%);
   min-height: 100vh;
   color: var(--text);
-  font-family: 'Sarabun','Leelawadee UI',Tahoma,sans-serif;
+  font-family: 'Prompt','Leelawadee UI',Tahoma,sans-serif;
   position: relative;
 }
 .gl-page::before {

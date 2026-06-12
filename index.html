@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="TRR999">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./glass.css">
 <script>
 /* Dark mode — apply BEFORE render to prevent flash */
@@ -27,7 +27,7 @@
 
 html,body{height:100%;overflow:hidden}
 body{
-  font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;
+  font-family:'Prompt','Leelawadee UI',Tahoma,sans-serif;
   font-size:14px;color:var(--text);
   display:flex;
   background:linear-gradient(140deg,var(--bg-from) 0%,var(--bg-mid) 50%,var(--bg-to) 100%);
@@ -187,83 +187,107 @@ body{
 
 /* ── Orb backgrounds ── */
 .bg-orb{
-  position:absolute;border-radius:50%;filter:blur(90px);
-  opacity:.55;pointer-events:none;z-index:0;
+  position:absolute;border-radius:50%;filter:blur(100px);
+  opacity:.6;pointer-events:none;z-index:0;
 }
-html.dark .bg-orb{opacity:.28}
+html.dark .bg-orb{opacity:.25}
 .bg-orb-1{
-  width:550px;height:550px;top:-140px;right:-120px;
-  background:radial-gradient(circle,rgba(59,130,246,.7) 0%,rgba(27,39,112,.6) 70%);
+  width:600px;height:600px;top:-160px;right:-130px;
+  background:radial-gradient(circle,rgba(99,102,241,.65) 0%,rgba(59,130,246,.5) 60%,transparent 80%);
 }
 .bg-orb-2{
-  width:420px;height:420px;bottom:-120px;left:-90px;
-  background:radial-gradient(circle,rgba(96,165,250,.65) 0%,rgba(37,99,235,.5) 70%);
+  width:450px;height:450px;bottom:-130px;left:-100px;
+  background:radial-gradient(circle,rgba(139,92,246,.6) 0%,rgba(96,165,250,.4) 60%,transparent 80%);
 }
 .bg-orb-3{
-  width:280px;height:280px;top:40%;left:36%;
-  background:radial-gradient(circle,rgba(147,197,253,.6) 0%,rgba(59,130,246,.4) 70%);
-  opacity:.35;
+  width:320px;height:320px;top:35%;left:32%;
+  background:radial-gradient(circle,rgba(196,181,253,.55) 0%,rgba(99,102,241,.3) 60%,transparent 80%);
+  opacity:.4;
 }
 
 /* ── Inner content ── */
 .content-inner{
   position:relative;z-index:1;
-  padding:48px 40px 50px;
+  padding:40px 40px 50px;
   display:flex;flex-direction:column;align-items:center;
   min-height:100%;
 }
 .portal-label{
-  font-size:10px;font-weight:700;letter-spacing:3.5px;
-  text-transform:uppercase;color:var(--muted);margin-bottom:8px;text-align:center;
+  font-size:10px;font-weight:700;letter-spacing:4px;
+  text-transform:uppercase;color:var(--accent);
+  margin-bottom:6px;text-align:center;
+}
+.portal-heading{
+  font-size:20px;font-weight:700;color:var(--text);
+  margin-bottom:4px;text-align:center;letter-spacing:.5px;
+}
+.portal-sub{
+  font-size:12px;color:var(--muted);margin-bottom:28px;text-align:center;
 }
 
 /* ══ Portal Cards ═════════════════════════════════════════════════════════ */
-.cards-row{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.cards-row{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin-top:0}
 .portal-card{
-  width:220px;
+  width:190px;
   background:var(--glass-bg-card);
   backdrop-filter:var(--blur);
   -webkit-backdrop-filter:var(--blur);
   border-radius:var(--r-xl);
   overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;
-  display:flex;flex-direction:column;align-items:center;
+  display:flex;flex-direction:column;
   border:1px solid var(--glass-border);
   box-shadow:var(--glass-shadow),var(--glass-inset);
-  transition:transform var(--t-md),box-shadow var(--t-md),background var(--t-md);
-}
-.portal-card:hover{
-  transform:translateY(-8px) scale(1.02);
-  box-shadow:var(--glass-shadow-lg),var(--glass-inset);
-  background:var(--glass-bg-strong);
-}
-.card-icon-area{
-  width:100%;padding:30px 20px 18px;
-  display:flex;justify-content:center;
-}
-.card-icon-circle{
-  width:86px;height:86px;border-radius:50%;
-  background:linear-gradient(135deg,var(--glass-bg-strong),var(--glass-bg-subtle));
-  border:1.5px solid var(--glass-border);
-  box-shadow:var(--glass-shadow);
-  display:flex;align-items:center;justify-content:center;font-size:42px;
-  backdrop-filter:var(--blur-xs);-webkit-backdrop-filter:var(--blur-xs);
   transition:transform var(--t-md),box-shadow var(--t-md);
 }
+.portal-card:hover{
+  transform:translateY(-10px);
+  box-shadow:var(--glass-shadow-lg),var(--glass-inset);
+}
+/* ── Icon area: colored gradient per card ── */
+.card-icon-area{
+  width:100%;height:100px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;color:#fff;
+}
+.card-icon-area::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.18) 0%,transparent 55%);
+  pointer-events:none;
+}
+/* Per-card gradient colors */
+.cards-row .portal-card:nth-child(1) .card-icon-area{background:linear-gradient(135deg,#3b82f6 0%,#1d4ed8 100%)}
+.cards-row .portal-card:nth-child(2) .card-icon-area{background:linear-gradient(135deg,#8b5cf6 0%,#6d28d9 100%)}
+.cards-row .portal-card:nth-child(3) .card-icon-area{background:linear-gradient(135deg,#10b981 0%,#047857 100%)}
+.cards-row .portal-card:nth-child(4) .card-icon-area{background:linear-gradient(135deg,#f59e0b 0%,#b45309 100%)}
+.cards-row .portal-card:nth-child(5) .card-icon-area{background:linear-gradient(135deg,#06b6d4 0%,#0e7490 100%)}
+.cards-row .portal-card:nth-child(6) .card-icon-area{background:linear-gradient(135deg,#f43f5e 0%,#be123c 100%)}
+.cards-row .portal-card:nth-child(7) .card-icon-area{background:linear-gradient(135deg,#64748b 0%,#334155 100%)}
+
+.card-icon-circle{
+  width:54px;height:54px;border-radius:var(--r-md);
+  background:rgba(255,255,255,.18);
+  border:1.5px solid rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  position:relative;z-index:1;
+  transition:transform var(--t-md),background var(--t-md);
+  box-shadow:0 4px 16px rgba(0,0,0,.12);
+}
+.card-icon-circle svg{width:26px;height:26px;stroke:#fff;color:#fff}
 .portal-card:hover .card-icon-circle{
-  transform:scale(1.08);
-  box-shadow:0 8px 28px rgba(59,130,246,.25);
+  transform:scale(1.1);
+  background:rgba(255,255,255,.28);
 }
 .card-title{
   font-size:13px;font-weight:700;color:var(--text);
-  letter-spacing:.8px;text-transform:uppercase;
-  text-align:center;padding:0 14px 6px;line-height:1.4;
+  letter-spacing:.3px;
+  text-align:center;padding:14px 12px 4px;line-height:1.5;
 }
 .card-sub-bar{
-  width:100%;
-  background:linear-gradient(90deg,var(--accent),var(--primary2));
-  padding:9px 14px;margin-top:12px;
-  text-align:center;font-size:10.5px;font-weight:700;
-  color:#fff;letter-spacing:2.5px;text-transform:uppercase;
+  padding:0 12px 14px;
+  text-align:center;font-size:9px;font-weight:700;
+  color:var(--muted);letter-spacing:2.5px;text-transform:uppercase;
+  background:none;margin-top:0;
 }
 
 /* ══ Brand section ════════════════════════════════════════════════════════ */
@@ -283,7 +307,7 @@ html.dark .bg-orb{opacity:.28}
 .brand-contact-btn{
   margin-top:6px;
   background:linear-gradient(135deg,var(--primary2),var(--accent));
-  color:#fff;font-family:'Sarabun',sans-serif;
+  color:#fff;font-family:'Prompt',sans-serif;
   font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
   padding:10px 34px;border-radius:var(--r-pill);border:none;cursor:pointer;
   box-shadow:0 4px 18px rgba(59,130,246,.4);
@@ -349,33 +373,36 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
   #sidebar.open{left:0;box-shadow:var(--glass-shadow-lg)}
   #main{width:100vw}
   #topbar{padding:0 16px;height:52px}
-  .content-inner{padding:32px 18px 40px}
+  .content-inner{padding:28px 18px 40px}
   .cards-row{gap:14px}
-  .portal-card{width:190px}
-  .card-icon-circle{width:72px;height:72px;font-size:34px}
-  .card-icon-area{padding:22px 14px 14px}
+  .portal-card{width:170px}
+  .card-icon-area{height:86px}
+  .card-icon-circle{width:48px;height:48px}
+  .card-icon-circle svg{width:22px;height:22px}
 }
 @media(max-width:639px){
   #topbar{padding:0 12px;height:48px}
   .tb-title{font-size:13px}
   .tb-badge{display:none}
   .pf-switch-btn span{display:none}
-  .content-inner{padding:22px 10px 30px}
-  .portal-label{font-size:9px;letter-spacing:2px}
+  .content-inner{padding:20px 10px 30px}
+  .portal-heading{font-size:17px}
   .cards-row{gap:10px}
   .portal-card{width:calc(50% - 5px);min-width:130px}
-  .card-icon-circle{width:58px;height:58px;font-size:26px}
-  .card-icon-area{padding:16px 10px 10px}
-  .card-title{font-size:11px;letter-spacing:.4px;padding:0 8px 4px}
-  .card-sub-bar{font-size:9.5px;padding:7px 8px}
+  .card-icon-area{height:78px}
+  .card-icon-circle{width:44px;height:44px}
+  .card-icon-circle svg{width:20px;height:20px}
+  .card-title{font-size:11.5px;padding:10px 8px 3px}
+  .card-sub-bar{padding:0 8px 10px;font-size:8.5px}
 }
 @media(max-width:480px){
   input,select,textarea{font-size:16px!important}
   .portal-card{width:calc(50% - 4px);min-width:110px}
-  .card-icon-circle{width:48px;height:48px;font-size:22px}
-  .card-icon-area{padding:12px 6px 8px}
-  .card-title{font-size:10px;letter-spacing:.2px;padding:0 5px 4px}
-  .card-sub-bar{font-size:9px;padding:5px 6px;letter-spacing:1.5px}
+  .card-icon-area{height:70px}
+  .card-icon-circle{width:40px;height:40px}
+  .card-icon-circle svg{width:18px;height:18px}
+  .card-title{font-size:10.5px;padding:8px 6px 2px}
+  .card-sub-bar{padding:0 6px 8px;letter-spacing:1.5px}
   .content-inner{padding:14px 8px 20px}
   .cards-row{gap:8px}
 }
@@ -656,7 +683,9 @@ html.dark .pf-orb{opacity:.22}
     <div class="bg-orb bg-orb-3"></div>
 
     <div class="content-inner">
-      <p class="portal-label">เลือกระบบที่ต้องการ</p>
+      <p class="portal-label">TARARIN 999 TRANSPORT</p>
+      <h2 class="portal-heading">เลือกระบบที่ต้องการ</h2>
+      <p class="portal-sub">ระบบบริหารจัดการครบวงจร</p>
 
       <div class="cards-row">
 
