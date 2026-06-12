@@ -383,82 +383,115 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
 /* ═══ Profile Picker ══════════════════════════════════════════════════════ */
 #profile-overlay{
   position:fixed;inset:0;z-index:9999;
-  background:linear-gradient(140deg,#020818 0%,#06112e 50%,#0a1a40 100%);
+  background:linear-gradient(140deg,var(--bg-from) 0%,var(--bg-mid) 50%,var(--bg-to) 100%);
   display:flex;flex-direction:column;align-items:center;
   justify-content:center;padding:20px 16px;overflow-y:auto;
 }
+/* Orbs */
+.pf-orb{
+  position:fixed;border-radius:50%;filter:blur(90px);
+  opacity:.5;pointer-events:none;z-index:0;
+}
+html.dark .pf-orb{opacity:.22}
+.pf-orb-1{width:500px;height:500px;top:-120px;right:-80px;
+  background:radial-gradient(circle,rgba(139,92,246,.55) 0%,rgba(59,130,246,.45) 70%);}
+.pf-orb-2{width:380px;height:380px;bottom:-90px;left:-60px;
+  background:radial-gradient(circle,rgba(96,165,250,.55) 0%,rgba(167,139,250,.45) 70%);}
+.pf-orb-3{width:260px;height:260px;top:38%;left:28%;opacity:.3;
+  background:radial-gradient(circle,rgba(196,181,253,.6) 0%,rgba(99,102,241,.35) 70%);}
+#pf-grid-box,#pf-pw-box{position:relative;z-index:1}
+
 .pf-brand{text-align:center;margin-bottom:6px}
 .pf-brand-logo{
-  width:54px;height:54px;border-radius:50%;
-  border:2px solid var(--accent2);overflow:hidden;
-  margin:0 auto 6px;background:var(--glass-bg-subtle);
+  width:60px;height:60px;border-radius:50%;
+  border:2px solid var(--accent);overflow:hidden;
+  margin:0 auto 8px;
+  background:var(--glass-bg);
+  backdrop-filter:var(--blur-xs);-webkit-backdrop-filter:var(--blur-xs);
+  box-shadow:var(--glass-shadow),0 0 0 4px rgba(59,130,246,.12);
 }
 .pf-brand-logo img{width:100%;height:100%;object-fit:cover}
-.pf-brand-name{font-size:11px;font-weight:700;color:var(--accent2);letter-spacing:2px}
-.pf-title{font-size:22px;font-weight:700;color:#fff;margin:14px 0 26px;text-align:center}
+.pf-brand-name{font-size:11px;font-weight:700;color:var(--primary);letter-spacing:2px;text-transform:uppercase}
+.pf-title{font-size:22px;font-weight:700;color:var(--text);margin:14px 0 26px;text-align:center}
 .pf-grid{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;max-width:720px}
 .pf-card{
   display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;
-  padding:14px;border-radius:var(--r-lg);
-  transition:transform .15s,background .15s,border-color .15s;
-  border:2px solid transparent;position:relative;min-width:95px;
+  padding:16px 14px;border-radius:var(--r-xl);
+  transition:transform .2s cubic-bezier(.4,0,.2,1),background .2s,border-color .2s,box-shadow .2s;
+  border:1.5px solid var(--glass-border);
+  background:var(--glass-bg-card);
+  backdrop-filter:var(--blur-xs);-webkit-backdrop-filter:var(--blur-xs);
+  box-shadow:var(--glass-shadow),var(--glass-inset);
+  position:relative;min-width:95px;
 }
 .pf-card:hover,.pf-card:focus{
-  background:rgba(255,255,255,.08);
-  border-color:rgba(96,165,250,.6);
-  transform:scale(1.06);outline:none;
+  background:var(--glass-bg-strong);
+  border-color:var(--accent);
+  transform:translateY(-7px) scale(1.03);
+  box-shadow:var(--glass-shadow-lg),var(--glass-inset);
+  outline:none;
 }
 .pf-avatar-wrap{position:relative;display:inline-block}
 .pf-avatar{
   width:108px;height:108px;border-radius:var(--r-md);
-  background:rgba(255,255,255,.08);
+  background:var(--glass-bg-strong);
+  backdrop-filter:var(--blur-xs);-webkit-backdrop-filter:var(--blur-xs);
   display:flex;align-items:center;justify-content:center;font-size:50px;
-  overflow:hidden;border:2px solid rgba(255,255,255,.15);
-  transition:border-color .15s;
+  overflow:hidden;border:2px solid var(--glass-border);
+  box-shadow:var(--glass-shadow);
+  transition:border-color .18s,box-shadow .18s;
 }
-.pf-card:hover .pf-avatar{border-color:var(--accent2)}
+.pf-card:hover .pf-avatar{border-color:var(--accent);box-shadow:0 4px 18px rgba(59,130,246,.25)}
 .pf-avatar img{width:100%;height:100%;object-fit:cover}
-.pf-name{font-size:13px;font-weight:600;color:rgba(255,255,255,.82);text-align:center;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pf-edit-badge{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;font-size:24px;border-radius:10px}
+.pf-name{font-size:13px;font-weight:600;color:var(--text);text-align:center;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-edit-badge{position:absolute;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;font-size:24px;border-radius:10px}
 .pf-edit-mode .pf-edit-badge{display:flex}
 .pf-actions{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 .pf-action-btn{
-  padding:8px 18px;border-radius:var(--r-sm);
-  border:1.5px solid rgba(255,255,255,.22);
-  background:rgba(255,255,255,.06);color:rgba(255,255,255,.62);
-  font-size:13px;cursor:pointer;font-family:inherit;transition:.15s;
+  padding:8px 18px;border-radius:var(--r-pill);
+  border:1.5px solid var(--glass-border-sm);
+  background:var(--glass-bg);color:var(--text2);
+  backdrop-filter:var(--blur-xs);-webkit-backdrop-filter:var(--blur-xs);
+  font-size:13px;cursor:pointer;font-family:inherit;
+  transition:.15s;box-shadow:var(--glass-shadow);
 }
-.pf-action-btn:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.5)}
+.pf-action-btn:hover{background:var(--glass-bg-strong);color:var(--text);border-color:var(--accent)}
 /* Password prompt */
 #pf-pw-box{display:none;flex-direction:column;align-items:center;text-align:center;max-width:320px;width:100%}
 .pf-pw-avatar{
-  font-size:52px;width:80px;height:80px;border-radius:var(--r-md);
-  background:rgba(255,255,255,.1);display:flex;align-items:center;
-  justify-content:center;margin:0 auto 10px;
-  border:2px solid rgba(96,165,250,.4);overflow:hidden;
+  font-size:52px;width:84px;height:84px;border-radius:var(--r-md);
+  background:var(--glass-bg-strong);
+  backdrop-filter:var(--blur-xs);-webkit-backdrop-filter:var(--blur-xs);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 10px;
+  border:2px solid var(--accent);
+  box-shadow:var(--glass-shadow),0 0 0 4px rgba(59,130,246,.12);
+  overflow:hidden;
 }
 .pf-pw-avatar img{width:100%;height:100%;object-fit:cover}
-.pf-pw-name{font-size:16px;font-weight:700;color:#fff;margin-bottom:18px}
+.pf-pw-name{font-size:16px;font-weight:700;color:var(--text);margin-bottom:18px}
 .pf-pw-inp{
   width:100%;padding:12px 14px;border-radius:var(--r-md);
-  border:1.5px solid rgba(96,165,250,.4);
-  background:rgba(255,255,255,.08);color:#fff;font-size:20px;
+  border:1.5px solid var(--input-border);
+  background:var(--glass-bg-strong);
+  backdrop-filter:var(--blur-xs);-webkit-backdrop-filter:var(--blur-xs);
+  color:var(--text);font-size:20px;
   font-family:inherit;outline:none;transition:.2s;
   text-align:center;letter-spacing:6px;margin-bottom:8px;
+  box-shadow:var(--glass-shadow);
 }
-.pf-pw-inp:focus{border-color:var(--accent2);background:rgba(255,255,255,.13)}
-.pf-pw-inp::placeholder{letter-spacing:1px;font-size:14px}
-.pf-pw-err{color:#f87171;font-size:12px;min-height:18px;margin-bottom:8px}
+.pf-pw-inp:focus{border-color:var(--input-focus);box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+.pf-pw-inp::placeholder{letter-spacing:1px;font-size:14px;color:var(--muted)}
+.pf-pw-err{color:var(--red);font-size:12px;min-height:18px;margin-bottom:8px}
 .pf-pw-btn{
-  width:100%;padding:12px;border-radius:var(--r-md);border:none;
+  width:100%;padding:12px;border-radius:var(--r-pill);border:none;
   background:linear-gradient(135deg,var(--primary2),var(--accent));
   color:#fff;font-size:15px;font-weight:700;cursor:pointer;
   margin-bottom:10px;transition:.15s;
   box-shadow:0 4px 18px rgba(59,130,246,.4);
 }
 .pf-pw-btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(59,130,246,.55)}
-.pf-pw-back{font-size:12px;color:rgba(255,255,255,.4);cursor:pointer;border:none;background:none;font-family:inherit;padding:4px 8px}
-.pf-pw-back:hover{color:rgba(255,255,255,.7)}
+.pf-pw-back{font-size:12px;color:var(--text2);cursor:pointer;border:none;background:none;font-family:inherit;padding:4px 8px;transition:.15s}
+.pf-pw-back:hover{color:var(--text)}
 /* Profile Edit Modal */
 #pf-edit-modal{display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,.6);backdrop-filter:var(--blur-xs);align-items:center;justify-content:center;padding:16px}
 #pf-edit-modal.show{display:flex}
@@ -718,6 +751,9 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
 
 <!-- ══ Profile Picker Overlay ═══════════════════════════════════════════ -->
 <div id="profile-overlay">
+  <div class="pf-orb pf-orb-1"></div>
+  <div class="pf-orb pf-orb-2"></div>
+  <div class="pf-orb pf-orb-3"></div>
   <!-- Profile grid -->
   <div id="pf-grid-box" style="display:flex;flex-direction:column;align-items:center;width:100%;">
     <div class="pf-brand">
@@ -725,7 +761,7 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
       <div class="pf-brand-name">TARARIN 999</div>
     </div>
     <div class="pf-title" id="pf-title-txt">ใครกำลังใช้งาน?</div>
-    <div id="pf-sync-status" style="font-size:11px;color:rgba(255,255,255,0.45);min-height:16px;margin-bottom:6px;text-align:center;"></div>
+    <div id="pf-sync-status" style="font-size:11px;color:var(--muted);min-height:16px;margin-bottom:6px;text-align:center;"></div>
     <div class="pf-grid" id="pf-grid"></div>
   </div>
   <!-- Password prompt -->
