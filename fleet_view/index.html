@@ -458,10 +458,11 @@ table.sub tr.sub-hdr td{background:var(--glass-bg-subtle);font-weight:700;font-s
 .stmt-tab{padding:6px 14px;border-radius:var(--r-pill);font-size:12px;font-weight:600;border:1px solid var(--glass-border-sm);background:var(--glass-bg-subtle);color:var(--text2);cursor:pointer;transition:var(--t);}
 .stmt-tab.active{background:linear-gradient(135deg,var(--primary2),var(--accent));color:#fff;border-color:transparent;}
 html.in-iframe body{display:flex!important;flex-direction:column!important;height:100vh!important;overflow:hidden!important}
-html.in-iframe #sidebar{position:static!important;width:100%!important;height:auto!important;display:grid!important;grid-template-columns:1fr auto!important;overflow-y:visible!important;flex-shrink:0!important;z-index:unset!important}
+html.in-iframe #sidebar{position:static!important;width:100%!important;height:auto!important;display:grid!important;grid-template-columns:1fr auto!important;overflow-y:visible!important;flex-shrink:0!important;z-index:unset!important;background:transparent!important}
 html.in-iframe .sb-logo,html.in-iframe #sb-overlay,html.in-iframe #qnav{display:none!important}
-html.in-iframe .sb-sec:nth-child(2){grid-row:1!important;grid-column:1!important;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;padding:0 4px!important;gap:0!important}
-html.in-iframe .sb-sec:nth-child(3){grid-row:2!important;grid-column:1/-1!important;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center!important;padding:3px 8px!important;gap:3px!important;background:rgba(0,0,0,.12)!important;border-top:1px solid rgba(255,255,255,.06)!important}
+html.in-iframe .sb-sec:nth-child(2){grid-row:1!important;grid-column:1!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;overflow-x:auto!important;padding:4px 8px!important;gap:6px!important;scrollbar-width:none!important}
+html.in-iframe .sb-sec:nth-child(2)::-webkit-scrollbar{display:none!important}
+html.in-iframe .sb-sec:nth-child(3){grid-row:2!important;grid-column:1/-1!important;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center!important;padding:4px 10px!important;gap:6px!important;background:rgba(255,255,255,0.08)!important;border-top:1px solid rgba(180,220,255,0.18)!important}
 html.in-iframe .sb-sec:nth-child(2) .sb-sec-hdr{display:none!important}
 html.in-iframe .sb-sec:nth-child(3) .sb-sec-hdr{display:inline-flex!important;align-self:center!important;font-size:9px!important;font-weight:700!important;color:rgba(255,255,255,.5)!important;padding:0 6px 0 0!important;letter-spacing:0!important;text-transform:none!important;white-space:nowrap!important;margin:0!important}
 html.in-iframe .sb-foot{grid-row:1!important;grid-column:2!important;display:flex!important;align-items:center!important;padding:0 8px!important;border-top:none!important;margin-top:0!important}
@@ -1790,9 +1791,7 @@ function toggleFullscreen(){
 // ═══════════════════════════════════════════
 function renderLatest(){
   var q=(document.getElementById('s-latest').value||'').toLowerCase();
-  var trips=getTrips();
-  var latestMap={};
-  trips.forEach(function(t){if(!latestMap[t.plate]||t.date>latestMap[t.plate].date)latestMap[t.plate]=t;});
+  var latestMap=latestByPlate(); // use allTrips regardless of month filter
   var orderedAll=getOrderedPlates(false);
   var plates=orderedAll.filter(function(p){return latestMap[p];});
   // Append any plates in latestMap not in orderedAll (unlikely but safe)

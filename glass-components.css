@@ -144,6 +144,30 @@ textarea::placeholder {
   border: 1px solid rgba(255,255,255,0.25) !important;
 }
 
+/* ── in-iframe: compact pill tabs (reset large glass bubble styles) */
+html.in-iframe .nav-btn,
+html.in-iframe .stmt-tab {
+  border-radius: var(--r-pill) !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  align-self: center !important;
+}
+html.in-iframe .nav-btn:hover,
+html.in-iframe .stmt-tab:hover {
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html.in-iframe .nav-btn.active,
+html.in-iframe .stmt-tab.active {
+  border-radius: var(--r-pill) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 /* ── Dark mode button hover ──────────────────────────────────────── */
 html.dark .btn:not(.btn-navy):not(.btn-blue):not(.btn-primary):not(.btn-green):not(.btn-red):not(.btn-gold):not(.btn-orange) {
   color: var(--text) !important;

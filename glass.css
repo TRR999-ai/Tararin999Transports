@@ -13,9 +13,9 @@
   --accent3:     #93c5fd;
   --accent-dark: #1d4ed8;
 
-  --bg-from:  #c7d9ff;
-  --bg-mid:   #dce8ff;
-  --bg-to:    #eef4ff;
+  --bg-from:  #c8e8ff;
+  --bg-mid:   #ddf3ff;
+  --bg-to:    #eefaff;
 
   --glass-bg:        rgba(255,255,255,0.55);
   --glass-bg-strong: rgba(255,255,255,0.78);
@@ -79,9 +79,9 @@ html.dark {
   --accent3:     #bfdbfe;
   --accent-dark: #3b82f6;
 
-  --bg-from:  #04091e;
-  --bg-mid:   #080f2c;
-  --bg-to:    #0b153a;
+  --bg-from:  #020c1b;
+  --bg-mid:   #031a2e;
+  --bg-to:    #041e3a;
 
   --glass-bg:        rgba(255,255,255,0.06);
   --glass-bg-strong: rgba(255,255,255,0.11);
