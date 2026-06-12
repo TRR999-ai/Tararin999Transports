@@ -347,7 +347,7 @@ html.in-iframe .mgr-body{height:calc(100vh - 44px)!important}
 ═══════════════════════════════════════════ -->
 <div id="view-employee">
   <div class="emp-topbar">
-    <a href="../index.html" class="emp-back">🏠 Portal</a>
+    <a href="../index.html" class="emp-back">Portal</a>
     <div class="emp-profile-badge">
       <div class="emp-av" id="emp-av"></div>
       <span class="emp-av-name" id="emp-av-name">—</span>
@@ -370,7 +370,7 @@ html.in-iframe .mgr-body{height:calc(100vh - 44px)!important}
 
     <div class="big-btn-wrap">
       <button class="big-btn btn-disabled" id="big-btn" onclick="handleClockBtn()">
-        <span class="big-btn-icon" id="big-btn-icon">📍</span>
+        <span class="big-btn-icon" id="big-btn-icon"></span>
         <span class="big-btn-label" id="big-btn-label">กำลังโหลด</span>
         <span class="big-btn-sub" id="big-btn-sub">โปรดรอ...</span>
       </button>
@@ -395,13 +395,13 @@ html.in-iframe .mgr-body{height:calc(100vh - 44px)!important}
       <div class="mgr-sb-sub">TARARIN 999</div>
     </div>
     <nav class="mgr-nav">
-      <button class="mgr-nav-btn active" id="nav-today" onclick="showMgrPage('today',this)"><span class="mgr-nav-ic">📅</span>วันนี้</button>
-      <button class="mgr-nav-btn" id="nav-history" onclick="showMgrPage('history',this)"><span class="mgr-nav-ic">📋</span>ประวัติ</button>
-      <button class="mgr-nav-btn" id="nav-report" onclick="showMgrPage('report',this)"><span class="mgr-nav-ic">📊</span>รายงานรายคน</button>
-      <button class="mgr-nav-btn" id="nav-settings" onclick="showMgrPage('settings',this)"><span class="mgr-nav-ic">⚙️</span>ตั้งค่า</button>
+      <button class="mgr-nav-btn active" id="nav-today" onclick="showMgrPage('today',this)"><span class="mgr-nav-ic"></span>วันนี้</button>
+      <button class="mgr-nav-btn" id="nav-history" onclick="showMgrPage('history',this)"><span class="mgr-nav-ic"></span>ประวัติ</button>
+      <button class="mgr-nav-btn" id="nav-report" onclick="showMgrPage('report',this)"><span class="mgr-nav-ic"></span>รายงานรายคน</button>
+      <button class="mgr-nav-btn" id="nav-settings" onclick="showMgrPage('settings',this)"><span class="mgr-nav-ic"></span>ตั้งค่า</button>
     </nav>
     <div class="mgr-sb-foot">
-      <a href="../index.html" class="mgr-back-link">🏠 กลับ Portal</a>
+      <a href="../index.html" class="mgr-back-link">กลับ Portal</a>
     </div>
   </aside>
   <div id="mgr-main">
@@ -409,7 +409,7 @@ html.in-iframe .mgr-body{height:calc(100vh - 44px)!important}
       <button class="sb-toggle" onclick="toggleMgrSidebar()">☰</button>
       <span class="mgr-page-title" id="mgr-page-title">วันนี้</span>
       <span class="mgr-page-sub" id="mgr-date-label">—</span>
-      <button class="att-btn" style="margin-left:8px;" onclick="refreshMgrData()">🔄 รีเฟรช</button>
+      <button class="att-btn" style="margin-left:8px;" onclick="refreshMgrData()">รีเฟรช</button>
     </header>
     <div class="mgr-body">
 
@@ -417,11 +417,11 @@ html.in-iframe .mgr-body{height:calc(100vh - 44px)!important}
       <div id="mgr-page-today" class="mgr-page active">
         <div class="att-kpi-row" id="mgr-kpi"></div>
         <div class="att-section">
-          <div class="att-section-hdr">👥 สถานะพนักงานวันนี้</div>
+          <div class="att-section-hdr">สถานะพนักงานวันนี้</div>
           <div class="att-section-body" id="mgr-emp-rows"></div>
         </div>
         <div class="att-section">
-          <div class="att-section-hdr">🕐 บันทึกทั้งหมดวันนี้</div>
+          <div class="att-section-hdr">บันทึกทั้งหมดวันนี้</div>
           <div class="tbl-wrap">
             <table class="att-table">
               <thead><tr><th>ชื่อ</th><th>ประเภท</th><th>เวลา</th><th>ระยะทาง (km)</th><th>สถานะ GPS</th></tr></thead>
@@ -440,7 +440,7 @@ html.in-iframe .mgr-body{height:calc(100vh - 44px)!important}
           <button class="att-btn outline" onclick="histNextDay()">▶</button>
         </div>
         <div class="att-section">
-          <div class="att-section-hdr">📋 บันทึกการเข้างาน</div>
+          <div class="att-section-hdr">บันทึกการเข้างาน</div>
           <div class="tbl-wrap">
             <table class="att-table">
               <thead><tr><th>ชื่อ</th><th>ประเภท</th><th>เวลา</th><th>ระยะ (km)</th><th>GPS</th></tr></thead>
@@ -457,7 +457,7 @@ html.in-iframe .mgr-body{height:calc(100vh - 44px)!important}
           <input type="month" class="att-date-inp" id="report-month" onchange="renderReport()">
         </div>
         <div class="att-section">
-          <div class="att-section-hdr">📊 สรุปรายคน</div>
+          <div class="att-section-hdr">สรุปรายคน</div>
           <div class="tbl-wrap">
             <table class="att-table">
               <thead><tr><th>พนักงาน</th><th>วันที่มา</th><th>มาสาย</th><th>เข้างานเฉลี่ย</th><th>ออกงานเฉลี่ย</th></tr></thead>
@@ -466,7 +466,7 @@ html.in-iframe .mgr-body{height:calc(100vh - 44px)!important}
           </div>
         </div>
         <div class="att-section" style="margin-top:16px;">
-          <div class="att-section-hdr">📅 รายละเอียดรายวัน</div>
+          <div class="att-section-hdr">รายละเอียดรายวัน</div>
           <div class="tbl-wrap">
             <table class="att-table">
               <thead><tr><th>วันที่</th><th>ชื่อ</th><th>เข้างาน</th><th>ออกงาน</th><th>ชั่วโมง</th></tr></thead>
@@ -479,7 +479,7 @@ html.in-iframe .mgr-body{height:calc(100vh - 44px)!important}
       <!-- SETTINGS PAGE -->
       <div id="mgr-page-settings" class="mgr-page">
         <div class="att-section">
-          <div class="att-section-hdr">📍 สถานที่ทำงาน (GPS)</div>
+          <div class="att-section-hdr">สถานที่ทำงาน (GPS)</div>
           <div class="att-section-body" style="padding:20px;">
             <div class="att-settings-grid">
               <div class="att-set-field">
@@ -500,8 +500,8 @@ html.in-iframe .mgr-body{height:calc(100vh - 44px)!important}
               </div>
             </div>
             <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
-              <button class="att-btn" onclick="useCurrentLocAsOffice()">📍 ใช้ตำแหน่งปัจจุบัน</button>
-              <button class="att-btn" onclick="saveOfficeSettings()">💾 บันทึก</button>
+              <button class="att-btn" onclick="useCurrentLocAsOffice()">ใช้ตำแหน่งปัจจุบัน</button>
+              <button class="att-btn" onclick="saveOfficeSettings()">บันทึก</button>
             </div>
             <div id="set-msg" style="font-size:12px;color:var(--green);margin-top:8px;min-height:18px;"></div>
             <div style="margin-top:16px;padding:12px;background:#f1f5f9;border-radius:8px;font-size:12px;color:var(--text2);">
@@ -511,10 +511,10 @@ html.in-iframe .mgr-body{height:calc(100vh - 44px)!important}
           </div>
         </div>
         <div class="att-section" style="margin-top:16px;">
-          <div class="att-section-hdr">🗑️ จัดการข้อมูล</div>
+          <div class="att-section-hdr">จัดการข้อมูล</div>
           <div style="padding:16px;display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="att-btn" onclick="exportAttendance()">📥 Export JSON</button>
-            <button class="att-btn" style="background:#dc2626;" onclick="clearAllAttendance()">🗑️ ล้างข้อมูลทั้งหมด</button>
+            <button class="att-btn" onclick="exportAttendance()">Export JSON</button>
+            <button class="att-btn" style="background:#dc2626;" onclick="clearAllAttendance()">ล้างข้อมูลทั้งหมด</button>
           </div>
         </div>
       </div>
@@ -583,15 +583,15 @@ function flushQueue(){
   Promise.all(promises).then(function(results){
     var failed=results.filter(function(r){return r!==null;});
     saveQueue(failed);
-    if(!failed.length)showToast('✅ sync '+q.length+' รายการสำเร็จ');
+    if(!failed.length)showToast('sync '+q.length+' รายการสำเร็จ');
   });
 }
-window.addEventListener('online',function(){showToast('🌐 เชื่อมต่อแล้ว — กำลัง sync...');setTimeout(flushQueue,1000);});
+window.addEventListener('online',function(){showToast('เชื่อมต่อแล้ว — กำลัง sync...');setTimeout(flushQueue,1000);});
 
 function fbSaveRecord(rec){
   if(!_db||!navigator.onLine){enqueueRecord(rec);return;}
   _db.collection('attendance').doc(rec.id).set(rec).catch(function(e){
-    showToast('⚠️ sync ล้มเหลว — บันทึกไว้ใน queue');
+    showToast('sync ล้มเหลว — บันทึกไว้ใน queue');
     enqueueRecord(rec);
     console.warn('[Attendance] write error',e);
   });
@@ -658,7 +658,7 @@ function showToast(msg,ms){
 
 // ─── data ──────────────────────────────────────────────────
 function loadRecords(){try{return JSON.parse(localStorage.getItem(RECORDS_KEY)||'[]');}catch(e){return[];}}
-function saveRecords(r){try{localStorage.setItem(RECORDS_KEY,JSON.stringify(r));}catch(e){showToast('⚠️ localStorage เต็ม — บันทึกไม่ได้');console.warn('[Attendance] localStorage error',e);}}
+function saveRecords(r){try{localStorage.setItem(RECORDS_KEY,JSON.stringify(r));}catch(e){showToast('localStorage เต็ม — บันทึกไม่ได้');console.warn('[Attendance] localStorage error',e);}}
 function addRecord(rec){var r=loadRecords();r.push(rec);saveRecords(r);fbSaveRecord(rec);}
 function loadOffice(){try{return JSON.parse(localStorage.getItem(OFFICE_KEY))||DEFAULT_OFFICE;}catch(e){return DEFAULT_OFFICE;}}
 function saveOffice(o){try{localStorage.setItem(OFFICE_KEY,JSON.stringify(o));}catch(e){}}
@@ -673,7 +673,7 @@ function getActiveProfile(){
 }
 function avHtml(pf,size){
   if(pf&&pf.avatarImg)return '<img src="'+pf.avatarImg+'" style="width:100%;height:100%;object-fit:cover;">';
-  return '<span style="font-size:'+(size*0.48)+'px;line-height:1;">'+(pf?pf.avatar:'👤')+'</span>';
+  return '<span style="font-size:'+(size*0.48)+'px;line-height:1;">'+(pf?pf.avatar:'')+'</span>';
 }
 function isExec(pf){return pf&&pf.id==='exec';}
 
@@ -774,12 +774,12 @@ function _renderEmpToday(){
   } else {
     var last=records[records.length-1];
     if(last.type==='in'){
-      statusEl.textContent='🟢 กำลังทำงาน';
+      statusEl.textContent=' กำลังทำงาน';
       timesEl.textContent='เข้างาน '+lastIn.time.slice(0,5);
       // Live worked time
       workedEl.textContent='';
     } else {
-      statusEl.textContent='✅ ออกงานแล้ววันนี้';
+      statusEl.textContent=' ออกงานแล้ววันนี้';
       timesEl.textContent='เข้า '+lastIn.time.slice(0,5)+' · ออก '+lastOut.time.slice(0,5);
       if(lastIn&&lastOut)workedEl.textContent='รวม '+timeDiff(lastIn.time,lastOut.time);
     }
@@ -793,7 +793,7 @@ function _renderEmpToday(){
       return '<div class="log-row log-'+r.type+'">'
         +'<span class="log-badge">'+(r.type==='in'?'เข้างาน':'ออกงาน')+'</span>'
         +'<span class="log-time">'+r.time.slice(0,5)+'</span>'
-        +(r.dist!=null?'<span class="log-dist">📍 '+r.dist.toFixed(2)+' km</span>':'')
+        +(r.dist!=null?'<span class="log-dist">'+r.dist.toFixed(2)+' km</span>':'')
         +'</div>';
     }).join('');
   } else {
@@ -818,33 +818,33 @@ function updateBigBtn(){
   if(isDone){
     // Already clocked out today
     btn.className='big-btn btn-done';
-    icon.textContent='✅';lbl.textContent='เสร็จงานวันนี้';
+    icon.textContent='';lbl.textContent='เสร็จงานวันนี้';
     sub.textContent='พบกันพรุ่งนี้!';
     btn.classList.remove('btn-ready');
   } else if(isWorking){
     // Ready to clock out
     if(_gpsOk||_gpsDist===null){
       btn.className='big-btn btn-out btn-ready';
-      icon.textContent='🔴';lbl.textContent='ออกงาน';
+      icon.textContent='';lbl.textContent='ออกงาน';
       sub.textContent='กดเพื่อบันทึกเวลาออก';
     } else {
       btn.className='big-btn btn-out btn-ready';
-      icon.textContent='🔴';lbl.textContent='ออกงาน';
+      icon.textContent='';lbl.textContent='ออกงาน';
       sub.textContent='(ไม่จำเป็นต้องอยู่ในพื้นที่)';
     }
   } else {
     // Ready to clock in
     if(_gpsLat===null){
       btn.className='big-btn btn-disabled';
-      icon.textContent='📍';lbl.textContent='รอ GPS';
+      icon.textContent='';lbl.textContent='รอ GPS';
       sub.textContent='กำลังระบุตำแหน่ง...';
     } else if(!_gpsOk){
       btn.className='big-btn btn-disabled';
-      icon.textContent='🚫';lbl.textContent='นอกพื้นที่';
+      icon.textContent='';lbl.textContent='นอกพื้นที่';
       sub.textContent='ห่าง '+(_gpsDist?_gpsDist.toFixed(2):'?')+' km';
     } else {
       btn.className='big-btn btn-in btn-ready';
-      icon.textContent='🟢';lbl.textContent='เข้างาน';
+      icon.textContent='';lbl.textContent='เข้างาน';
       sub.textContent='กดเพื่อบันทึกเวลาเข้า';
     }
   }
@@ -862,7 +862,7 @@ function handleClockBtn(){
   // Build confirm message
   var type=isWorking?'out':'in';
   var timeNow=nowTimeShort();
-  var icon=type==='in'?'🟢':'🔴';
+  var icon='';
   var title=type==='in'?'เข้างาน '+timeNow+'?':'ออกงาน '+timeNow+'?';
   var sub2=type==='in'
     ?'บันทึกเวลาเข้างาน '+timeNow+' น.'+((_gpsDist!=null)?' ('+_gpsDist.toFixed(2)+' km จากที่ทำงาน)':'')
@@ -888,7 +888,7 @@ function doClockAction(type){
     ok:_gpsOk
   };
   addRecord(rec);
-  showToast(type==='in'?'✅ บันทึกเวลาเข้างานแล้ว':'✅ บันทึกเวลาออกงานแล้ว');
+  showToast(type==='in'?'บันทึกเวลาเข้างานแล้ว':'บันทึกเวลาออกงานแล้ว');
   renderEmpToday();
 }
 
@@ -971,10 +971,10 @@ function _renderToday(){
   });
   // KPI cards
   document.getElementById('mgr-kpi').innerHTML=
-    '<div class="att-kpi"><div class="k-label">👥 พนักงานทั้งหมด</div><div class="k-val">'+emps.length+'</div><div class="k-sub">คน</div></div>'
-   +'<div class="att-kpi green"><div class="k-label">✅ มาทำงาน</div><div class="k-val">'+present+'</div><div class="k-sub">คน</div></div>'
-   +'<div class="att-kpi red"><div class="k-label">❌ ไม่มา / ยังไม่เช็ค</div><div class="k-val">'+absent+'</div><div class="k-sub">คน</div></div>'
-   +'<div class="att-kpi amber"><div class="k-label">⚠️ มาสาย (หลัง '+lateAfter+')</div><div class="k-val">'+late+'</div><div class="k-sub">คน</div></div>';
+    '<div class="att-kpi"><div class="k-label">พนักงานทั้งหมด</div><div class="k-val">'+emps.length+'</div><div class="k-sub">คน</div></div>'
+   +'<div class="att-kpi green"><div class="k-label">มาทำงาน</div><div class="k-val">'+present+'</div><div class="k-sub">คน</div></div>'
+   +'<div class="att-kpi red"><div class="k-label">ไม่มา / ยังไม่เช็ค</div><div class="k-val">'+absent+'</div><div class="k-sub">คน</div></div>'
+   +'<div class="att-kpi amber"><div class="k-label">มาสาย (หลัง '+lateAfter+')</div><div class="k-val">'+late+'</div><div class="k-sub">คน</div></div>';
   // Employee rows
   document.getElementById('mgr-emp-rows').innerHTML=emps.map(function(e){
     var st=empStatus[e.id]||{status:'none'};
@@ -999,7 +999,7 @@ function _renderToday(){
       +'<td><span class="att-badge '+(r.type==='in'?'in':'out')+'">'+(r.type==='in'?'เข้างาน':'ออกงาน')+'</span></td>'
       +'<td><b>'+r.time.slice(0,5)+'</b></td>'
       +'<td>'+(r.dist!=null?r.dist.toFixed(2):'—')+'</td>'
-      +'<td>'+(r.ok===true?'✅ อยู่ในพื้นที่':r.ok===false?'⚠️ นอกพื้นที่':'—')+'</td>'
+      +'<td>'+(r.ok===true?'อยู่ในพื้นที่':r.ok===false?'นอกพื้นที่':'—')+'</td>'
       +'</tr>';
   }).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px;">ยังไม่มีบันทึกวันนี้</td></tr>';
 }
@@ -1017,7 +1017,7 @@ function _renderHistoryForDate(date){
       +'<td><span class="att-badge '+(r.type==='in'?'in':'out')+'">'+(r.type==='in'?'เข้างาน':'ออกงาน')+'</span></td>'
       +'<td><b>'+r.time.slice(0,5)+'</b></td>'
       +'<td>'+(r.dist!=null?r.dist.toFixed(2):'—')+'</td>'
-      +'<td>'+(r.ok===true?'✅':r.ok===false?'⚠️':'—')+'</td>'
+      +'<td>'+(r.ok===true?'✓':r.ok===false?'!':'—')+'</td>'
       +'</tr>';
   }).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px;">ไม่มีข้อมูลวันนี้</td></tr>';
 }
@@ -1086,11 +1086,11 @@ function saveOfficeSettings(){
   var lon=parseFloat(document.getElementById('set-lon').value);
   var radius=parseFloat(document.getElementById('set-radius').value)||5;
   var lateAfter=document.getElementById('set-late-after').value||'08:00';
-  if(isNaN(lat)||isNaN(lon)){document.getElementById('set-msg').textContent='⚠️ กรุณาใส่พิกัด GPS ให้ถูกต้อง';document.getElementById('set-msg').style.color='var(--red)';return;}
+  if(isNaN(lat)||isNaN(lon)){document.getElementById('set-msg').textContent='กรุณาใส่พิกัด GPS ให้ถูกต้อง';document.getElementById('set-msg').style.color='var(--red)';return;}
   saveOffice({lat:lat,lon:lon,name:name,radius:radius});
   saveLateAfter(lateAfter);
   document.getElementById('set-msg').style.color='var(--green)';
-  document.getElementById('set-msg').textContent='✅ บันทึกแล้ว';
+  document.getElementById('set-msg').textContent='บันทึกแล้ว';
   showToast('บันทึกการตั้งค่าแล้ว');
   setTimeout(function(){document.getElementById('set-msg').textContent='';},3000);
 }
@@ -1102,10 +1102,10 @@ function useCurrentLocAsOffice(){
     document.getElementById('set-lat').value=pos.coords.latitude.toFixed(6);
     document.getElementById('set-lon').value=pos.coords.longitude.toFixed(6);
     document.getElementById('set-msg').style.color='var(--green)';
-    document.getElementById('set-msg').textContent='✅ ได้ตำแหน่งแล้ว — กด "บันทึก" เพื่อยืนยัน';
+    document.getElementById('set-msg').textContent='ได้ตำแหน่งแล้ว — กด "บันทึก" เพื่อยืนยัน';
   },function(){
     document.getElementById('set-msg').style.color='var(--red)';
-    document.getElementById('set-msg').textContent='⚠️ ไม่สามารถระบุตำแหน่งได้';
+    document.getElementById('set-msg').textContent='ไม่สามารถระบุตำแหน่งได้';
   },{enableHighAccuracy:true,timeout:10000});
 }
 function exportAttendance(){
@@ -1115,7 +1115,7 @@ function exportAttendance(){
   a.download='attendance_'+todayStr()+'.json';a.click();
 }
 function clearAllAttendance(){
-  showConfirm('🗑️','ล้างข้อมูลทั้งหมด?','ข้อมูลการเช็คชื่อทั้งหมดจะถูกลบถาวร ไม่สามารถกู้คืนได้',function(){
+  showConfirm(''),'ล้างข้อมูลทั้งหมด?','ข้อมูลการเช็คชื่อทั้งหมดจะถูกลบถาวร ไม่สามารถกู้คืนได้',function(){
     localStorage.removeItem(RECORDS_KEY);renderToday();showToast('ล้างข้อมูลแล้ว');
   });
 }
@@ -1163,15 +1163,15 @@ function closeConfirm(){document.getElementById('confirm-modal').classList.remov
 </style>
 <div id="qnav">
   <div id="qnav-pop">
-    <a class="qn-a" href="../index.html"><span class="qn-ic">🏠</span>Portal</a>
+    <a class="qn-a" href="../index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Portal</a>
     <div class="qn-hr"></div>
-    <a class="qn-a" href="../project1/transport.html"><span class="qn-ic">🚛</span>งานขนส่ง</a>
-    <a class="qn-a" href="../project2/index.html"><span class="qn-ic">💳</span>Fleet Card</a>
-    <a class="qn-a" href="../trr.html"><span class="qn-ic">⛽</span>ต้นทุนน้ำมัน</a>
-    <a class="qn-a" href="../priceboard/index.html"><span class="qn-ic">💰</span>กระดานราคา</a>
-    <a class="qn-a" href="../fleet_view/index.html"><span class="qn-ic">🚦</span>Fleet View</a>
-    <a class="qn-a" href="../attendance/index.html"><span class="qn-ic">🕐</span>เช็คชื่อ</a>
-    <a class="qn-a" href="../help.html"><span class="qn-ic">📖</span>คู่มือ</a>
+    <a class="qn-a" href="../project1/transport.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>งานขนส่ง</a>
+    <a class="qn-a" href="../project2/index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Fleet Card</a>
+    <a class="qn-a" href="../trr.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span>ต้นทุนน้ำมัน</a>
+    <a class="qn-a" href="../priceboard/index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>กระดานราคา</a>
+    <a class="qn-a" href="../fleet_view/index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>Fleet View</a>
+    <a class="qn-a" href="../attendance/index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>เช็คชื่อ</a>
+    <a class="qn-a" href="../help.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>คู่มือ</a>
   </div>
   <button id="qnav-fab" title="ไปที่..."><svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><rect x="0" y="0" width="7" height="7" rx="1.5"/><rect x="11" y="0" width="7" height="7" rx="1.5"/><rect x="0" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg></button>
 </div>

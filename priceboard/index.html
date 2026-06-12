@@ -248,21 +248,21 @@ html.in-iframe #topbar,html.in-iframe #qnav{display:none!important}
   </div>
   <div class="tb-right">
     <a href="../index.html" class="btn btn-ghost">← หน้าแรก</a>
-    <button class="btn btn-gold" onclick="buildBoard()">⚡ สร้างกระดานใหม่</button>
+    <button class="btn btn-gold" onclick="buildBoard()">สร้างกระดานใหม่</button>
   </div>
 </header>
 
 <!-- Controls -->
 <div id="controls" class="no-print">
   <div class="ctrl-group">
-    <label>⛽ ราคาน้ำมันวันนี้:</label>
+    <label>ราคาน้ำมันวันนี้:</label>
     <input id="fuel-price" class="ctrl-input" type="number" value="29.50"
            min="15.01" max="58.99" step="0.01" oninput="onUpdate()">
     <span style="font-size:13px;color:var(--muted)">บาท/ลิตร</span>
     <span class="fuel-badge" id="fuel-col-label">—</span>
   </div>
   <div class="ctrl-group">
-    <label>📈 ปรับราคาเพิ่ม:</label>
+    <label>ปรับราคาเพิ่ม:</label>
     <input id="markup-pct" class="ctrl-input" type="number" value="0"
            min="-50" max="300" step="0.5" oninput="onUpdate()">
     <span style="font-size:13px;color:var(--muted)">%</span>
@@ -273,9 +273,9 @@ html.in-iframe #topbar,html.in-iframe #qnav{display:none!important}
 
 <!-- Tabs -->
 <div id="tabs" class="no-print">
-  <button class="tab-btn active" onclick="switchTab('matrix')">📊 กระดานต้นฉบับ</button>
-  <button class="tab-btn"        onclick="switchTab('new-board')">📋 กระดานราคาใหม่</button>
-  <button class="tab-btn"        onclick="switchTab('compare')">🔍 เปรียบเทียบราคาลูกค้า</button>
+  <button class="tab-btn active" onclick="switchTab('matrix')">กระดานต้นฉบับ</button>
+  <button class="tab-btn"        onclick="switchTab('new-board')">กระดานราคาใหม่</button>
+  <button class="tab-btn"        onclick="switchTab('compare')">เปรียบเทียบราคาลูกค้า</button>
 </div>
 
 <div id="content">
@@ -301,8 +301,8 @@ html.in-iframe #topbar,html.in-iframe #qnav{display:none!important}
     <span id="col-count">เลือก 44/44 คอลัมน์</span>
     <span style="font-size:12px;color:var(--muted)">· คลิก checkbox บนหัวคอลัมน์เพื่อเลือก/ซ่อน</span>
     <div style="flex:1"></div>
-    <button class="btn btn-green" onclick="exportExcel()">📥 บันทึก Excel</button>
-    <button class="btn btn-blue"  onclick="exportPDF()">🖨 บันทึก PDF</button>
+    <button class="btn btn-green" onclick="exportExcel()">บันทึก Excel</button>
+    <button class="btn btn-blue"  onclick="exportPDF()">บันทึก PDF</button>
   </div>
 
   <!-- print header -->
@@ -335,9 +335,9 @@ html.in-iframe #topbar,html.in-iframe #qnav{display:none!important}
       <span><b class="clr-g">+%</b> = ลูกค้าแพงกว่าเรา</span>
       <span><b class="clr-r">−%</b> = ลูกค้าถูกกว่าเรา</span>
     </div>
-    <button class="btn btn-gold" onclick="analyzeCompare()">🔍 วิเคราะห์</button>
-    <button class="btn btn-soft" onclick="clearCustPrices()">🗑 ล้างค่า</button>
-    <button class="btn btn-green" onclick="exportCompareExcel()">📥 ส่งออก Excel</button>
+    <button class="btn btn-gold" onclick="analyzeCompare()">วิเคราะห์</button>
+    <button class="btn btn-soft" onclick="clearCustPrices()">ล้างค่า</button>
+    <button class="btn btn-green" onclick="exportCompareExcel()">ส่งออก Excel</button>
   </div>
 
   <div id="cmp-summary-bar">
@@ -853,15 +853,15 @@ onUpdate();
 </style>
 <div id="qnav">
   <div id="qnav-pop">
-    <a class="qn-a" href="../index.html"><span class="qn-ic">🏠</span>Portal</a>
+    <a class="qn-a" href="../index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Portal</a>
     <div class="qn-hr"></div>
-    <a class="qn-a" href="../project1/transport.html"><span class="qn-ic">🚛</span>งานขนส่ง</a>
-    <a class="qn-a" href="../project2/index.html"><span class="qn-ic">💳</span>Fleet Card</a>
-    <a class="qn-a" href="../trr.html"><span class="qn-ic">⛽</span>ต้นทุนน้ำมัน</a>
-    <a class="qn-a" href="../priceboard/index.html"><span class="qn-ic">💰</span>กระดานราคา</a>
-    <a class="qn-a" href="../fleet_view/index.html"><span class="qn-ic">🚦</span>Fleet View</a>
-    <a class="qn-a" href="../attendance/index.html"><span class="qn-ic">🕐</span>เช็คชื่อ</a>
-    <a class="qn-a" href="../help.html"><span class="qn-ic">📖</span>คู่มือ</a>
+    <a class="qn-a" href="../project1/transport.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>งานขนส่ง</a>
+    <a class="qn-a" href="../project2/index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Fleet Card</a>
+    <a class="qn-a" href="../trr.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span>ต้นทุนน้ำมัน</a>
+    <a class="qn-a" href="../priceboard/index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>กระดานราคา</a>
+    <a class="qn-a" href="../fleet_view/index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>Fleet View</a>
+    <a class="qn-a" href="../attendance/index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>เช็คชื่อ</a>
+    <a class="qn-a" href="../help.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>คู่มือ</a>
   </div>
   <button id="qnav-fab" title="ไปที่..."><svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><rect x="0" y="0" width="7" height="7" rx="1.5"/><rect x="11" y="0" width="7" height="7" rx="1.5"/><rect x="0" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg></button>
 </div>

@@ -709,7 +709,7 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
     <div class="pf-edit-cur-row">
       <div class="pf-edit-cur-av" id="pf-edit-cur-av"></div>
       <div>
-        <label class="pf-upload-lbl" for="pf-photo-inp">📷 อัปโหลดรูป</label>
+        <label class="pf-upload-lbl" for="pf-photo-inp">อัปโหลดรูป</label>
         <input type="file" id="pf-photo-inp" accept="image/*" style="display:none" onchange="handlePfPhoto(this)">
         <div style="font-size:11px;color:var(--muted);margin-top:4px;">หรือเลือก Emoji ด้านล่าง</div>
       </div>
@@ -735,7 +735,7 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
     </div>
     <div class="pf-edit-err" id="pf-edit-err"></div>
     <div class="pf-edit-btns">
-      <button class="pf-edit-btn-save" onclick="savePfEdit()">💾 บันทึก</button>
+      <button class="pf-edit-btn-save" onclick="savePfEdit()">บันทึก</button>
       <button class="pf-edit-btn-cancel" onclick="closePfEdit()">ยกเลิก</button>
     </div>
   </div>
@@ -840,7 +840,7 @@ function fbSaveProfile(pf){
     id:pf.id,name:pf.name,avatar:pf.avatar,
     avatarImg:pf.avatarImg||null,pwHash:pf.pwHash||null,
     updatedAt:Date.now()
-  },{merge:true}).catch(function(e){showToast('⚠️ sync profile ล้มเหลว');console.warn('[Portal] fbSaveProfile error',e);});
+  },{merge:true}).catch(function(e){showToast('sync profile ล้มเหลว');console.warn('[Portal] fbSaveProfile error',e);});
 }
 function fbLoadProfiles(cb){
   if(!_pfDb){cb([]);return;}
@@ -909,7 +909,7 @@ function _loadPFviaSheet(onDone){
   var sheetId=localStorage.getItem('fleet_sheet_id')||PF_SHEET_ID;
   var cb='gas_pfgviz_'+Date.now();
   var script=document.createElement('script');
-  var timer=setTimeout(function(){cleanup();_pfSyncMsg('⚠️ GAS connect failed');if(onDone)onDone();},8000);
+  var timer=setTimeout(function(){cleanup();_pfSyncMsg('GAS connect failed');if(onDone)onDone();},8000);
   function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
   window[cb]=function(data){
     cleanup();
@@ -923,21 +923,21 @@ function _loadPFviaSheet(onDone){
           if(note){
             var remote=JSON.parse(note);
             var changed=_pfMerge(remote);
-            _pfSyncMsg(changed?'✅ sync แล้ว':'✅ ข้อมูลตรงกัน');
+            _pfSyncMsg(changed?'sync แล้ว':'ข้อมูลตรงกัน');
           }
           break;
         }
       }
-    }catch(e){_pfSyncMsg('⚠️ parse error');}
+    }catch(e){_pfSyncMsg('parse error');}
     if(onDone)onDone();
   };
-  script.onerror=function(){cleanup();_pfSyncMsg('⚠️ GAS connect failed');if(onDone)onDone();};
+  script.onerror=function(){cleanup();_pfSyncMsg('GAS connect failed');if(onDone)onDone();};
   script.src='https://docs.google.com/spreadsheets/d/'+sheetId+'/gviz/tq?tqx=out:json;responseHandler:'+cb+'&sheet=Fleet_Status';
   document.head.appendChild(script);
 }
 
 function _doLoadPF(gasUrl,onDone,isRetry){
-  _pfSyncMsg('🔄 กำลัง sync โปรไฟล์...');
+  _pfSyncMsg('กำลัง sync โปรไฟล์...');
   var cb='gas_pfload_'+Date.now();
   var script=document.createElement('script');
   var timer=setTimeout(function(){cleanup();if(!isRetry&&gasUrl!==PF_GAS_URL){_doLoadPF(PF_GAS_URL,onDone,true);}else{_loadPFviaSheet(onDone);}},8000);
@@ -949,9 +949,9 @@ function _doLoadPF(gasUrl,onDone,isRetry){
       if(entry&&entry.note){
         var remote=JSON.parse(entry.note);
         var changed=_pfMerge(remote);
-        _pfSyncMsg(changed?'✅ sync แล้ว':'✅ ข้อมูลตรงกัน');
-      } else { _pfSyncMsg('⚠️ ไม่พบข้อมูลใน GAS'); }
-    }catch(e){_pfSyncMsg('⚠️ parse error');}
+        _pfSyncMsg(changed?'sync แล้ว':'ข้อมูลตรงกัน');
+      } else { _pfSyncMsg('ไม่พบข้อมูลใน GAS'); }
+    }catch(e){_pfSyncMsg('parse error');}
     if(onDone)onDone();
   };
   script.onerror=function(){
@@ -970,11 +970,11 @@ function loadProfilesFromGAS(onDone){
 
 var PF_EMOJIS = ['👷','🔧','🚛','⛽','👔','👩‍💼','🏢','💼','🎯','📊','🔑','⚙️','🌟','🎖️','🏆','👨‍💼','🚗','🛻','🧑‍🔧','👩‍🔧'];
 var DEFAULT_PROFILES = [
-  {id:'emp1',name:'พนักงาน 1',avatar:'👷',avatarImg:null,pwHash:null},
-  {id:'emp2',name:'พนักงาน 2',avatar:'🔧',avatarImg:null,pwHash:null},
-  {id:'emp3',name:'พนักงาน 3',avatar:'🚛',avatarImg:null,pwHash:null},
-  {id:'emp4',name:'พนักงาน 4',avatar:'⛽',avatarImg:null,pwHash:null},
-  {id:'exec',name:'ผู้บริหาร', avatar:'👔',avatarImg:null,pwHash:null}
+  {id:'emp1',name:'พนักงาน 1',avatar:'',avatarImg:null,pwHash:null},
+  {id:'emp2',name:'พนักงาน 2',avatar:'',avatarImg:null,pwHash:null},
+  {id:'emp3',name:'พนักงาน 3',avatar:'',avatarImg:null,pwHash:null},
+  {id:'emp4',name:'พนักงาน 4',avatar:'',avatarImg:null,pwHash:null},
+  {id:'exec',name:'ผู้บริหาร', avatar:'',avatarImg:null,pwHash:null}
 ];
 var _pfEditId=null,_pfEditMode=false,_pfSelProfile=null,_pfEditAvatarImg=null;
 
@@ -986,7 +986,7 @@ function hashPw(pw){
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 function loadProfiles(){try{var r=localStorage.getItem(PROFILES_KEY);if(r){var p=JSON.parse(r);if(p&&p.length)return p;}}catch(e){}return null;}
-function saveProfiles(p){try{localStorage.setItem(PROFILES_KEY,JSON.stringify(p));}catch(e){showToast('⚠️ localStorage เต็ม — บันทึกไม่ได้');console.warn('[Portal] saveProfiles error',e);}}
+function saveProfiles(p){try{localStorage.setItem(PROFILES_KEY,JSON.stringify(p));}catch(e){showToast('localStorage เต็ม — บันทึกไม่ได้');console.warn('[Portal] saveProfiles error',e);}}
 function getProfiles(){var p=loadProfiles();if(!p){p=DEFAULT_PROFILES.map(function(d){return Object.assign({},d);});saveProfiles(p);}return p;}
 function getActiveProfile(){
   var id=sessionStorage.getItem(ACTIVE_PF_KEY);if(!id)return null;
@@ -1006,9 +1006,9 @@ function renderProfilePicker(){
       +'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectProfile(\''+pf.id+'\')}">'
       +'<div class="pf-avatar-wrap">'
       +'<div class="pf-avatar">'+avHtml(pf,108)+'</div>'
-      +'<div class="pf-edit-badge">✏️</div>'
+      +'<div class="pf-edit-badge">&#9998;</div>'
       +'</div>'
-      +'<div class="pf-name">'+escHtml(pf.name)+(pf.pwHash?' 🔒':'')+'</div>'
+      +'<div class="pf-name">'+escHtml(pf.name)+(pf.pwHash?' ★':'')+'</div>'
       +'</div>';
   }).join('');
   _pfEditMode=false;

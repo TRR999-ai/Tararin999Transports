@@ -144,7 +144,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
 <!-- ── Mobile nav bar ── -->
 <div id="mobile-nav">
   <button class="mn-toggle" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('sb-overlay').classList.toggle('show')">☰</button>
-  <span class="mn-title">📖 คู่มือการใช้งาน</span>
+  <span class="mn-title">คู่มือการใช้งาน</span>
   <a class="mn-back" href="./index.html">← หน้าหลัก</a>
 </div>
 
@@ -157,15 +157,15 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
   </div>
   <nav class="sb-nav">
     <div class="sb-group">ระบบหลัก</div>
-    <a class="sb-link active" onclick="scrollTo('sec-portal')"><span class="ic">🏠</span>Portal & ล็อกอิน</a>
-    <a class="sb-link" onclick="scrollTo('sec-fleet-view')"><span class="ic">🚦</span>Fleet Dashboard</a>
-    <a class="sb-link" onclick="scrollTo('sec-fleet-card')"><span class="ic">💳</span>Fleet Card Batch</a>
-    <a class="sb-link" onclick="scrollTo('sec-trr')"><span class="ic">⛽</span>ต้นทุนน้ำมัน TRR</a>
-    <a class="sb-link" onclick="scrollTo('sec-price')"><span class="ic">💰</span>กระดานราคา</a>
-    <a class="sb-link" onclick="scrollTo('sec-transport')"><span class="ic">🚚</span>งานขนส่ง</a>
+    <a class="sb-link active" onclick="scrollTo('sec-portal')"><span class="ic"></span>Portal & ล็อกอิน</a>
+    <a class="sb-link" onclick="scrollTo('sec-fleet-view')"><span class="ic"></span>Fleet Dashboard</a>
+    <a class="sb-link" onclick="scrollTo('sec-fleet-card')"><span class="ic"></span>Fleet Card Batch</a>
+    <a class="sb-link" onclick="scrollTo('sec-trr')"><span class="ic"></span>ต้นทุนน้ำมัน TRR</a>
+    <a class="sb-link" onclick="scrollTo('sec-price')"><span class="ic"></span>กระดานราคา</a>
+    <a class="sb-link" onclick="scrollTo('sec-transport')"><span class="ic"></span>งานขนส่ง</a>
     <div class="sb-group" style="margin-top:8px;">การตั้งค่า</div>
-    <a class="sb-link" onclick="scrollTo('sec-gas')"><span class="ic">⚙️</span>GAS Sync Setup</a>
-    <a class="sb-link" onclick="scrollTo('sec-stmt-setup')"><span class="ic">🏦</span>Statement Setup</a>
+    <a class="sb-link" onclick="scrollTo('sec-gas')"><span class="ic"></span>GAS Sync Setup</a>
+    <a class="sb-link" onclick="scrollTo('sec-stmt-setup')"><span class="ic"></span>Statement Setup</a>
   </nav>
   <a class="sb-back" href="./index.html">← กลับหน้าหลัก</a>
 </aside>
@@ -173,7 +173,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
 <!-- ── Main Content ── -->
 <main id="main">
   <div class="page-header">
-    <h1>📖 คู่มือการใช้งาน</h1>
+    <h1>คู่มือการใช้งาน</h1>
     <p>TARARIN 999 Transport System — ครอบคลุมทุกระบบ</p>
   </div>
 
@@ -182,7 +182,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
   ════════════════════════════════════════════════ -->
   <div class="help-section anchor" id="sec-portal">
     <div class="help-section-hdr">
-      <span class="sys-icon">🏠</span>
+      <span class="sys-icon"></span>
       <div>
         <div class="sys-name">User Portal — หน้าหลัก</div>
         <div class="sys-desc">ศูนย์กลางนำทางไปทุกระบบ พร้อมระบบล็อกอิน</div>
@@ -191,7 +191,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
     <div class="help-body">
 
       <div class="step-group">
-        <div class="step-group-title">🔐 ล็อกอินครั้งแรก (ตั้งรหัสผ่าน)</div>
+        <div class="step-group-title">ล็อกอินครั้งแรก (ตั้งรหัสผ่าน)</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">เปิดไฟล์ <code>project4/index.html</code> — จะขึ้นหน้า "ตั้งรหัสผ่านครั้งแรก"</span></li>
           <li><span class="step-num">2</span><span class="step-txt">พิมพ์ <b>รหัสผ่าน</b> ที่ต้องการ (ขั้นต่ำ 4 ตัวอักษร) ในช่องแรก</span></li>
@@ -201,36 +201,36 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">🔑 ล็อกอินปกติ</div>
+        <div class="step-group-title">ล็อกอินปกติ</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">เปิดหน้า portal — ถ้า session หมด จะขึ้นหน้าล็อกอิน</span></li>
           <li><span class="step-num">2</span><span class="step-txt">พิมพ์รหัสผ่าน → กด <b>เข้าสู่ระบบ</b> หรือกด Enter</span></li>
           <li><span class="step-num">3</span><span class="step-txt">ถ้าเปิดหน้าระบบย่อยโดยตรง (เช่น fleet_view) จะ redirect มาล็อกอินที่นี่ก่อน แล้วกลับไปหน้าเดิมอัตโนมัติ</span></li>
         </ol>
-        <div class="tip"><span class="tip-icon">💡</span><span class="tip-txt">เครื่องเดิม session อยู่ตลอด — ไม่ต้อง login ซ้ำทุกวัน ยกเว้นมีการเปลี่ยนรหัสผ่าน</span></div>
+        <div class="tip"><span class="tip-txt">เครื่องเดิม session อยู่ตลอด — ไม่ต้อง login ซ้ำทุกวัน ยกเว้นมีการเปลี่ยนรหัสผ่าน</span></div>
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">🔄 เปลี่ยนรหัสผ่าน</div>
+        <div class="step-group-title">เปลี่ยนรหัสผ่าน</div>
         <ol class="steps">
-          <li><span class="step-num">1</span><span class="step-txt">คลิกที่ <b>👤 TARARIN 999</b> มุมขวาบน</span></li>
+          <li><span class="step-num">1</span><span class="step-txt">คลิกที่ <b>TARARIN 999</b> มุมขวาบน</span></li>
           <li><span class="step-num">2</span><span class="step-txt">ใส่ <b>รหัสผู้ดูแล</b> (admin code) ก่อน — ผู้ดูแลระบบเท่านั้นรู้รหัสนี้</span></li>
           <li><span class="step-num">3</span><span class="step-txt">พิมพ์รหัสผ่านใหม่ + ยืนยัน → กด <b>เปลี่ยนรหัสผ่าน</b></span></li>
           <li><span class="step-num">4</span><span class="step-txt">ระบบ logout อัตโนมัติ — ทุกเครื่องต้อง login ใหม่ด้วยรหัสใหม่</span></li>
         </ol>
-        <div class="note"><span class="note-icon">ℹ️</span><span class="note-txt">ปุ่ม <b>🚪 ออกจากระบบ</b> มุมขวาบน — ล้าง session ของเครื่องนั้นทันที</span></div>
+        <div class="note"><span class="note-txt">ปุ่ม <b>ออกจากระบบ</b> มุมขวาบน — ล้าง session ของเครื่องนั้นทันที</span></div>
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">🗂 การนำทาง</div>
+        <div class="step-group-title">การนำทาง</div>
         <table class="feat-table">
           <thead><tr><th>การ์ด / ลิงก์</th><th>ไปที่</th></tr></thead>
           <tbody>
-            <tr><td>🚚 ระบบจัดการงานขนส่ง</td><td>Transport — บันทึก/ดูงานขนส่ง</td></tr>
-            <tr><td>💳 Fleet Card Batch Update</td><td>อัปเดตวงเงินบัตรน้ำมันทีละหลายใบ</td></tr>
-            <tr><td>⛽ ต้นทุนน้ำมัน TRR</td><td>คำนวณต้นทุนน้ำมันต่อเที่ยว</td></tr>
-            <tr><td>💰 กระดานราคา</td><td>ตารางราคาค่าขนส่ง</td></tr>
-            <tr><td>🚦 Fleet Dashboard</td><td>สถานะกำลังรถ + วิเคราะห์ข้อมูล</td></tr>
+            <tr><td>ระบบจัดการงานขนส่ง</td><td>Transport — บันทึก/ดูงานขนส่ง</td></tr>
+            <tr><td>Fleet Card Batch Update</td><td>อัปเดตวงเงินบัตรน้ำมันทีละหลายใบ</td></tr>
+            <tr><td>ต้นทุนน้ำมัน TRR</td><td>คำนวณต้นทุนน้ำมันต่อเที่ยว</td></tr>
+            <tr><td>กระดานราคา</td><td>ตารางราคาค่าขนส่ง</td></tr>
+            <tr><td>Fleet Dashboard</td><td>สถานะกำลังรถ + วิเคราะห์ข้อมูล</td></tr>
           </tbody>
         </table>
       </div>
@@ -243,7 +243,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
   ════════════════════════════════════════════════ -->
   <div class="help-section anchor" id="sec-fleet-view">
     <div class="help-section-hdr">
-      <span class="sys-icon">🚦</span>
+      <span class="sys-icon"></span>
       <div>
         <div class="sys-name">Fleet Dashboard — ระบบติดตามกำลังรถ</div>
         <div class="sys-desc">ดึงข้อมูลจาก Google Sheets แบบ real-time วิเคราะห์ต้นทุน + สถานะรถ</div>
@@ -252,7 +252,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
     <div class="help-body">
 
       <div class="step-group">
-        <div class="step-group-title">📊 ภาพรวม KPI</div>
+        <div class="step-group-title">ภาพรวม KPI</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">หน้าแรกแสดง KPI รวม — จำนวน trips, km รวม, ค่าน้ำมันรวม, ฿/km เฉลี่ย</span></li>
           <li><span class="step-num">2</span><span class="step-txt">กด <b>dropdown เดือน</b> มุมขวาบนเพื่อเปลี่ยนเดือนดู</span></li>
@@ -261,18 +261,18 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">🚦 กำลังรถวันนี้ (Board)</div>
+        <div class="step-group-title">กำลังรถวันนี้ (Board)</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">แสดงการ์ดรถทุกคัน พร้อมสถานะ ทะเบียน คนขับ และงานล่าสุด</span></li>
-          <li><span class="step-num">2</span><span class="step-txt"><b>กดการ์ด</b> เพื่อดูรายละเอียด — ตั้งสถานะ <span class="badge badge-green">✅ พร้อม</span> <span class="badge badge-gold">❌ ไม่พร้อม</span> <span class="badge" style="background:#fef9c3;color:#854d0e;">🏖️ ลา</span></span></li>
+          <li><span class="step-num">2</span><span class="step-txt"><b>กดการ์ด</b> เพื่อดูรายละเอียด — ตั้งสถานะ <span class="badge badge-green">พร้อม</span> <span class="badge badge-gold">ไม่พร้อม</span> <span class="badge" style="background:#fef9c3;color:#854d0e;">ลา</span></span></li>
           <li><span class="step-num">3</span><span class="step-txt">แถบด้านบน filter ตาม <b>ประเภทรถ</b> — กดชิปเพื่อกรองเฉพาะกลุ่ม</span></li>
-          <li><span class="step-num">4</span><span class="step-txt">ปุ่ม <b>⚙ จัดการทะเบียน</b> — เรียงลำดับ/ซ่อนรถ และสร้างประเภทรถเอง</span></li>
+          <li><span class="step-num">4</span><span class="step-txt">ปุ่ม <b>จัดการทะเบียน</b> — เรียงลำดับ/ซ่อนรถ และสร้างประเภทรถเอง</span></li>
         </ol>
-        <div class="tip"><span class="tip-icon">💡</span><span class="tip-txt">สถานะ "พร้อม/ไม่พร้อม" รีเซ็ตอัตโนมัติทุกเที่ยงคืน — "ลา" ไม่รีเซ็ต</span></div>
+        <div class="tip"><span class="tip-txt">สถานะ "พร้อม/ไม่พร้อม" รีเซ็ตอัตโนมัติทุกเที่ยงคืน — "ลา" ไม่รีเซ็ต</span></div>
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">🔍 งานล่าสุดแต่ละคัน</div>
+        <div class="step-group-title">งานล่าสุดแต่ละคัน</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">แสดงการ์ดรถพร้อมงานล่าสุด — <span class="badge badge-green">วันนี้</span> <span class="badge badge-gold">เมื่อวาน</span> บอกความใหม่</span></li>
           <li><span class="step-num">2</span><span class="step-txt">ช่อง <b>Note</b> ในการ์ด — พิมพ์หมายเหตุ บันทึกอัตโนมัติ</span></li>
@@ -282,7 +282,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">🚗 สรุปรายคัน + 👤 สรุปรายคนขับ</div>
+        <div class="step-group-title">สรุปรายคัน + สรุปรายคนขับ</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">ตารางสรุป trips, km, ค่าน้ำมัน, ฿/km แยกตามทะเบียน/คนขับ</span></li>
           <li><span class="step-num">2</span><span class="step-txt">กดหัวคอลัมน์เพื่อ <b>sort</b> — กดซ้ำเพื่อกลับทิศ</span></li>
@@ -291,7 +291,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">📈 วิเคราะห์</div>
+        <div class="step-group-title">วิเคราะห์</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt"><b>เปรียบเทียบเดือนนี้ vs เดือนก่อน</b> — KPI 4 ตัว พร้อม % เปลี่ยนแปลง</span></li>
           <li><span class="step-num">2</span><span class="step-txt"><b>Top Routes</b> — chart + ตาราง 12 เส้นทางต้นทุนสูงสุด</span></li>
@@ -300,15 +300,15 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">🏦 Statement วิเคราะห์</div>
+        <div class="step-group-title">Statement วิเคราะห์</div>
         <ol class="steps">
-          <li><span class="step-num">1</span><span class="step-txt"><b>วิธีที่ 1 (อัปโหลดไฟล์):</b> กด <b>📂 อัปโหลดไฟล์</b> → เลือกไฟล์ <code>.xlsx</code> จาก TMB Transaction Report</span></li>
-          <li><span class="step-num">2</span><span class="step-txt"><b>วิธีที่ 2 (Google Sheets):</b> ตั้งค่า Sheet ID ใน Settings → กด <b>☁️ ดึงจาก Sheets</b> → เลือกเดือน</span></li>
-          <li><span class="step-num">3</span><span class="step-txt">ดู 4 tab: <b>🚗 รายคัน</b> / <b>📍 สถานีน้ำมัน</b> / <b>🗺️ รายจังหวัด</b> / <b>📅 รายวัน</b></span></li>
+          <li><span class="step-num">1</span><span class="step-txt"><b>วิธีที่ 1 (อัปโหลดไฟล์):</b> กด <b> อัปโหลดไฟล์</b> → เลือกไฟล์ <code>.xlsx</code> จาก TMB Transaction Report</span></li>
+          <li><span class="step-num">2</span><span class="step-txt"><b>วิธีที่ 2 (Google Sheets):</b> ตั้งค่า Sheet ID ใน Settings → กด <b>ดึงจาก Sheets</b> → เลือกเดือน</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">ดู 4 tab: <b>รายคัน</b> / <b>สถานีน้ำมัน</b> / <b>รายจังหวัด</b> / <b>รายวัน</b></span></li>
           <li><span class="step-num">4</span><span class="step-txt"><b>คลิก</b> ที่แถวใดก็ได้ใน 3 tab แรกเพื่อ drill-down ดูรายละเอียด</span></li>
           <li><span class="step-num">5</span><span class="step-txt">กด bar ใน tab รายวัน → ดูว่าวันนั้นรถไหนเติมที่ไหนบ้าง</span></li>
         </ol>
-        <div class="tip"><span class="tip-icon">💡</span><span class="tip-txt">ทะเบียนที่มี ⚠️ หมายถึงไม่พบใน Trip Sheet — km/ลิตร คำนวณไม่ได้ ตรวจสอบรูปแบบชื่อทะเบียน</span></div>
+        <div class="tip"><span class="tip-txt">ทะเบียนที่มี [!] หมายถึงไม่พบใน Trip Sheet — km/ลิตร คำนวณไม่ได้ ตรวจสอบรูปแบบชื่อทะเบียน</span></div>
       </div>
 
     </div>
@@ -319,7 +319,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
   ════════════════════════════════════════════════ -->
   <div class="help-section anchor" id="sec-fleet-card">
     <div class="help-section-hdr">
-      <span class="sys-icon">💳</span>
+      <span class="sys-icon"></span>
       <div>
         <div class="sys-name">Fleet Card Batch Update — อัปเดตวงเงินบัตรน้ำมัน</div>
         <div class="sys-desc">อัปเดตวงเงินบัตรน้ำมันหลายใบพร้อมกัน export ไฟล์ส่ง TMB</div>
@@ -328,22 +328,22 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
     <div class="help-body">
 
       <div class="step-group">
-        <div class="step-group-title">📋 ขั้นตอนการใช้งาน</div>
+        <div class="step-group-title">ขั้นตอนการใช้งาน</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">ระบบโหลดข้อมูลบัตรจาก Google Sheet อัตโนมัติ (หมายเลขบัตร + ชื่อ + วงเงินปัจจุบัน)</span></li>
           <li><span class="step-num">2</span><span class="step-txt">แก้ไข <b>วงเงิน</b> ในตารางโดยตรง — คลิกที่ช่องวงเงินแล้วพิมพ์ค่าใหม่</span></li>
-          <li><span class="step-num">3</span><span class="step-txt">หรือกด <b>📋 วางวงเงิน</b> — วาง list วงเงินทีละบรรทัด (ต้องตรงลำดับกับตาราง)</span></li>
-          <li><span class="step-num">4</span><span class="step-txt">กด <b>➕ เพิ่มบัตร</b> เพื่อเพิ่มบัตรใหม่ทีละใบ หรือวางหลายใบพร้อมกัน</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">หรือกด <b>วางวงเงิน</b> — วาง list วงเงินทีละบรรทัด (ต้องตรงลำดับกับตาราง)</span></li>
+          <li><span class="step-num">4</span><span class="step-txt">กด <b>เพิ่มบัตร</b> เพื่อเพิ่มบัตรใหม่ทีละใบ หรือวางหลายใบพร้อมกัน</span></li>
           <li><span class="step-num">5</span><span class="step-txt">เมื่อแก้ครบ กด <b>Export</b> → ดาวน์โหลดไฟล์ Excel พร้อมส่งธนาคาร</span></li>
         </ol>
-        <div class="note"><span class="note-icon">ℹ️</span><span class="note-txt">ไฟล์ที่ export จะใช้ <b>Template TTB</b> อัตโนมัติถ้าโหลดได้ — ถ้าไม่มี template จะ export แบบ preview</span></div>
+        <div class="note"><span class="note-txt">ไฟล์ที่ export จะใช้ <b>Template TTB</b> อัตโนมัติถ้าโหลดได้ — ถ้าไม่มี template จะ export แบบ preview</span></div>
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">🗑️ ลบบัตร</div>
+        <div class="step-group-title">ลบบัตร</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">ติ๊ก checkbox หน้าแถวที่ต้องการลบ</span></li>
-          <li><span class="step-num">2</span><span class="step-txt">กด <b>🗑 ลบที่เลือก</b></span></li>
+          <li><span class="step-num">2</span><span class="step-txt">กด <b>ลบที่เลือก</b></span></li>
         </ol>
       </div>
 
@@ -355,7 +355,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
   ════════════════════════════════════════════════ -->
   <div class="help-section anchor" id="sec-trr">
     <div class="help-section-hdr">
-      <span class="sys-icon">⛽</span>
+      <span class="sys-icon"></span>
       <div>
         <div class="sys-name">ต้นทุนน้ำมัน TRR Transport</div>
         <div class="sys-desc">คำนวณต้นทุนน้ำมันตามระยะทาง + จัดการตารางระยะทาง</div>
@@ -364,9 +364,9 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
     <div class="help-body">
 
       <div class="step-group">
-        <div class="step-group-title">🧮 คำนวณต้นทุนน้ำมัน</div>
+        <div class="step-group-title">คำนวณต้นทุนน้ำมัน</div>
         <ol class="steps">
-          <li><span class="step-num">1</span><span class="step-txt">เลือกเมนู <b>🧮 คำนวณต้นทุน</b> จาก sidebar</span></li>
+          <li><span class="step-num">1</span><span class="step-txt">เลือกเมนู <b>คำนวณต้นทุน</b> จาก sidebar</span></li>
           <li><span class="step-num">2</span><span class="step-txt">เลือก <b>ต้นทาง → ปลายทาง</b> จาก dropdown</span></li>
           <li><span class="step-num">3</span><span class="step-txt">ใส่ <b>ราคาน้ำมัน (฿/ลิตร)</b> และ <b>อัตราสิ้นเปลือง (กม/ลิตร)</b></span></li>
           <li><span class="step-num">4</span><span class="step-txt">กด <b>คำนวณ</b> → ระบบแสดงต้นทุนน้ำมัน ไป-กลับ พร้อม breakdown</span></li>
@@ -375,22 +375,22 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">📊 ตารางระยะทาง</div>
+        <div class="step-group-title">ตารางระยะทาง</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">หน้าแรก — แสดง matrix ระยะทางระหว่างทุกสถานที่</span></li>
           <li><span class="step-num">2</span><span class="step-txt">คลิกที่ช่องใน matrix เพื่อดูรายละเอียดเส้นทาง</span></li>
-          <li><span class="step-num">3</span><span class="step-txt">กด <b>🏠 แดชบอร์ด</b> → ดูประวัติการคำนวณล่าสุด + ตั้งค่าน้ำมันปัจจุบัน</span></li>
+          <li><span class="step-num">3</span><span class="step-txt">กด <b>แดชบอร์ด</b> → ดูประวัติการคำนวณล่าสุด + ตั้งค่าน้ำมันปัจจุบัน</span></li>
         </ol>
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">📍 จัดการข้อมูล</div>
+        <div class="step-group-title">จัดการข้อมูล</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt"><b>Tab สถานที่</b> — เพิ่ม/แก้/ลบ สถานที่ที่ใช้บ่อย</span></li>
           <li><span class="step-num">2</span><span class="step-txt"><b>Tab ระยะทาง</b> — กำหนดระยะทางระหว่างคู่สถานที่</span></li>
           <li><span class="step-num">3</span><span class="step-txt"><b>Tab Backhaul</b> — ระยะทางขากลับ (อาจต่างจากขาไป)</span></li>
         </ol>
-        <div class="tip"><span class="tip-icon">💡</span><span class="tip-txt">ข้อมูลทั้งหมดบันทึกใน localStorage — ใช้งานได้ offline ไม่ต้องการ internet</span></div>
+        <div class="tip"><span class="tip-txt">ข้อมูลทั้งหมดบันทึกใน localStorage — ใช้งานได้ offline ไม่ต้องการ internet</span></div>
       </div>
 
     </div>
@@ -401,7 +401,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
   ════════════════════════════════════════════════ -->
   <div class="help-section anchor" id="sec-price">
     <div class="help-section-hdr">
-      <span class="sys-icon">💰</span>
+      <span class="sys-icon"></span>
       <div>
         <div class="sys-name">กระดานราคาขนส่ง 6 ล้อ</div>
         <div class="sys-desc">ตารางราคาค่าขนส่งพร้อม markup + คำนวณ quotation</div>
@@ -410,7 +410,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
     <div class="help-body">
 
       <div class="step-group">
-        <div class="step-group-title">📊 ดูตารางราคา</div>
+        <div class="step-group-title">ดูตารางราคา</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">หน้าแรกแสดง <b>ตารางราคา matrix</b> — แถวคือต้นทาง คอลัมน์คือปลายทาง</span></li>
           <li><span class="step-num">2</span><span class="step-txt">คลิกชื่อ <b>ต้นทาง/ปลายทาง</b> ใน header เพื่อ highlight เส้นทางนั้น</span></li>
@@ -419,9 +419,9 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">⚙️ ตั้งค่า Markup และราคา</div>
+        <div class="step-group-title">ตั้งค่า Markup และราคา</div>
         <ol class="steps">
-          <li><span class="step-num">1</span><span class="step-txt">ไปที่ <b>⚙️ ตั้งค่า / Admin</b></span></li>
+          <li><span class="step-num">1</span><span class="step-txt">ไปที่ <b>ตั้งค่า / Admin</b></span></li>
           <li><span class="step-num">2</span><span class="step-txt">ตั้ง <b>% markup</b> ที่ต้องการบวกเพิ่มจากต้นทุน</span></li>
           <li><span class="step-num">3</span><span class="step-txt">แก้ไขราคาแต่ละเส้นทางได้โดยตรงในตาราง</span></li>
         </ol>
@@ -435,7 +435,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
   ════════════════════════════════════════════════ -->
   <div class="help-section anchor" id="sec-transport">
     <div class="help-section-hdr">
-      <span class="sys-icon">🚚</span>
+      <span class="sys-icon"></span>
       <div>
         <div class="sys-name">ระบบจัดการงานขนส่ง</div>
         <div class="sys-desc">บันทึก ติดตาม และสรุปงานขนส่ง 6 ล้อ / หัวลาก</div>
@@ -444,7 +444,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
     <div class="help-body">
 
       <div class="step-group">
-        <div class="step-group-title">📋 ดูรายการงาน</div>
+        <div class="step-group-title">ดูรายการงาน</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">Tab <span class="badge badge-navy">6 ล้อ</span> และ <span class="badge" style="background:#fff3e0;color:#e65100;">หัวลาก</span> — สลับดูแต่ละประเภทรถ</span></li>
           <li><span class="step-num">2</span><span class="step-txt">ตารางแสดงรายการงานทั้งหมด — วันที่ เส้นทาง คนขับ สถานะ</span></li>
@@ -453,7 +453,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">✏️ บันทึกงานใหม่</div>
+        <div class="step-group-title">บันทึกงานใหม่</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">กรอก วันที่, ทะเบียนรถ, คนขับ, ต้นทาง-ปลายทาง, ประเภทงาน</span></li>
           <li><span class="step-num">2</span><span class="step-txt">กด <b>บันทึก</b> — ข้อมูลส่งไป Google Sheets อัตโนมัติ</span></li>
@@ -469,7 +469,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
   ════════════════════════════════════════════════ -->
   <div class="help-section anchor" id="sec-gas">
     <div class="help-section-hdr">
-      <span class="sys-icon">⚙️</span>
+      <span class="sys-icon"></span>
       <div>
         <div class="sys-name">ตั้งค่า GAS Sync — Google Apps Script</div>
         <div class="sys-desc">เชื่อม Fleet Dashboard กับ Google Sheets สำหรับ sync สถานะรถข้ามอุปกรณ์</div>
@@ -478,22 +478,22 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
     <div class="help-body">
 
       <div class="step-group">
-        <div class="step-group-title">🔧 ขั้นตอนติดตั้ง GAS (ครั้งแรก)</div>
+        <div class="step-group-title">ขั้นตอนติดตั้ง GAS (ครั้งแรก)</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">เปิด Google Sheet ของ trip data → <b>Extensions → Apps Script</b></span></li>
-          <li><span class="step-num">2</span><span class="step-txt">ลบ code เดิมทั้งหมด → วาง code จาก <b>📋 GAS Script</b> ในหน้า Settings ของ Fleet Dashboard</span></li>
+          <li><span class="step-num">2</span><span class="step-txt">ลบ code เดิมทั้งหมด → วาง code จาก <b>GAS Script</b> ในหน้า Settings ของ Fleet Dashboard</span></li>
           <li><span class="step-num">3</span><span class="step-txt">กด <b>Deploy → New deployment → Web app</b></span></li>
           <li><span class="step-num">4</span><span class="step-txt">ตั้งค่า: Execute as = <b>Me</b> / Who has access = <b>Anyone</b> → Deploy</span></li>
-          <li><span class="step-num">5</span><span class="step-txt">คัดลอก URL ที่ได้ → วางในช่อง <b>GAS URL</b> ใน Settings → กด <b>💾 บันทึก</b></span></li>
-          <li><span class="step-num">6</span><span class="step-txt">กด <b>🔌 Test</b> — ถ้า ✅ แสดงว่าเชื่อมต่อสำเร็จ</span></li>
+          <li><span class="step-num">5</span><span class="step-txt">คัดลอก URL ที่ได้ → วางในช่อง <b>GAS URL</b> ใน Settings → กด <b>บันทึก</b></span></li>
+          <li><span class="step-num">6</span><span class="step-txt">กด <b>Test</b> — ถ้าแสดง เชื่อมต่อสำเร็จ แสดงว่าเชื่อมต่อสำเร็จ</span></li>
         </ol>
-        <div class="note"><span class="note-icon">ℹ️</span><span class="note-txt">GAS sync ใช้สำหรับ <b>sync สถานะรถ + Note</b> ข้ามอุปกรณ์ และ <b>list sheet tabs</b> สำหรับ Statement วิเคราะห์</span></div>
+        <div class="note"><span class="note-txt">GAS sync ใช้สำหรับ <b>sync สถานะรถ + Note</b> ข้ามอุปกรณ์ และ <b>list sheet tabs</b> สำหรับ Statement วิเคราะห์</span></div>
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">🔄 Re-deploy เมื่อ update code</div>
+        <div class="step-group-title">Re-deploy เมื่อ update code</div>
         <ol class="steps">
-          <li><span class="step-num">1</span><span class="step-txt">Copy code ใหม่จาก Settings (กด 📋 Copy Code)</span></li>
+          <li><span class="step-num">1</span><span class="step-txt">Copy code ใหม่จาก Settings (กด ปุ่ม Copy Copy Code)</span></li>
           <li><span class="step-num">2</span><span class="step-txt">Apps Script → วาง code ใหม่ทับ → <b>Deploy → Manage deployments</b></span></li>
           <li><span class="step-num">3</span><span class="step-txt">กด Edit (ดินสอ) → Version = <b>New version</b> → Deploy</span></li>
           <li><span class="step-num">4</span><span class="step-txt">URL เดิมยังใช้ได้ ไม่ต้องอัปเดตใน Settings</span></li>
@@ -508,7 +508,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
   ════════════════════════════════════════════════ -->
   <div class="help-section anchor" id="sec-stmt-setup">
     <div class="help-section-hdr">
-      <span class="sys-icon">🏦</span>
+      <span class="sys-icon"></span>
       <div>
         <div class="sys-name">ตั้งค่า Statement Google Sheets</div>
         <div class="sys-desc">เชื่อม Transaction Report กับ Google Sheets แบบ tab ต่อเดือน</div>
@@ -517,7 +517,7 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
     <div class="help-body">
 
       <div class="step-group">
-        <div class="step-group-title">📁 เตรียม Google Sheet</div>
+        <div class="step-group-title">เตรียม Google Sheet</div>
         <ol class="steps">
           <li><span class="step-num">1</span><span class="step-txt">สร้าง Google Sheet ใหม่ (แยกจาก trip data sheet)</span></li>
           <li><span class="step-num">2</span><span class="step-txt">ตั้งชื่อ tab ตามเดือน รูปแบบ <code>YYYY-MM</code> เช่น <code>2026-04</code>, <code>2026-05</code></span></li>
@@ -528,14 +528,14 @@ html.in-iframe #main{max-width:100%!important;padding:20px 28px 40px!important}
       </div>
 
       <div class="step-group">
-        <div class="step-group-title">🔗 ตั้งค่าใน Fleet Dashboard</div>
+        <div class="step-group-title">ตั้งค่าใน Fleet Dashboard</div>
         <ol class="steps">
-          <li><span class="step-num">1</span><span class="step-txt">Fleet Dashboard → <b>⚙️ ตั้งค่า GAS Sync</b> → หัวข้อ <b>🏦 Transaction Report</b></span></li>
-          <li><span class="step-num">2</span><span class="step-txt">วาง Sheet ID → กด <b>💾 บันทึก</b></span></li>
-          <li><span class="step-num">3</span><span class="step-txt">ไปหน้า <b>🏦 Statement วิเคราะห์</b> → กด <b>☁️ ดึงจาก Sheets</b></span></li>
+          <li><span class="step-num">1</span><span class="step-txt">Fleet Dashboard → <b>ตั้งค่า GAS Sync</b> → หัวข้อ <b>Transaction Report</b></span></li>
+          <li><span class="step-num">2</span><span class="step-txt">วาง Sheet ID → กด <b>บันทึก</b></span></li>
+          <li><span class="step-num">3</span><span class="step-txt">ไปหน้า <b>Statement วิเคราะห์</b> → กด <b>ดึงจาก Sheets</b></span></li>
           <li><span class="step-num">4</span><span class="step-txt">เลือกเดือนจาก chip ที่ขึ้นมา → ข้อมูลโหลดอัตโนมัติ</span></li>
         </ol>
-        <div class="tip"><span class="tip-icon">💡</span><span class="tip-txt">เดือนถัดไป: เพิ่ม tab ใหม่ชื่อ <code>2026-05</code> วาง data ลงไป → กด "ดึงจาก Sheets" แล้วเลือกเดือนใหม่ได้เลย</span></div>
+        <div class="tip"><span class="tip-txt">เดือนถัดไป: เพิ่ม tab ใหม่ชื่อ <code>2026-05</code> วาง data ลงไป → กด "ดึงจาก Sheets" แล้วเลือกเดือนใหม่ได้เลย</span></div>
       </div>
 
     </div>
@@ -589,15 +589,15 @@ window.addEventListener('scroll',function(){
 </style>
 <div id="qnav">
   <div id="qnav-pop">
-    <a class="qn-a" href="./index.html"><span class="qn-ic">🏠</span>Portal</a>
+    <a class="qn-a" href="./index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Portal</a>
     <div class="qn-hr"></div>
-    <a class="qn-a" href="./project1/transport.html"><span class="qn-ic">🚛</span>งานขนส่ง</a>
-    <a class="qn-a" href="./project2/index.html"><span class="qn-ic">💳</span>Fleet Card</a>
-    <a class="qn-a" href="./trr.html"><span class="qn-ic">⛽</span>ต้นทุนน้ำมัน</a>
-    <a class="qn-a" href="./priceboard/index.html"><span class="qn-ic">💰</span>กระดานราคา</a>
-    <a class="qn-a" href="./fleet_view/index.html"><span class="qn-ic">🚦</span>Fleet View</a>
-    <a class="qn-a" href="./attendance/index.html"><span class="qn-ic">🕐</span>เช็คชื่อ</a>
-    <a class="qn-a" href="./help.html"><span class="qn-ic">📖</span>คู่มือ</a>
+    <a class="qn-a" href="./project1/transport.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>งานขนส่ง</a>
+    <a class="qn-a" href="./project2/index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Fleet Card</a>
+    <a class="qn-a" href="./trr.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span>ต้นทุนน้ำมัน</a>
+    <a class="qn-a" href="./priceboard/index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>กระดานราคา</a>
+    <a class="qn-a" href="./fleet_view/index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>Fleet View</a>
+    <a class="qn-a" href="./attendance/index.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>เช็คชื่อ</a>
+    <a class="qn-a" href="./help.html"><span class="qn-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>คู่มือ</a>
   </div>
   <button id="qnav-fab" title="ไปที่..."><svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><rect x="0" y="0" width="7" height="7" rx="1.5"/><rect x="11" y="0" width="7" height="7" rx="1.5"/><rect x="0" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg></button>
 </div>
