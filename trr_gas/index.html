@@ -5,21 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TRR Transport — ระบบต้นทุนน้ำมันขนส่ง</title>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="../TRR999logo.png">
+<script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');</script>
+<link rel="stylesheet" href="../glass.css">
 <style>
 /* ══ Base ══════════════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --navy:      #1B2770;
-  --navy2:     #2233A0;
-  --navy-dark: #141D5C;
-  --gold:      #F5A623;
-  --gold2:     #FBBF24;
-  --bg:        #F0F2F5;
-  --white:     #FFFFFF;
-  --border:    #E2E8F0;
-  --text:      #2D3748;
-  --muted:     #64748B;
-  --surface:   #F8FAFF;
+  --navy:      var(--primary);
+  --navy2:     var(--primary2);
+  --navy-dark: var(--primary);
+  --gold:      var(--accent);
+  --gold2:     var(--accent2);
+  --bg:        transparent;
+  --white:     var(--glass-bg-card);
+  --border:    var(--glass-border-sm);
+  --surface:   var(--glass-bg-subtle);
   --green:     #22C55E;
   --green2:    #16A34A;
   --red:       #EF4444;
@@ -32,17 +33,22 @@ body {
   font-family: 'Prompt', 'Leelawadee UI', 'Tahoma', sans-serif;
   font-size: 14px;
   color: var(--text);
-  background: var(--bg);
+  background: linear-gradient(140deg,var(--bg-from) 0%,var(--bg-mid) 50%,var(--bg-to) 100%);
+  background-attachment: fixed;
   display: flex;
+  animation: pgFade .22s ease;
 }
+@keyframes pgFade{from{opacity:0}to{opacity:1}}
 
 /* ══ Layout ════════════════════════════════════════════════════════════════ */
 #sidebar {
   width: var(--sidebar-w);
   flex-shrink: 0;
   height: 100vh;
-  background: var(--white);
-  border-right: 1px solid var(--border);
+  background: var(--sb-bg);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border-right: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -116,15 +122,15 @@ body {
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .nav-btn:hover {
-  background: #F8FAFF;
-  color: var(--navy);
-  border-left-color: var(--border);
+  background: var(--sb-item-hover);
+  color: var(--sb-text-hover);
+  border-left-color: var(--glass-border-sm);
 }
 .nav-btn.active {
-  background: #EEF2FF;
-  color: var(--navy);
+  background: var(--sb-item-active);
+  color: var(--sb-text-active);
   font-weight: 700;
-  border-left-color: var(--gold);
+  border-left-color: var(--sb-accent);
 }
 
 /* ══ Fuel box (sidebar bottom) ══════════════════════════════════════════════ */
@@ -709,6 +715,44 @@ input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--navy); c
   .page-body{padding:8px 6px}
   .settings-block input,.settings-block select{font-size:16px!important}
 }
+/* ── Dark mode overrides ────────────────────────────── */
+html.dark thead th{background:var(--glass-bg-subtle);color:var(--text2);border-bottom-color:var(--glass-border-sm);}
+html.dark tbody tr{border-bottom-color:var(--glass-border-sm);}
+html.dark tbody tr:nth-child(even){background:var(--glass-bg-subtle);}
+html.dark tbody tr:hover{background:var(--sb-item-hover);}
+html.dark tbody td.green{color:#4ade80;}
+html.dark tbody td.missing{background:rgba(245,158,11,0.12);color:#fbbf24;}
+html.dark .dist-cell:hover{background:var(--glass-bg-subtle);}
+html.dark .dist-cell input{background:var(--input-bg);color:var(--text);border-color:var(--input-border);}
+html.dark .dist-cell.has-val{color:#4ade80;}
+html.dark .dist-cell.no-val{color:#fb923c;}
+html.dark .stats-bar{background:var(--glass-bg-subtle);color:var(--text);}
+html.dark .stats-bar.warn{background:rgba(249,115,22,0.12);color:#fb923c;border-color:rgba(249,115,22,0.4);}
+html.dark .mode-btn{background:var(--glass-bg-subtle);color:var(--text2);border-color:var(--glass-border-sm);}
+html.dark .mode-btn:hover{background:var(--sb-item-hover);color:var(--text);border-color:var(--accent);}
+html.dark .mode-btn.active{background:linear-gradient(135deg,var(--primary2),var(--accent));color:#fff;border-color:transparent;}
+html.dark .formula-box{background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:var(--text);}
+html.dark .legs-box{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.2);color:#4ade80;}
+html.dark .dist-status-box{background:var(--glass-bg-subtle);border-color:var(--glass-border-sm);}
+html.dark .dst-ok{color:#4ade80;}
+html.dark .dst-warn{color:#f87171;}
+html.dark .tab-btn{background:var(--glass-bg-subtle);color:var(--text2);border-color:var(--glass-border-sm);}
+html.dark .tab-btn.active{background:var(--glass-bg-card);color:var(--primary);border-top-color:var(--accent);}
+html.dark .tab-content{background:var(--glass-bg-card);border-color:var(--glass-border);}
+html.dark input[type="text"],html.dark input[type="number"],html.dark select,html.dark textarea{border-color:var(--input-border);background:var(--input-bg);color:var(--text);}
+html.dark .rate-badge{background:var(--glass-bg-subtle);color:var(--text);}
+html.dark .fuel-badge{background:rgba(245,166,35,0.12);color:var(--accent2);border-color:rgba(245,166,35,0.4);}
+html.dark .dist-info{background:rgba(34,197,94,0.10);color:#4ade80;}
+html.dark #fuel-input{color:#fff;}
+html.dark #modal-header{color:#fff;}
+html.dark #toast{color:#fff;}
+html.dark .ms-total-box{background:var(--glass-bg-subtle);border-color:var(--glass-border-sm);}
+html.dark #fuel-box .fuel-title{color:var(--accent2);}
+html.dark #fuel-box .fuel-unit{color:var(--accent);}
+html.dark .btn-outline{color:var(--primary);border-color:var(--primary);}
+html.dark .btn-outline:hover:not(:disabled){background:rgba(59,130,246,0.08);}
+html.dark ::-webkit-scrollbar-track{background:var(--glass-bg-subtle);}
+html.dark ::-webkit-scrollbar-thumb{background:var(--glass-border);}
 </style>
 </head>
 <body>

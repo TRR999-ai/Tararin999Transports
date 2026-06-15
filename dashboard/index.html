@@ -6,21 +6,23 @@
 <title>Dashboard — ธรารินทร์ 999</title>
 <link rel="icon" type="image/png" href="../TRR999logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');</script>
+<link rel="stylesheet" href="../glass.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --navy:#1B2770;--navy-dark:#141D5C;--navy2:#2233A0;
-  --gold:#F5A623;--gold2:#FBBF24;
-  --cream:#FFF8EC;--white:#fff;
-  --bg:#E9EDF5;--card-bg:#fff;
-  --text:#2D3748;--muted:#64748B;
-  --success:#16a34a;--danger:#dc2626;--warn:#d97706;
+  --navy:var(--primary);--navy-dark:var(--primary);--navy2:var(--primary2);
+  --gold:var(--accent);--gold2:var(--accent2);
+  --cream:#FFF8EC;--white:var(--glass-bg-card);
+  --bg:transparent;--card-bg:var(--glass-bg-card);
+  --success:var(--green);--danger:var(--red);--warn:var(--amber);
   --sidebar-w:200px;
 }
 html,body{height:100%;overflow:hidden}
-body{font-family:'Prompt','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color:var(--text);display:flex;background:var(--bg)}
+body{font-family:'Prompt','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color:var(--text);display:flex;background:linear-gradient(140deg,var(--bg-from) 0%,var(--bg-mid) 50%,var(--bg-to) 100%);background-attachment:fixed;animation:pgFade .22s ease;}
+@keyframes pgFade{from{opacity:0}to{opacity:1}}
 
 /* ─── Sidebar ─── */
 #sidebar{width:var(--sidebar-w);flex-shrink:0;height:100vh;background:var(--navy-dark);display:flex;flex-direction:column}
@@ -171,6 +173,14 @@ body{font-family:'Prompt','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color
   .chart-row{grid-template-columns:1fr}
   .chart-card.full{grid-column:auto}
 }
+/* ── Dark mode overrides ── */
+html.dark .tbl-card td{border-bottom-color:var(--glass-border-sm);}
+html.dark .tbl-card tr:hover td{background:var(--sb-item-hover);}
+html.dark #gas-bar{background:var(--glass-bg);border-bottom-color:var(--glass-border);}
+html.dark #gas-url-input{background:var(--input-bg);border-color:var(--input-border);color:var(--text);}
+html.dark .drop-zone{border-color:var(--glass-border);}
+html.dark .drop-zone:hover,html.dark .drop-zone.drag-over{border-color:var(--accent);background:rgba(96,165,250,0.05);}
+html.dark .kpi-card,html.dark .chart-card,html.dark .tbl-card{box-shadow:var(--glass-shadow);}
 </style>
 </head>
 <body>

@@ -284,6 +284,25 @@ textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3
 html.in-iframe #qnav{display:none!important}
 html.in-iframe header .header-logo,html.in-iframe header .header-info{display:none!important}
 html.in-iframe header{padding:5px 16px!important;background:#fff!important;border-bottom:1px solid rgba(0,0,0,.1)!important;box-shadow:none!important;justify-content:flex-end!important}
+/* ── Dark mode overrides ──────────────────────────────── */
+html.dark .modal-close{background:var(--glass-bg);color:var(--text);border:1px solid var(--glass-border);}
+html.dark .tab{background:var(--glass-bg-subtle);color:var(--text2);}
+html.dark .tab.active-trailer{background:rgba(230,81,0,0.18);color:#fb923c;border-bottom-color:#fb923c;}
+html.dark .site-pill{background:var(--glass-bg-subtle);border-color:var(--glass-border-sm);color:var(--text);}
+html.dark .dtable th{background:var(--glass-bg-subtle);color:var(--text2);border-bottom-color:var(--glass-border-sm);}
+html.dark .dtable td{border-bottom-color:var(--glass-border-sm);color:var(--text);}
+html.dark .dtable tr:hover td{background:var(--sb-item-hover);}
+html.dark .hint{color:var(--muted);}
+html.dark #cpPopup{background:var(--glass-bg-strong);border-color:var(--glass-border);}
+html.dark .co-badge.tr{background:rgba(230,81,0,0.18);color:#fb923c;}
+html.dark .add-row input{border-color:var(--input-border);}
+html.dark .site-inp{border-color:var(--input-border);background:var(--input-bg);color:var(--text);}
+html.dark.in-iframe header{background:var(--glass-bg-strong)!important;border-bottom-color:var(--glass-border)!important;}
+/* ── Dark mode: trip card internals ──────────────────── */
+html.dark .trip-card{background:var(--glass-bg-card);border-color:var(--glass-border);}
+html.dark .trip-desc{background:var(--input-bg);color:var(--text);border-color:var(--input-border);}
+html.dark .output-box{background:var(--glass-bg-subtle);color:var(--text);border-color:var(--glass-border-sm);}
+html.dark .form-row input,html.dark .form-row select{background:var(--input-bg);color:var(--text);border-color:var(--input-border);}
 </style>
 <script>if(window.self!==window.top)document.documentElement.classList.add('in-iframe');</script>
   <link rel="stylesheet" href="../glass-components.css">
