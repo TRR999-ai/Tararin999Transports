@@ -1277,9 +1277,11 @@ function renderTrips() {
 }
 
 function buildCard(t, idx) {
-  var opts6w  = buildOptions(db['6wheel'],  t.driver);
-  var optsTR  = buildOptions(db['trailer'], t.driver);
-  var drvOpts = t.type === '6wheel' ? opts6w : optsTR;
+  var drvList = db[t.type === '6wheel' ? '6wheel' : 'trailer'] || [];
+  var drvOpts = buildOptionsGrouped(drvList, t.driver);
+  var siteList = getSiteList(t.type === '6wheel' ? '6wheel' : 'trailer');
+  var siteFltOpts = '<option value="">ทุกหน้างาน</option>' +
+    siteList.map(function(s){ return '<option value="' + esc(s) + '">' + esc(s) + '</option>'; }).join('');
 
   var plateVal = t.tempPlate ? t.tempPlateVal
     : (t.plate ? t.plate + ' ' + t.province : '');
@@ -1318,8 +1320,14 @@ function buildCard(t, idx) {
         '</div>' +
 
         '<div class="form-group">' +
-          '<label>คนขับรถ</label>' +
-          '<select onchange="pickDriver(' + t.id + ',this.value)">' +
+          '<label style="display:flex;align-items:center;justify-content:space-between;gap:6px;">' +
+            'คนขับรถ' +
+            '<select id="site-flt-' + t.id + '" onchange="filterDriverSite(' + t.id + ',this.value)"' +
+              ' style="font-size:11px;padding:2px 5px;border-radius:5px;border:1px solid #ccc;color:#555;font-weight:normal;max-width:130px;">' +
+              siteFltOpts +
+            '</select>' +
+          '</label>' +
+          '<select id="drv-sel-' + t.id + '" onchange="pickDriver(' + t.id + ',this.value)">' +
             '<option value="">— เลือกคนขับ —</option>' +
             drvOpts +
           '</select>' +
@@ -1393,8 +1401,54 @@ function buildCard(t, idx) {
 function buildOptions(list, selected) {
   return list.map(function (d) {
     return '<option value="' + esc(d.name) + '"' +
-      (d.name === selected ? ' selected' : '') + '>' + d.name + '</option>';
+      (d.name === selected ? ' selected' : '') + '>' + esc(d.name) + '</option>';
   }).join('');
+}
+
+function buildOptionsGrouped(list, selected) {
+  var sites = [], siteMap = {}, noSite = [];
+  list.forEach(function(d) {
+    var s = (d.site || '').trim();
+    if (!s) { noSite.push(d); return; }
+    if (!siteMap[s]) { sites.push(s); siteMap[s] = []; }
+    siteMap[s].push(d);
+  });
+  var html = '';
+  sites.forEach(function(s) {
+    html += '<optgroup label="' + esc(s) + '">';
+    siteMap[s].forEach(function(d) {
+      html += '<option value="' + esc(d.name) + '"' + (d.name === selected ? ' selected' : '') + '>' + esc(d.name) + '</option>';
+    });
+    html += '</optgroup>';
+  });
+  if (noSite.length) {
+    if (sites.length) html += '<optgroup label="— ไม่ระบุหน้างาน —">';
+    noSite.forEach(function(d) {
+      html += '<option value="' + esc(d.name) + '"' + (d.name === selected ? ' selected' : '') + '>' + esc(d.name) + '</option>';
+    });
+    if (sites.length) html += '</optgroup>';
+  }
+  return html;
+}
+
+function getSiteList(type) {
+  var sites = [], seen = {};
+  (db[type] || []).forEach(function(d) {
+    var s = (d.site || '').trim();
+    if (s && !seen[s]) { seen[s] = true; sites.push(s); }
+  });
+  return sites;
+}
+
+function filterDriverSite(tripId, site) {
+  var t = getTripById(tripId);
+  if (!t) return;
+  var list = db[t.type] || [];
+  var filtered = site ? list.filter(function(d){ return (d.site||'').trim() === site; }) : list;
+  var sel = document.getElementById('drv-sel-' + tripId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— เลือกคนขับ —</option>' +
+    (site ? buildOptions(filtered, t.driver) : buildOptionsGrouped(filtered, t.driver));
 }
 
 function esc(s) {
@@ -1937,6 +1991,7 @@ window.loadFromFirestore = loadFromFirestore;
 window.setField         = setField;
 window.setType          = setType;
 window.pickDriver       = pickDriver;
+window.filterDriverSite = filterDriverSite;
 window.toggleTemp       = toggleTemp;
 window.removeTrip       = removeTrip;
 window.openDatePicker   = openDatePicker;
