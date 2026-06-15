@@ -7,6 +7,8 @@
 <link rel="icon" type="image/png" href="../TRR999logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <link rel="stylesheet" href="../glass.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -430,14 +432,12 @@ html.in-iframe header{padding:5px 16px!important;background:#fff!important;borde
       <button class="modal-close" onclick="closeDriverModal()">&#x2715;</button>
     </div>
 
-    <!-- Google Sheet sync bar -->
+    <!-- Firebase sync bar -->
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:9px 12px;background:#f5f9ff;border-radius:8px;border:1px solid #dde3ff;">
-      <span id="syncDot" style="width:10px;height:10px;border-radius:50%;background:#bdbdbd;flex-shrink:0;" title="ยังไม่ตั้งค่า URL"></span>
-      <span style="font-size:12px;color:#555;white-space:nowrap;">Google Sheet URL:</span>
-      <input id="gasUrlInput" type="text" placeholder="https://script.google.com/macros/s/.../exec"
-        style="flex:1;border:1px solid #ccc;border-radius:5px;padding:5px 8px;font-size:12px;min-width:0;" />
-      <button class="btn btn-blue btn-sm" onclick="setGasUrl()" style="white-space:nowrap;">บันทึก</button>
-      <button class="btn btn-ghost btn-sm" onclick="loadFromSheet()" title="โหลดจาก Sheet" style="font-size:16px;padding:4px 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+      <span id="syncDot" style="width:10px;height:10px;border-radius:50%;background:#2196f3;flex-shrink:0;" title="กำลังเชื่อมต่อ..."></span>
+      <span style="font-size:12px;color:#555;white-space:nowrap;">Firebase:</span>
+      <span id="syncLabel" style="flex:1;font-size:12px;color:#888;">กำลังเชื่อมต่อ...</span>
+      <button class="btn btn-ghost btn-sm" onclick="loadFromFirestore()" title="โหลดจาก Firebase" style="display:flex;align-items:center;gap:5px;padding:5px 10px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>รีโหลด</button>
     </div>
 
     <div class="tabs">
@@ -566,87 +566,58 @@ var db;
 try { db = JSON.parse(localStorage.getItem('transportDB') || 'null') || DEFAULT_DB; }
 catch (e) { db = JSON.parse(JSON.stringify(DEFAULT_DB)); }
 
-// ── Google Sheet sync ──────────────────────────────
-// ★ ใส่ URL ที่ได้จาก deploy project1_gas/Code.gs แล้วกด Save
-const DRIVER_GAS_URL = 'https://script.google.com/macros/s/AKfycbw-GjxnUX_ORhqf_3SVGiBDSvQXrGxEPcoRyIb5HB64qcwMLtYmU88ygTaPeSiPvdIg/exec';
-var GAS_URL = DRIVER_GAS_URL || localStorage.getItem('gasURL') || '';
-var _sheetLoading = false;
+// ── Firebase Firestore driver sync ─────────────────
+var _fdb = null;
+var _fdbReady = false;
+(function(){
+  try {
+    var cfg={apiKey:"AIzaSyAQbnhjkyVuRIpe4UfOzCyXyAo6TB2Tlok",authDomain:"tararin999.firebaseapp.com",projectId:"tararin999",storageBucket:"tararin999.firebasestorage.app",messagingSenderId:"167015953995",appId:"1:167015953995:web:9a1efe5ce392a78886ffce"};
+    var app;try{app=firebase.app();}catch(e){app=firebase.initializeApp(cfg);}
+    _fdb=firebase.firestore(app);
+    _fdbReady=true;
+  }catch(e){console.warn('Firebase init failed',e);}
+})();
 
 function saveDB() {
   try { localStorage.setItem('transportDB', JSON.stringify(db)); } catch(e) {}
-  if (GAS_URL && !_sheetLoading) _saveToSheet();
+  _saveToFirestore();
 }
 
 function _syncDot(state) {
   var el = document.getElementById('syncDot');
   if (!el) return;
-  var map = { syncing:['#ffa000','กำลัง sync...'], ok:['#43a047','Sync แล้ว ✓'], err:['#e53935','Sync ไม่สำเร็จ ✗'], idle:['#bdbdbd','ยังไม่ตั้งค่า URL'] };
+  var map = { syncing:['#ffa000','กำลัง sync...'], ok:['#43a047','Firebase sync ✓'], err:['#e53935','Firebase ผิดพลาด ✗'], idle:['#2196f3','กำลังเชื่อมต่อ...'] };
   var v = map[state] || map.idle;
   el.style.background = v[0]; el.title = v[1];
+  var lbl = document.getElementById('syncLabel');
+  if (lbl) lbl.textContent = v[1];
 }
 
-function _saveToSheet() {
-  if (!GAS_URL) return;
+function _saveToFirestore() {
+  if (!_fdb) return;
   _syncDot('syncing');
-  var drivers = [];
-  ['6wheel','trailer'].forEach(function(type) {
-    (db[type]||[]).forEach(function(d) {
-      var row = {type:type};
-      ['plate','province','name','name2','phone','site','color'].forEach(function(f){ row[f]=d[f]||''; });
-      drivers.push(row);
-    });
-  });
-  fetch(GAS_URL, { method:'POST', body: JSON.stringify({drivers:drivers}) })
-    .then(function(r){ return r.json(); })
-    .then(function(res){ _syncDot(res.ok ? 'ok' : 'err'); })
-    .catch(function(){ _syncDot('err'); });
+  var payload = {'6wheel':db['6wheel']||[],'trailer':db['trailer']||[],updated:Date.now()};
+  _fdb.collection('trr_config').doc('drivers').set(payload)
+    .then(function(){ _syncDot('ok'); })
+    .catch(function(e){ console.error('Firestore save:',e); _syncDot('err'); });
 }
 
-function loadFromSheet() {
-  if (!GAS_URL) { showToast('ยังไม่ได้ใส่ Google Sheet URL'); return; }
+function loadFromFirestore() {
+  if (!_fdb) { showToast('Firebase ยังไม่พร้อม'); return; }
   _syncDot('syncing');
-  _sheetLoading = true;
-  fetch(GAS_URL + '?t=' + Date.now())
-    .then(function(r){ return r.json(); })
-    .then(function(res) {
-      _sheetLoading = false;
-      if (!res.ok || !res.data) { _syncDot('err'); showToast('โหลดไม่สำเร็จ: ข้อมูลไม่สำเร็จ'); return; }
-      var newDb = {'6wheel':[], 'trailer':[]};
-      // Build lookup from current db to preserve local phone/site/color if sheet has none
-      var localPhoneMap = {};
-      ['6wheel','trailer'].forEach(function(t){(db[t]||[]).forEach(function(d){if(d.name)localPhoneMap[d.name]={phone:d.phone||'',site:d.site||'',color:d.color||''};});});
-      res.data.forEach(function(d) {
-        var type = d.type||'6wheel';
-        if(type!=='6wheel'&&type!=='trailer')type='6wheel';
-        if (!newDb[type]) newDb[type]=[];
-        var driver = {};
-        ['plate','province','name','name2','phone','site','color'].forEach(function(f){ driver[f]=d[f]||''; });
-        // Fallback to local phone if sheet returned empty
-        if (!driver.phone && localPhoneMap[driver.name]) driver.phone = localPhoneMap[driver.name].phone;
-        if (!driver.site  && localPhoneMap[driver.name]) driver.site  = localPhoneMap[driver.name].site;
-        if (!driver.color && localPhoneMap[driver.name]) driver.color = localPhoneMap[driver.name].color;
-        var suppressed = loadSuppressed();
-        if (driver.plate && suppressed.indexOf(driver.plate) !== -1) return;
-        newDb[type].push(driver);
-      });
-      db = newDb;
+  _fdb.collection('trr_config').doc('drivers').get()
+    .then(function(doc) {
+      if (!doc.exists) { _syncDot('ok'); showToast('ยังไม่มีข้อมูลใน Firebase — เพิ่มคนขับแล้วระบบจะบันทึกเอง'); return; }
+      var data = doc.data();
+      db['6wheel'] = data['6wheel'] || [];
+      db['trailer'] = data['trailer'] || [];
       try { localStorage.setItem('transportDB', JSON.stringify(db)); } catch(e) {}
       renderDriverTable();
       _syncDot('ok');
-      showToast('โหลดข้อมูลจาก Google Sheet แล้ว');
     })
-    .catch(function(){ _sheetLoading=false; _syncDot('err'); showToast('เชื่อมต่อไม่ได้'); });
+    .catch(function(e){ console.error('Firestore load:',e); _syncDot('err'); showToast('Firebase โหลดไม่สำเร็จ'); });
 }
-
-function setGasUrl() {
-  var val = (document.getElementById('gasUrlInput')||{}).value;
-  if (val !== undefined) val = val.trim(); else return;
-  GAS_URL = val;
-  localStorage.setItem('gasURL', val);
-  if (val) { loadFromSheet(); }
-  else { _syncDot('idle'); showToast('ลบ URL แล้ว'); }
-}
-// ──────────────────────────────────────────────────
+// ───────────────────────────────────────────────────
 
 function ensureMasterPlates() {
   var changed = false;
@@ -1602,10 +1573,8 @@ function copyAll() {
 function openDriverModal() {
   document.getElementById('driverModal').classList.add('open');
   renderDriverTable();
-  var inp = document.getElementById('gasUrlInput');
-  if (inp) inp.value = GAS_URL;
-  _syncDot(GAS_URL ? 'ok' : 'idle');
-  if (GAS_URL) loadFromSheet();
+  _syncDot(_fdbReady ? 'idle' : 'err');
+  if (_fdbReady) loadFromFirestore();
 }
 function closeDriverModal() { document.getElementById('driverModal').classList.remove('open'); }
 function switchTab(type) {
@@ -1964,8 +1933,7 @@ window.refreshSiteColor    = refreshSiteColor;
 window.showColorPicker     = showColorPicker;
 window.selectColor         = selectColor;
 window.resetColorFromPicker= resetColorFromPicker;
-window.setGasUrl        = setGasUrl;
-window.loadFromSheet    = loadFromSheet;
+window.loadFromFirestore = loadFromFirestore;
 window.setField         = setField;
 window.setType          = setType;
 window.pickDriver       = pickDriver;
