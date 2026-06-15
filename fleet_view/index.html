@@ -1311,17 +1311,19 @@ function fbSetFleetStatus(plate,status,note){
 
 function initFleetStatusListener(){
   if(!_db)return;
+  // Compute today's midnight epoch once at listener init (persists across snapshot callbacks)
+  var _todayMs=(function(){var d=new Date();d.setHours(0,0,0,0);return d.getTime();})();
   _db.collection('fleet_status').onSnapshot(function(snap){
     var now=Date.now();
     if(!_fbFleetReady){
       // Initial load — apply all, with guards for daily reset and recent local edit
-      var justResetInit=(_resetTime>0&&(now-_resetTime)<90000);
       snap.forEach(function(doc){
         var plate=doc.id;
         if(plate.charAt(0)==='_')return; // skip virtual plates
         var data=doc.data();
         var st=data.status||'';
-        if(justResetInit&&(st==='ready'||st==='busy'))return; // skip stale status after daily reset
+        // Block stale ready/busy: if today is a new day AND doc was last updated before midnight
+        if(_resetJustHappened&&(data.updatedAt||0)<_todayMs&&(st==='ready'||st==='busy'))return;
         var localAge=now-(statusSetAt[plate]||0);
         if(statusSetAt[plate]&&localAge<1800000)return; // trust recent local edit
         statusMap[plate]=st;
@@ -1335,14 +1337,14 @@ function initFleetStatusListener(){
     }
     // Real-time updates from other devices
     var changed=false;
-    var justReset=(_resetTime>0&&(now-_resetTime)<90000);
     snap.docChanges().forEach(function(change){
       if(change.doc.metadata.hasPendingWrites)return; // skip own writes (not yet confirmed by server)
       var plate=change.doc.id;
       if(plate.charAt(0)==='_')return;
       var data=change.doc.data();
       var st=data.status||'';
-      if(justReset&&(st==='ready'||st==='busy'))return; // skip stale after daily reset
+      // Block stale ready/busy that originated before today's reset
+      if(_resetJustHappened&&(data.updatedAt||0)<_todayMs&&(st==='ready'||st==='busy'))return;
       var localAge=now-(statusSetAt[plate]||0);
       var recentlySet=(statusSetAt[plate]&&localAge<1800000);
       var syncPending=!!_pendingGasSync[plate];
