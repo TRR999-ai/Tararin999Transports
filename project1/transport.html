@@ -1627,8 +1627,7 @@ function copyAll() {
 function openDriverModal() {
   document.getElementById('driverModal').classList.add('open');
   renderDriverTable();
-  _syncDot(_fdbReady ? 'idle' : 'err');
-  if (_fdbReady) loadFromFirestore();
+  _syncDot(_fdbReady ? 'ok' : 'err');
 }
 function closeDriverModal() { document.getElementById('driverModal').classList.remove('open'); }
 function switchTab(type) {
@@ -1954,7 +1953,26 @@ var ds0 = todayStr();
 document.getElementById('dateInput').value  = ds0;
 document.getElementById('headerText').value = ds0;
 
-ensureMasterPlates();   // add any missing plates from master list
+// Load Firestore FIRST, then ensureMasterPlates — prevents race where
+// ensureMasterPlates saves empty data that Firestore load then reads back
+if (_fdbReady) {
+  _fdb.collection('trr_config').doc('drivers').get().then(function(doc){
+    if (doc.exists) {
+      var data = doc.data();
+      db['6wheel'] = data['6wheel'] || [];
+      db['trailer'] = data['trailer'] || [];
+      try { localStorage.setItem('transportDB', JSON.stringify(db)); } catch(e) {}
+    }
+    ensureMasterPlates();
+    _syncDot('ok');
+  }).catch(function(e){
+    console.warn('Startup Firestore load:', e);
+    ensureMasterPlates();
+    _syncDot('err');
+  });
+} else {
+  ensureMasterPlates();
+}
 
 // Load announce/footer from localStorage
 (function() {
