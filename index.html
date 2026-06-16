@@ -1207,7 +1207,22 @@ function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt
 
 function loadProfiles(){try{var r=localStorage.getItem(PROFILES_KEY);if(r){var p=JSON.parse(r);if(p&&p.length)return p;}}catch(e){}return null;}
 function saveProfiles(p){try{localStorage.setItem(PROFILES_KEY,JSON.stringify(p));}catch(e){showToast('localStorage เต็ม — บันทึกไม่ได้');console.warn('[Portal] saveProfiles error',e);}}
-function getProfiles(){var p=loadProfiles();if(!p){p=DEFAULT_PROFILES.map(function(d){return Object.assign({},d);});saveProfiles(p);}return p;}
+function getProfiles(){
+  var p=loadProfiles();
+  if(!p){p=DEFAULT_PROFILES.map(function(d){return Object.assign({},d);});saveProfiles(p);return p;}
+  // Merge any new DEFAULT_PROFILES entries not yet in saved list (insert before exec slot)
+  var changed=false;
+  DEFAULT_PROFILES.forEach(function(def){
+    if(!p.find(function(x){return x.id===def.id;})){
+      var execIdx=p.findIndex(function(x){return x.id==='exec';});
+      var pos=execIdx>=0?execIdx:p.length;
+      p.splice(pos,0,Object.assign({},def));
+      changed=true;
+    }
+  });
+  if(changed)saveProfiles(p);
+  return p;
+}
 function getActiveProfile(){
   var id=sessionStorage.getItem(ACTIVE_PF_KEY);if(!id)return null;
   return getProfiles().find(function(p){return p.id===id;})||null;
