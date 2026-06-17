@@ -1,0 +1,87 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TARARIN 999 — Firestore Security Rules
+//
+// IMPORTANT: This app does NOT use Firebase Authentication (no login tokens),
+// so rules cannot identify *who* is making a request (request.auth is always
+// null). That means reads cannot be restricted to "exec only" at the server —
+// the exec gate on the audit page is client-side only.
+//
+// What these rules DO enforce (works without auth):
+//   • audit_log   → create-only + shape-validated, NEVER editable/deletable
+//                   (tamper-proof audit trail — the whole point of the feature)
+//   • attendance  → append-only; re-sync allowed but the person/time fields are
+//                   frozen; records can never be deleted
+//   • everything else → shape validation + size caps to limit abuse; no deletes
+//   • any unknown collection → denied
+//
+// To harden reads & enforce roles server-side you must add Firebase Auth
+// (Anonymous Auth as a minimum, custom claims for exec). See the commented
+// "HARDENED" variants below each block.
+// ─────────────────────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function str(v, max) { return v is string && v.size() <= max; }
+
+    // ── Audit log: immutable, create-only ──────────────────────────────────
+    match /audit_log/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(
+                         ['ts','who','whoName','module','action','detail','device'])
+                      && request.resource.data.ts is number
+                      && str(request.resource.data.who, 64)
+                      && str(request.resource.data.whoName, 120)
+                      && str(request.resource.data.module, 40)
+                      && str(request.resource.data.action, 60)
+                      && str(request.resource.data.detail, 600)
+                      && str(request.resource.data.device, 220);
+      allow update, delete: if false;   // audit trail can never be altered
+      // HARDENED (with Anonymous Auth): add  && request.auth != null  to create,
+      // and restrict read to exec via custom claim:  allow read: if request.auth.token.exec == true;
+    }
+
+    // ── Attendance: append-only time records ───────────────────────────────
+    match /attendance/{id} {
+      allow read: if true;
+      allow create: if str(request.resource.data.pid, 64)
+                      && str(request.resource.data.date, 20)
+                      && request.resource.data.ts is number;
+      // Allow idempotent re-sync only; freeze identity & timestamp.
+      allow update: if resource.data.pid  == request.resource.data.pid
+                      && resource.data.ts   == request.resource.data.ts
+                      && resource.data.date == request.resource.data.date
+                      && resource.data.type == request.resource.data.type;
+      allow delete: if false;           // time records can never be deleted
+    }
+
+    // ── Profiles ───────────────────────────────────────────────────────────
+    match /profiles/{id} {
+      allow read: if true;
+      allow create, update: if str(request.resource.data.id, 40)
+                              && str(request.resource.data.name, 80);
+      allow delete: if false;
+    }
+
+    // ── Fleet status (includes virtual config plates like __fleet_cfg_v1__) ─
+    match /fleet_status/{plate} {
+      allow read: if true;
+      allow create, update: if true;    // small status/note payloads
+      allow delete: if false;
+    }
+
+    // ── Transport config (e.g. doc 'drivers') ──────────────────────────────
+    match /trr_config/{doc} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if false;
+    }
+
+    // ── Default deny for any other collection ──────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

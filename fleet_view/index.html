@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="../glass.css?v=1">
 <link rel="stylesheet" href="../ui-fx.css?v=1">
 <script src="../ui-fx.js?v=1"></script>
-<script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');</script>
+<script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');var _a=localStorage.getItem('trr_accent');if(_a&&_a!=='ocean')document.documentElement.setAttribute('data-accent',_a);</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>

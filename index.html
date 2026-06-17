@@ -16,10 +16,12 @@
 <link rel="stylesheet" href="./glass.css?v=1">
 <link rel="stylesheet" href="./ui-fx.css?v=1">
 <script>
-/* Dark mode — apply BEFORE render to prevent flash */
+/* Dark mode + accent — apply BEFORE render to prevent flash */
 (function(){
   if(localStorage.getItem('trr_dark_mode')==='1')
     document.documentElement.classList.add('dark');
+  var a=localStorage.getItem('trr_accent');
+  if(a&&a!=='ocean')document.documentElement.setAttribute('data-accent',a);
 })();
 </script>
 <style>
@@ -212,7 +214,25 @@ html.dark #topbar{
 /* ── Content / Portal home ── */
 #content{flex:1;position:relative;overflow:hidden}
 #portal-home{position:absolute;inset:0;overflow:auto}
-#page-frame{position:absolute;inset:0;width:100%;height:100%;border:none;display:none}
+#frame-pool{position:absolute;inset:0;display:none}
+#frame-pool.show{display:block}
+.page-frame{position:absolute;inset:0;width:100%;height:100%;border:none;display:none}
+.page-frame.active{display:block;animation:frameIn .28s cubic-bezier(.22,1,.36,1)}
+@keyframes frameIn{from{opacity:0}to{opacity:1}}
+/* Top loading bar */
+#top-bar{position:absolute;top:0;left:0;right:0;height:3px;z-index:30;opacity:0;transition:opacity .3s;pointer-events:none}
+#top-bar.show{opacity:1}
+#top-bar .tb-fill{height:100%;width:0;border-radius:0 3px 3px 0;background:linear-gradient(90deg,var(--accent),var(--accent2));box-shadow:0 0 9px var(--accent)}
+/* First-load skeleton (shown only while a page loads for the first time) */
+#frame-skeleton{position:absolute;inset:0;z-index:20;display:none;flex-direction:column;gap:16px;padding:26px 28px;background:var(--bg-mid,#ddf3ff)}
+#frame-skeleton.show{display:flex}
+#frame-skeleton .fsk-bar{height:30px;width:240px;border-radius:9px;background:var(--glass-bg-subtle)}
+#frame-skeleton .fsk-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+#frame-skeleton .fsk-card{height:78px;border-radius:13px}
+#frame-skeleton .fsk-block{height:200px;border-radius:14px}
+#frame-skeleton .fsk-block.sm{height:120px}
+@media(max-width:640px){#frame-skeleton .fsk-row{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){.page-frame.active{animation:none}}
 #frame-loader{
   position:absolute;inset:0;display:none;align-items:center;justify-content:center;
   background:var(--glass-bg-subtle);backdrop-filter:var(--blur-sm);
@@ -280,6 +300,7 @@ html.dark .bg-orb{opacity:.22;filter:blur(110px)}
   border:1px solid rgba(255,255,255,0.82);
   box-shadow:0 8px 28px rgba(99,102,241,0.12),0 2px 8px rgba(99,102,241,0.06),inset 0 1.5px 0 rgba(255,255,255,0.95),inset 0 -1px 0 rgba(160,130,255,0.08);
   transition:transform .22s cubic-bezier(.34,1.2,.64,1),box-shadow .22s ease;
+  will-change:transform;
 }
 html.dark .portal-card{
   background:rgba(255,255,255,0.07);
@@ -964,8 +985,18 @@ html.dark .pf-orb{opacity:.22}
       <p class="portal-footer">©2026 บริษัท ธรารินทร์ 999 ขนส่ง จำกัด — TARARIN 999 TRANSPORT CO.,LTD.</p>
     </div>
     </div><!-- /#portal-home -->
+    <div id="top-bar"><div class="tb-fill"></div></div>
+    <div id="frame-skeleton">
+      <div class="fsk-bar"></div>
+      <div class="fsk-row">
+        <div class="trr-skel fsk-card"></div><div class="trr-skel fsk-card"></div>
+        <div class="trr-skel fsk-card"></div><div class="trr-skel fsk-card"></div>
+      </div>
+      <div class="trr-skel fsk-block"></div>
+      <div class="trr-skel fsk-block sm"></div>
+    </div>
     <div id="frame-loader">กำลังโหลด...</div>
-    <iframe id="page-frame" title="TRR Portal Frame"></iframe>
+    <div id="frame-pool"></div>
   </div>
 
 </div>
@@ -1089,7 +1120,7 @@ html.dark .pf-orb{opacity:.22}
   var key='trr_dark_mode';
   function apply(dark){
     document.documentElement.classList.toggle('dark',dark);
-    try{var f=document.getElementById('page-frame');if(f&&f.contentWindow)f.contentWindow.postMessage({type:'trr_dark_mode',dark:dark},'*');}catch(e){}
+    if(window.broadcastToFrames)broadcastToFrames({type:'trr_dark_mode',dark:dark});
   }
   apply(localStorage.getItem(key)==='1');
   document.addEventListener('DOMContentLoaded',function(){
@@ -1109,7 +1140,7 @@ html.dark .pf-orb{opacity:.22}
     if(a&&a!=='ocean')document.documentElement.setAttribute('data-accent',a);
     else document.documentElement.removeAttribute('data-accent');
     // broadcast to open iframe
-    try{var f=document.getElementById('page-frame');if(f&&f.contentWindow)f.contentWindow.postMessage({type:'trr_accent',accent:a},'*');}catch(e){}
+    if(window.broadcastToFrames)broadcastToFrames({type:'trr_accent',accent:a});
   }
   function markActive(a){
     document.querySelectorAll('.acc-sw').forEach(function(b){
@@ -1407,14 +1438,21 @@ function verifyProfilePw(){
   }
 }
 
-// ── iframe navigation ──────────────────────────────────────────────────────
+// ── iframe navigation (keep-alive pool) ─────────────────────────────────────
+// Each visited page keeps its own iframe alive and hidden; switching back is
+// instant (no reload / no re-fetch). Frames are evicted only on profile change.
+var FRAME_POOL_MAX = 8;
+function trrFrames(){ return document.querySelectorAll('#frame-pool .page-frame'); }
+function broadcastToFrames(msg){
+  trrFrames().forEach(function(f){ try{ if(f.contentWindow)f.contentWindow.postMessage(msg,'*'); }catch(e){} });
+}
+function clearFramePool(){ var p=document.getElementById('frame-pool'); if(p)p.innerHTML=''; }
+
 function navTo(page, title) {
-  var frame  = document.getElementById('page-frame');
+  var pool   = document.getElementById('frame-pool');
   var loader = document.getElementById('frame-loader');
-  var home   = document.getElementById('portal-home');
-  loader.classList.add('show');
-  home.style.display = 'none';
-  frame.style.display = 'block';
+  document.getElementById('portal-home').style.display = 'none';
+  pool.classList.add('show');
   document.querySelector('.tb-title').textContent = title || 'TRR Portal';
   document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
   var match = document.querySelector('.nav-item[data-page="'+page+'"]');
@@ -1423,14 +1461,72 @@ function navTo(page, title) {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sb-overlay').classList.remove('show');
   }
-  frame.onload = function(){ loader.classList.remove('show'); };
-  frame.src = page;
+  var frames = pool.querySelectorAll('.page-frame');
+  var existing = null;
+  frames.forEach(function(f){
+    f.classList.remove('active');
+    if (f.getAttribute('data-page') === page) existing = f;
+  });
+  if (existing) {                       // already loaded → instant show
+    existing.classList.add('active');
+    existing.setAttribute('data-used', Date.now());
+    loader.classList.remove('show');
+    topbarDone();
+    return;
+  }
+  // First visit → create + load this page (top progress bar while loading)
+  evictOldestFrame(pool);
+  var f = document.createElement('iframe');
+  f.className = 'page-frame active';
+  f.title = title || 'TRR';
+  f.setAttribute('data-page', page);
+  f.setAttribute('data-used', Date.now());
+  topbarStart();
+  f.onload = function(){ loader.classList.remove('show'); topbarDone(); };
+  pool.appendChild(f);
+  f.src = page;
+}
+// ── Top progress bar (slim, indeterminate-style) ──
+// Only appears if the load takes >150ms, so fast/cached switches don't flicker.
+var _topbarTimer=null;
+function topbarStart(){
+  var b=document.getElementById('top-bar'); if(!b)return;
+  clearTimeout(_topbarTimer);
+  _topbarTimer=setTimeout(function(){
+    var fill=b.querySelector('.tb-fill');
+    b.classList.add('show');
+    fill.style.transition='none'; fill.style.width='0';
+    void fill.offsetWidth;               // reflow to restart
+    fill.style.transition='width 9s cubic-bezier(.12,.7,.25,1)';
+    fill.style.width='92%';              // creep toward—but never reach—100%
+    var sk=document.getElementById('frame-skeleton'); if(sk)sk.classList.add('show');
+  },150);
+}
+function topbarDone(){
+  clearTimeout(_topbarTimer);            // fast load → bar/skeleton never shown
+  var sk=document.getElementById('frame-skeleton'); if(sk)sk.classList.remove('show');
+  var b=document.getElementById('top-bar'); if(!b||!b.classList.contains('show'))return;
+  var fill=b.querySelector('.tb-fill');
+  fill.style.transition='width .22s ease';
+  fill.style.width='100%';
+  setTimeout(function(){
+    b.classList.remove('show');
+    setTimeout(function(){ fill.style.transition='none'; fill.style.width='0'; },300);
+  },240);
+}
+function evictOldestFrame(pool){
+  var frames = Array.prototype.slice.call(pool.querySelectorAll('.page-frame'));
+  if (frames.length < FRAME_POOL_MAX) return;
+  frames.sort(function(a,b){ return (+a.getAttribute('data-used')||0) - (+b.getAttribute('data-used')||0); });
+  var victim = frames.find(function(f){ return !f.classList.contains('active'); });
+  if (victim) victim.parentNode.removeChild(victim);
 }
 function animateHomeCards(){ if(window.TRRfx)TRRfx.stagger('.cards-row .portal-card',70); }
 function navHome() {
-  var frame = document.getElementById('page-frame');
-  frame.style.display = 'none';
-  frame.src = 'about:blank';
+  document.getElementById('frame-pool').classList.remove('show');
+  trrFrames().forEach(function(f){ f.classList.remove('active'); });
+  document.getElementById('frame-loader').classList.remove('show');
+  topbarDone();
   document.getElementById('portal-home').style.display = '';
   animateHomeCards();
   document.querySelector('.tb-title').textContent = 'User Portal';
@@ -1452,10 +1548,15 @@ function enterPortal(pf){
   updateHeaderProfile(pf);
   if(document.getElementById('portal-home').style.display!=='none')setTimeout(animateHomeCards,60);
   if(window.TRRAudit)TRRAudit.log('portal','login','เข้าใช้งานในชื่อ '+pf.name);
-  // Reload iframe if it's currently showing a page (profile changed → stale content)
-  var frame=document.getElementById('page-frame');
-  if(frame&&frame.style.display!=='none'&&frame.src&&frame.src.indexOf('about:blank')===-1){
-    var cur=frame.src;frame.src='about:blank';frame.src=cur;
+  // Profile changed → evict cached frames so pages reload fresh with new identity
+  var pool=document.getElementById('frame-pool');
+  if(pool&&pool.classList.contains('show')){
+    var act=pool.querySelector('.page-frame.active');
+    var curPage=act?act.getAttribute('data-page'):null;
+    clearFramePool();
+    if(curPage){var t=document.querySelector('.nav-item[data-page="'+curPage+'"]');navTo(curPage,t?t.title:'');}
+  } else {
+    clearFramePool();
   }
   var redir='';try{redir=sessionStorage.getItem('trr_redirect')||'';}catch(e){}
   if(redir&&redir.indexOf('index.html')===-1&&redir!==location.href){

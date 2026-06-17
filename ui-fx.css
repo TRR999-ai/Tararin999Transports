@@ -12,6 +12,25 @@ html.trr-theme-anim *{
               fill .35s ease, stroke .35s ease !important;
 }
 
+/* ── Smooth scrolling + momentum ── */
+html{scroll-behavior:smooth}
+*{-webkit-overflow-scrolling:touch}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* ── Consistent themed scrollbar (baseline; page rules can override) ── */
+*{scrollbar-width:thin;scrollbar-color:var(--glass-border-sm,rgba(0,0,0,.18)) transparent}
+*::-webkit-scrollbar{width:9px;height:9px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{
+  background:var(--glass-border-sm,rgba(0,0,0,.18));
+  border-radius:8px;border:2px solid transparent;background-clip:padding-box;
+}
+*::-webkit-scrollbar-thumb:hover{background:var(--muted,rgba(0,0,0,.32));background-clip:padding-box}
+
+/* ── GPU compositing hints for frequently-animated elements ── */
+.trr-toast,.trr-confetti i,.trr-ripple-ink,.trr-enter{will-change:transform,opacity}
+.trr-spark-line,.trr-ring-arc{will-change:stroke-dashoffset}
+
 /* ── Click ripple ── */
 .trr-ripple-ink{
   position:absolute;border-radius:50%;transform:scale(0);

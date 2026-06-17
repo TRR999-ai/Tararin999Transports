@@ -6,7 +6,7 @@
 <title>เช็คชื่อเข้างาน — TARARIN 999</title>
 <link rel="icon" type="image/png" href="../TRR999logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');</script>
+<script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');var _a=localStorage.getItem('trr_accent');if(_a&&_a!=='ocean')document.documentElement.setAttribute('data-accent',_a);</script>
 <link rel="stylesheet" href="../glass.css?v=1">
 <link rel="stylesheet" href="../ui-fx.css?v=1">
 <script src="../ui-fx.js?v=1"></script>
@@ -333,6 +333,13 @@ html:not(.dark) .gps-checking .gps-dot{background:var(--muted);}
 .confirm-icon{font-size:52px;margin-bottom:8px;}
 .confirm-title{font-size:17px;font-weight:800;color:var(--navy);margin-bottom:6px;}
 .confirm-sub{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5;}
+.cf-late-wrap{text-align:left;margin:-6px 0 18px;}
+.cf-late-label{display:block;font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px;}
+html.dark .cf-late-label{color:#fbbf24;}
+#cf-late-note{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:15px;font-family:inherit;outline:none;resize:vertical;min-height:48px;color:var(--text);background:var(--input-bg,#fff);}
+#cf-late-note:focus{border-color:#f59e0b;}
+.att-late-reason{font-size:11px;color:#92400e;margin-top:2px;font-style:italic;}
+html.dark .att-late-reason{color:#fbbf24;}
 .confirm-btns{display:flex;gap:10px;}
 .confirm-btn{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
 .confirm-btn.primary{background:var(--navy);color:#fff;}
@@ -561,6 +568,10 @@ html.dark .att-set-field input{background:var(--input-bg);color:var(--text);bord
     <div class="confirm-icon" id="cf-icon">⏱️</div>
     <div class="confirm-title" id="cf-title">ยืนยัน?</div>
     <div class="confirm-sub" id="cf-sub"></div>
+    <div class="cf-late-wrap" id="cf-late-wrap" style="display:none;">
+      <label class="cf-late-label">⚠️ มาสาย — ระบุเหตุผล (ไม่บังคับ)</label>
+      <textarea id="cf-late-note" rows="2" placeholder="เช่น รถติด, ธุระส่วนตัว, ลาป่วยครึ่งวัน..." maxlength="200"></textarea>
+    </div>
     <div class="confirm-btns">
       <button class="confirm-btn cancel" onclick="closeConfirm()">ยกเลิก</button>
       <button class="confirm-btn primary" id="cf-ok-btn">ยืนยัน</button>
@@ -684,6 +695,7 @@ function haversine(lat1,lon1,lat2,lon2){
   var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function showToast(msg,ms){
   var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   setTimeout(function(){t.classList.remove('show');},ms||2500);
@@ -901,12 +913,15 @@ function handleClockBtn(){
     ?'บันทึกเวลาเข้างาน '+timeNow+' น.'+((_gpsDist!=null)?' ('+_gpsDist.toFixed(2)+' km จากที่ทำงาน)':'')
     :'บันทึกเวลาออกงาน '+timeNow+' น.'+(isWorking?' · รวมงาน '+timeDiff(last.time,nowTimeStr()):'');
 
-  showConfirm(icon,title,sub2,function(){
-    doClockAction(type);
-  });
+  // Late on clock-in → offer a reason field
+  var isLate=(type==='in')&&(nowTimeShort()>loadLateAfter());
+
+  showConfirm(icon,title,sub2,function(note){
+    doClockAction(type,note);
+  },{late:isLate});
 }
 
-function doClockAction(type){
+function doClockAction(type,lateNote){
   var rec={
     id:'att_'+Date.now()+'_'+_curProfile.id,
     pid:_curProfile.id,
@@ -920,8 +935,9 @@ function doClockAction(type){
     dist:_gpsDist!=null?Math.round(_gpsDist*100)/100:null,
     ok:_gpsOk
   };
+  if(type==='in'&&lateNote)rec.lateNote=lateNote;
   addRecord(rec);
-  if(window.TRRAudit)TRRAudit.log('attendance',type==='in'?'clock_in':'clock_out',(rec.pname||rec.pid)+' '+(type==='in'?'เข้างาน':'ออกงาน')+' '+rec.time+' น.');
+  if(window.TRRAudit)TRRAudit.log('attendance',type==='in'?'clock_in':'clock_out',(rec.pname||rec.pid)+' '+(type==='in'?'เข้างาน':'ออกงาน')+' '+rec.time+' น.'+(rec.lateNote?' · มาสาย: '+rec.lateNote:''));
   showToast(type==='in'?'บันทึกเวลาเข้างานแล้ว':'บันทึกเวลาออกงานแล้ว');
   if(window.TRRfx){
     TRRfx.haptic(type==='in'?[20,40,20]:30);
@@ -1020,7 +1036,9 @@ function _renderToday(){
     var badge=st.status==='in'?'<span class="att-badge in">กำลังทำงาน</span>'
       :st.status==='out'?'<span class="att-badge out">ออกงานแล้ว</span>'
       :'<span class="att-badge none">ยังไม่เช็ค</span>';
-    var lateStr=(st.in&&st.in.time.slice(0,5)>loadLateAfter())?'<span class="att-badge late" style="margin-left:4px;">มาสาย</span>':'';
+    var isLate=(st.in&&st.in.time.slice(0,5)>loadLateAfter());
+    var lateStr=isLate?'<span class="att-badge late" style="margin-left:4px;">มาสาย</span>':'';
+    var reasonStr=(isLate&&st.in&&st.in.lateNote)?'<div class="att-late-reason">📝 '+esc(st.in.lateNote)+'</div>':'';
     var times='';
     if(st.in)times='เข้า <b>'+st.in.time.slice(0,5)+'</b>';
     if(st.out)times+=' · ออก <b>'+st.out.time.slice(0,5)+'</b>';
@@ -1028,7 +1046,7 @@ function _renderToday(){
     return '<div class="att-emp-row">'
       +'<div class="att-emp-av">'+avHtml(e,36)+'</div>'
       +'<div><div class="att-emp-name">'+e.name+'</div>'
-      +'<div class="att-emp-status">'+badge+lateStr+'</div></div>'
+      +'<div class="att-emp-status">'+badge+lateStr+'</div>'+reasonStr+'</div>'
       +(times?'<div class="att-emp-times">'+times+'</div>':'')
       +'</div>';
   }).join('');
@@ -1161,13 +1179,23 @@ function clearAllAttendance(){
 
 // ─── Confirm Modal ──────────────────────────────────────────
 var _confirmCb=null;
-function showConfirm(icon,title,sub,cb){
+function showConfirm(icon,title,sub,cb,opts){
+  opts=opts||{};
   _confirmCb=cb;
   document.getElementById('cf-icon').textContent=icon;
   document.getElementById('cf-title').textContent=title;
   document.getElementById('cf-sub').textContent=sub;
-  document.getElementById('cf-ok-btn').onclick=function(){closeConfirm();if(_confirmCb)_confirmCb();};
+  var lateWrap=document.getElementById('cf-late-wrap');
+  var lateNote=document.getElementById('cf-late-note');
+  lateNote.value='';
+  lateWrap.style.display=opts.late?'block':'none';
+  document.getElementById('cf-ok-btn').onclick=function(){
+    var note=opts.late?lateNote.value.trim():'';
+    closeConfirm();
+    if(_confirmCb)_confirmCb(note);
+  };
   document.getElementById('confirm-modal').classList.add('show');
+  if(opts.late)setTimeout(function(){lateNote.focus();},50);
 }
 function closeConfirm(){document.getElementById('confirm-modal').classList.remove('show');}
 
