@@ -9,7 +9,10 @@
 <script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');</script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<link rel="stylesheet" href="../glass.css">
+<script src="../audit.js?v=1"></script>
+<link rel="stylesheet" href="../glass.css?v=1">
+<link rel="stylesheet" href="../ui-fx.css?v=1">
+<script src="../ui-fx.js?v=1"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Prompt', 'Noto Sans Thai', sans-serif; background: linear-gradient(140deg,var(--bg-from) 0%,var(--bg-mid) 50%,var(--bg-to) 100%); background-attachment:fixed; color: var(--text); font-size: 15px; animation: pgFade .22s ease; }
@@ -305,7 +308,7 @@ html.dark .output-box{background:var(--glass-bg-subtle);color:var(--text);border
 html.dark .form-row input,html.dark .form-row select{background:var(--input-bg);color:var(--text);border-color:var(--input-border);}
 </style>
 <script>if(window.self!==window.top)document.documentElement.classList.add('in-iframe');</script>
-  <link rel="stylesheet" href="../glass-components.css">
+  <link rel="stylesheet" href="../glass-components.css?v=1">
 </head>
 <body>
 <script>(function(){var pw=localStorage.getItem('trr_pw_hash'),ses=localStorage.getItem('trr_session');if(pw&&ses===pw)return;try{sessionStorage.setItem('trr_redirect',location.href);}catch(e){}location.replace('../index.html');})();</script>
@@ -593,6 +596,7 @@ var _fdbReady = false;
     var cfg={apiKey:"AIzaSyAQbnhjkyVuRIpe4UfOzCyXyAo6TB2Tlok",authDomain:"tararin999.firebaseapp.com",projectId:"tararin999",storageBucket:"tararin999.firebasestorage.app",messagingSenderId:"167015953995",appId:"1:167015953995:web:9a1efe5ce392a78886ffce"};
     var app;try{app=firebase.app();}catch(e){app=firebase.initializeApp(cfg);}
     _fdb=firebase.firestore(app);
+    try{_fdb.enablePersistence({synchronizeTabs:true}).catch(function(){});}catch(e){}
     _fdbReady=true;
   }catch(e){console.warn('Firebase init failed',e);}
 })();
@@ -1927,6 +1931,7 @@ function addDriver() {
   if (!plate) { showToast('กรุณาใส่ทะเบียนรถ'); return; }
   db[currentTab].push({ name:name, name2:name2, plate:plate, province:province, phone:phone, site:site });
   saveDB(); renderDriverTable();
+  if(window.TRRAudit)TRRAudit.log('transport','add_driver','เพิ่มคนขับ '+(name||plate)+' ('+plate+') ['+currentTab+']');
   document.getElementById('nName').value   = '';
   document.getElementById('nName2').value  = '';
   document.getElementById('nPlate').value  = '';
@@ -1939,6 +1944,7 @@ function deleteDriver(idx) {
   var label = d.name ? d.name : d.plate;
   if (!confirm('ลบ "' + label + '" ออก?')) return;
   suppressDriver(d.plate);
+  if(window.TRRAudit)TRRAudit.log('transport','delete_driver','ลบคนขับ '+label+' ('+d.plate+') ['+currentTab+']');
   db[currentTab].splice(idx, 1); saveDB(); renderDriverTable();
 }
 function sortBySite() {

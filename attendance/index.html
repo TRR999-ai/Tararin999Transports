@@ -7,7 +7,9 @@
 <link rel="icon" type="image/png" href="../TRR999logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');</script>
-<link rel="stylesheet" href="../glass.css">
+<link rel="stylesheet" href="../glass.css?v=1">
+<link rel="stylesheet" href="../ui-fx.css?v=1">
+<script src="../ui-fx.js?v=1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -360,13 +362,14 @@ html.dark .att-date-inp{background:var(--input-bg);color:var(--text);border-colo
 html.dark .att-set-field input{background:var(--input-bg);color:var(--text);border-color:var(--input-border);}
 </style>
 <script>if(window.self!==window.top)document.documentElement.classList.add('in-iframe');</script>
-  <link rel="stylesheet" href="../glass-components.css">
+  <link rel="stylesheet" href="../glass-components.css?v=1">
 </head>
 <body>
 
 <!-- ── Firebase SDK ───────────────────────────── -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="../audit.js?v=1"></script>
 
 <!-- ── Auth check ─────────────────────────────── -->
 <script>(function(){var pw=localStorage.getItem('trr_pw_hash'),ses=localStorage.getItem('trr_session');if(pw&&ses===pw)return;try{sessionStorage.setItem('trr_redirect',location.href);}catch(e){}location.replace('../index.html');})();</script>
@@ -595,6 +598,7 @@ var _db = null;
     };
     firebase.initializeApp(cfg);
     _db=firebase.firestore();
+    try{_db.enablePersistence({synchronizeTabs:true}).catch(function(){});}catch(e){}
     setTimeout(flushQueue,2000);
   }catch(e){console.warn('Firebase init failed',e);}
 })();
@@ -917,7 +921,13 @@ function doClockAction(type){
     ok:_gpsOk
   };
   addRecord(rec);
+  if(window.TRRAudit)TRRAudit.log('attendance',type==='in'?'clock_in':'clock_out',(rec.pname||rec.pid)+' '+(type==='in'?'เข้างาน':'ออกงาน')+' '+rec.time+' น.');
   showToast(type==='in'?'บันทึกเวลาเข้างานแล้ว':'บันทึกเวลาออกงานแล้ว');
+  if(window.TRRfx){
+    TRRfx.haptic(type==='in'?[20,40,20]:30);
+    TRRfx.toast((rec.pname||'')+' '+(type==='in'?'เข้างาน':'ออกงาน')+' '+rec.time+' น.',{type:'success',icon:type==='in'?'✓':'↩'});
+    if(type==='in')TRRfx.confetti({count:80});
+  }
   renderEmpToday();
 }
 

@@ -7,7 +7,9 @@
 <link rel="icon" type="image/png" href="../TRR999logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');</script>
-<link rel="stylesheet" href="../glass.css">
+<link rel="stylesheet" href="../glass.css?v=1">
+<link rel="stylesheet" href="../ui-fx.css?v=1">
+<script src="../ui-fx.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
@@ -59,6 +61,7 @@ body{font-family:'Prompt','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color
 .kpi-card.gold{border-left-color:var(--gold)}
 .kpi-card.green{border-left-color:var(--success)}
 .kpi-card.red{border-left-color:var(--danger)}
+.kpi-spark{position:absolute;right:12px;bottom:10px;line-height:0;opacity:.9}
 .kpi-label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.3px;text-transform:uppercase;margin-bottom:6px}
 .kpi-value{font-size:22px;font-weight:700;color:var(--navy);line-height:1.1}
 .kpi-unit{font-size:11px;color:var(--muted);margin-top:3px}
@@ -257,6 +260,7 @@ html.dark .kpi-card,html.dark .chart-card,html.dark .tbl-card{box-shadow:var(--g
           <div class="kpi-value" id="kv-amount">—</div>
           <div class="kpi-unit">บาท</div>
           <div class="kpi-icon">💰</div>
+          <div class="kpi-spark" id="spark-amount"></div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">จำนวนรถ</div>
@@ -435,9 +439,20 @@ function setSheetBtn(ok) {
 }
 
 // ─── Load trip data from GAS ──────────────────────────────────────────────
+// Show shimmer placeholders in the given KPI value elements while loading.
+function kpiSkeleton(ids) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<span class="trr-skel" style="height:20px;width:72%"></span>';
+  });
+}
 function loadTrips() {
   if (!ST.gasUrl) { setGasStatus('ยังไม่ได้ใส่ URL', 'err'); return; }
   setGasStatus('กำลังโหลด...', '');
+  if (ST.excel.summary.length > 0) {
+    document.getElementById('trip-kpi-row').style.display = 'grid';
+    kpiSkeleton(['kv-trips','kv-dist','kv-calc','kv-variance']);
+  }
   // Filter by statement month if available
   const month = getStatementMonth();
   const url = ST.gasUrl + '?action=trips' + (month ? '&month=' + encodeURIComponent(month) : '');
@@ -624,16 +639,37 @@ function renderAll() {
 }
 
 // ─── KPIs ──────────────────────────────────────────────────────────────
+// Animated number setter — counts up via TRRfx, falls back to plain text.
+function kpiSet(id, value, dec, signed) {
+  const el = document.getElementById(id); if (!el) return;
+  dec = dec || 0;
+  const pre = (signed && value >= 0) ? '+' : '';
+  if (window.TRRfx) TRRfx.countUp(el, value, { decimals: dec, duration: 850, prefix: pre });
+  else el.textContent = pre + fmtN(value, dec);
+}
 function renderKPIs() {
   const ex = ST.excel;
   const totalAmt = ex.summary.reduce((s,r) => s+(parseFloat(r.amount)||0), 0);
   const totalLit = ex.summary.reduce((s,r) => s+(parseFloat(r.litres)||0), 0);
   const avgPrice = totalLit > 0 ? totalAmt/totalLit : 0;
-  document.getElementById('kv-amount').textContent   = fmt(totalAmt);
-  document.getElementById('kv-vehicles').textContent = ex.summary.length;
-  document.getElementById('kv-litres').textContent   = fmtN(totalLit, 2);
-  document.getElementById('kv-price').textContent    = fmtN(avgPrice, 2);
-  document.getElementById('kv-txns').textContent     = fmtN(ex.transactions.length);
+  kpiSet('kv-amount',   totalAmt, 2);
+  kpiSet('kv-vehicles', ex.summary.length, 0);
+  kpiSet('kv-litres',   totalLit, 2);
+  kpiSet('kv-price',    avgPrice, 2);
+  kpiSet('kv-txns',     ex.transactions.length, 0);
+  renderAmountSpark();
+}
+// Daily-spend trend sparkline under the main amount KPI
+function renderAmountSpark() {
+  const el = document.getElementById('spark-amount');
+  if (!el || !window.TRRfx) return;
+  const byDate = {};
+  ST.excel.transactions.forEach(t => { byDate[t.date] = (byDate[t.date]||0) + (parseFloat(t.amount)||0); });
+  const series = Object.keys(byDate).sort((a,b) => {
+    const [da,ma,ya] = a.split('/').map(Number), [db,mb,yb] = b.split('/').map(Number);
+    return new Date(ya,ma-1,da) - new Date(yb,mb-1,db);
+  }).map(d => byDate[d]);
+  TRRfx.sparkline(el, series, { width: 110, height: 28, color: 'var(--accent)' });
 }
 
 // ─── Trip KPIs (from GAS) ────────────────────────────────────────────
@@ -645,12 +681,12 @@ function renderTripKPIs() {
   const totalAct   = ST.excel.summary.reduce((s,r) => s+(parseFloat(r.amount)||0), 0);
   const variance   = totalAct - totalCalc;
 
-  document.getElementById('kv-trips').textContent   = fmtN(totalTrips);
-  document.getElementById('kv-dist').textContent    = fmtN(totalDist, 0);
-  document.getElementById('kv-calc').textContent    = fmt(totalCalc);
+  kpiSet('kv-trips', totalTrips, 0);
+  kpiSet('kv-dist',  totalDist, 0);
+  kpiSet('kv-calc',  totalCalc, 2);
+  kpiSet('kv-variance', variance, 2, true);
   const vEl = document.getElementById('kv-variance');
-  vEl.textContent = (variance >= 0 ? '+' : '') + fmt(variance);
-  vEl.className   = 'kpi-value ' + (variance > 0 ? 'variance-pos' : 'variance-neg');
+  vEl.className = 'kpi-value ' + (variance > 0 ? 'variance-pos' : 'variance-neg');
 
   document.getElementById('trip-kpi-row').style.display = 'grid';
 }

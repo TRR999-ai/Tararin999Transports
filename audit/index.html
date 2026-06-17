@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>บันทึกการใช้งาน — TARARIN 999</title>
+<link rel="icon" type="image/png" href="../TRR999logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');</script>
+<script>if(window.self!==window.top)document.documentElement.classList.add('in-iframe');</script>
+<link rel="stylesheet" href="../glass.css?v=1">
+<link rel="stylesheet" href="../ui-fx.css?v=1">
+<script src="../ui-fx.js?v=1"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Prompt','Leelawadee UI',Tahoma,sans-serif;font-size:14px;color:var(--text);min-height:100vh;-webkit-text-size-adjust:100%;animation:pgFade .22s ease;background:linear-gradient(140deg,var(--bg-from) 0%,var(--bg-mid) 50%,var(--bg-to) 100%);background-attachment:fixed;}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px;}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.head h1{font-size:20px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:9px;}
+.head .ico{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--primary),var(--primary2));display:flex;align-items:center;justify-content:center;color:#fff;}
+.sub{color:var(--muted);font-size:12.5px;margin-left:auto;}
+.filters{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px;}
+.filters select,.filters input{font-family:inherit;font-size:13px;padding:8px 11px;border-radius:9px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);outline:none;}
+.filters input{flex:1;min-width:160px;}
+.btn{font-family:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:9px;border:1px solid var(--glass-border-sm);background:var(--glass-bg-subtle);color:var(--text);cursor:pointer;transition:.15s;}
+.btn:hover{background:var(--sb-item-hover);}
+.btn.primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border:none;}
+.card{background:var(--glass-bg-card);border:1px solid var(--glass-border-sm);border-radius:14px;backdrop-filter:var(--blur);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;text-align:left;padding:11px 13px;border-bottom:1px solid var(--glass-border-sm);white-space:nowrap;}
+td{font-size:13px;padding:11px 13px;border-bottom:1px solid var(--glass-border-sm);color:var(--text);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--sb-item-hover);}
+.t-time{color:var(--muted);font-size:12px;white-space:nowrap;}
+.t-who{font-weight:600;white-space:nowrap;}
+.mod{display:inline-block;font-size:11px;font-weight:600;padding:2.5px 9px;border-radius:20px;background:var(--glass-bg-subtle);color:var(--text2,var(--muted));white-space:nowrap;}
+.mod.portal{background:rgba(59,130,246,0.14);color:#2563eb;}
+.mod.fleet_view{background:rgba(16,185,129,0.14);color:#059669;}
+.mod.transport{background:rgba(245,158,11,0.16);color:#d97706;}
+.mod.attendance{background:rgba(139,92,246,0.14);color:#7c3aed;}
+html.dark .mod.portal{background:rgba(59,130,246,0.2);color:#93c5fd;}
+html.dark .mod.fleet_view{background:rgba(16,185,129,0.2);color:#6ee7b7;}
+html.dark .mod.transport{background:rgba(245,158,11,0.2);color:#fcd34d;}
+html.dark .mod.attendance{background:rgba(139,92,246,0.22);color:#c4b5fd;}
+.empty{text-align:center;padding:50px 20px;color:var(--muted);}
+.gate{text-align:center;padding:70px 20px;color:var(--muted);}
+.gate .lock{font-size:42px;margin-bottom:12px;}
+.count{font-size:12px;color:var(--muted);margin:10px 2px;}
+@media(max-width:640px){
+  .wrap{padding:14px 10px 50px;}
+  .sub{display:none;}
+  th:nth-child(5),td:nth-child(5){display:none;}
+  .t-detail{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;}
+  th:nth-child(4),td:nth-child(4){white-space:normal;}
+}
+@media(min-width:641px){.t-detail{display:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <h1>
+      <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></span>
+      บันทึกการใช้งาน
+    </h1>
+    <span class="sub">ใครทำอะไร เมื่อไหร่ — Audit Log</span>
+  </div>
+
+  <div id="gate" class="gate" style="display:none;">
+    <div class="lock">🔒</div>
+    <div>เฉพาะผู้บริหารเท่านั้น</div>
+  </div>
+
+  <div id="main" style="display:none;">
+    <div class="filters">
+      <select id="f-module"><option value="">ทุกโมดูล</option></select>
+      <select id="f-who"><option value="">ทุกคน</option></select>
+      <input id="f-date" type="date" title="กรองตามวันที่">
+      <input id="f-search" type="text" placeholder="ค้นหารายละเอียด...">
+      <button class="btn" onclick="clearFilters()">ล้าง</button>
+      <button class="btn primary" onclick="reload()">⟳ โหลดใหม่</button>
+    </div>
+    <div class="count" id="count"></div>
+    <div class="card">
+      <table>
+        <thead><tr><th>เวลา</th><th>ผู้ใช้</th><th>โมดูล</th><th>การกระทำ</th><th>รายละเอียด</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="5" class="empty">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+var MOD_LABEL={portal:'Portal',fleet_view:'Fleet View',transport:'งานขนส่ง',attendance:'เช็คชื่อ'};
+var ACT_LABEL={login:'เข้าใช้งาน',edit_profile:'แก้ไขโปรไฟล์',set_status:'ตั้งสถานะรถ',add_driver:'เพิ่มคนขับ',delete_driver:'ลบคนขับ',clock_in:'เข้างาน',clock_out:'ออกงาน'};
+var _all=[],_db=null;
+
+// ── Access gate: exec only ──
+(function(){
+  var id=localStorage.getItem('portal_active_profile')||'';
+  if(id!=='exec'){document.getElementById('gate').style.display='block';return;}
+  document.getElementById('main').style.display='block';
+  initFb();
+})();
+
+function initFb(){
+  try{
+    var cfg={apiKey:"AIzaSyAQbnhjkyVuRIpe4UfOzCyXyAo6TB2Tlok",authDomain:"tararin999.firebaseapp.com",projectId:"tararin999",storageBucket:"tararin999.firebasestorage.app",messagingSenderId:"167015953995",appId:"1:167015953995:web:9a1efe5ce392a78886ffce"};
+    var app;try{app=firebase.app();}catch(e){app=firebase.initializeApp(cfg);}
+    _db=firebase.firestore(app);
+    try{_db.enablePersistence({synchronizeTabs:true}).catch(function(){});}catch(e){}
+  }catch(e){console.warn('Firebase init (audit) failed',e);}
+  reload();
+}
+
+function reload(){
+  if(!_db){document.getElementById('rows').innerHTML='<tr><td colspan="5" class="empty">Firebase ไม่พร้อม</td></tr>';return;}
+  document.getElementById('rows').innerHTML='<tr><td colspan="5" class="empty">กำลังโหลด...</td></tr>';
+  _db.collection('audit_log').orderBy('ts','desc').limit(500).get()
+    .then(function(snap){
+      _all=[];snap.forEach(function(d){_all.push(d.data());});
+      buildWhoFilter();buildModuleFilter();render();
+    })
+    .catch(function(e){
+      console.warn('audit load error',e);
+      document.getElementById('rows').innerHTML='<tr><td colspan="5" class="empty">โหลดไม่ได้ — '+(e&&e.message||'error')+'</td></tr>';
+    });
+}
+
+function buildWhoFilter(){
+  var sel=document.getElementById('f-who');var cur=sel.value;
+  var seen={};var opts='<option value="">ทุกคน</option>';
+  _all.forEach(function(r){if(r.who&&!seen[r.who]){seen[r.who]=1;opts+='<option value="'+esc(r.who)+'">'+esc(r.whoName||r.who)+'</option>';}});
+  sel.innerHTML=opts;sel.value=cur;
+}
+function buildModuleFilter(){
+  var sel=document.getElementById('f-module');var cur=sel.value;
+  var seen={};var opts='<option value="">ทุกโมดูล</option>';
+  _all.forEach(function(r){if(r.module&&!seen[r.module]){seen[r.module]=1;opts+='<option value="'+esc(r.module)+'">'+(MOD_LABEL[r.module]||r.module)+'</option>';}});
+  sel.innerHTML=opts;sel.value=cur;
+}
+
+function render(){
+  var fm=document.getElementById('f-module').value;
+  var fw=document.getElementById('f-who').value;
+  var fd=document.getElementById('f-date').value;
+  var fs=(document.getElementById('f-search').value||'').toLowerCase().trim();
+  var rows=_all.filter(function(r){
+    if(fm&&r.module!==fm)return false;
+    if(fw&&r.who!==fw)return false;
+    if(fd&&dateKey(r.ts)!==fd)return false;
+    if(fs){var hay=((r.detail||'')+' '+(r.whoName||'')+' '+(ACT_LABEL[r.action]||r.action||'')).toLowerCase();if(hay.indexOf(fs)<0)return false;}
+    return true;
+  });
+  document.getElementById('count').textContent='แสดง '+rows.length+' รายการ'+(_all.length>=500?' (ล่าสุด 500)':'');
+  if(!rows.length){document.getElementById('rows').innerHTML='<tr><td colspan="5"><div class="trr-empty"><div class="ico"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="ttl">ไม่มีรายการ</div><div class="desc">ยังไม่มีบันทึกที่ตรงกับเงื่อนไข — ลองล้างตัวกรองหรือเปลี่ยนวันที่</div></div></td></tr>';return;}
+  var h='';
+  rows.forEach(function(r){
+    h+='<tr>'+
+      '<td class="t-time">'+fmtTs(r.ts)+'</td>'+
+      '<td class="t-who">'+esc(r.whoName||r.who||'—')+'</td>'+
+      '<td><span class="mod '+esc(r.module||'')+'">'+(MOD_LABEL[r.module]||r.module||'—')+'</span></td>'+
+      '<td>'+(ACT_LABEL[r.action]||esc(r.action||'—'))+'<span class="t-detail">'+esc(r.detail||'')+'</span></td>'+
+      '<td>'+esc(r.detail||'')+'</td>'+
+    '</tr>';
+  });
+  document.getElementById('rows').innerHTML=h;
+}
+
+function clearFilters(){
+  document.getElementById('f-module').value='';
+  document.getElementById('f-who').value='';
+  document.getElementById('f-date').value='';
+  document.getElementById('f-search').value='';
+  render();
+}
+
+['f-module','f-who','f-date','f-search'].forEach(function(id){
+  document.getElementById(id).addEventListener('input',render);
+  document.getElementById(id).addEventListener('change',render);
+});
+
+function pad2(n){return n<10?'0'+n:''+n;}
+function dateKey(ts){var d=new Date(ts);return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
+function fmtTs(ts){
+  if(!ts)return '—';
+  var d=new Date(ts),now=new Date();
+  var sameDay=d.toDateString()===now.toDateString();
+  var time=pad2(d.getHours())+':'+pad2(d.getMinutes());
+  if(sameDay)return 'วันนี้ '+time;
+  return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+' '+time;
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+// Dark mode sync from parent portal
+window.addEventListener('message',function(e){if(e.data&&e.data.type==='trr_dark_mode'){if(e.data.dark)document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark');}});
+</script>
+</body>
+</html>

@@ -13,7 +13,8 @@
 <meta name="apple-mobile-web-app-title" content="TRR999">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./glass.css">
+<link rel="stylesheet" href="./glass.css?v=1">
+<link rel="stylesheet" href="./ui-fx.css?v=1">
 <script>
 /* Dark mode — apply BEFORE render to prevent flash */
 (function(){
@@ -170,6 +171,10 @@ html.dark #topbar{
 }
 .tb-menu-icon:hover{background:var(--glass-bg-subtle)}
 .tb-title{font-size:15px;font-weight:700;color:var(--text);letter-spacing:.4px}
+.net-badge{font-size:10px;line-height:1;color:var(--green,#16a34a);transition:color .3s;cursor:default}
+.net-badge.offline{color:var(--red,#dc2626)}
+.net-badge.offline::after{content:" ออฟไลน์";font-size:10px;font-weight:600;letter-spacing:0}
+.tb-left{display:flex;align-items:center;gap:8px}
 .tb-right{display:flex;align-items:center;gap:10px}
 .tb-badge{
   background:var(--badge-bg);border:1px solid var(--badge-border);
@@ -489,6 +494,18 @@ html.dark .contact-row a,html.dark .contact-link{color:var(--accent2)}
 .sb-theme-label::before{content:'Light mode'}
 html.dark .sb-theme-label::before{content:'Dark mode'}
 .sb-copyright{font-size:10px;color:var(--muted);text-align:center;white-space:nowrap}
+/* Accent swatch picker */
+.sb-accent-row{display:flex;align-items:center;gap:7px;margin-top:11px;flex-wrap:wrap}
+.acc-sw{
+  width:20px;height:20px;border-radius:50%;cursor:pointer;padding:0;
+  background:var(--sw);border:2px solid transparent;
+  box-shadow:0 1px 4px rgba(0,0,0,.18);transition:transform .15s,border-color .15s;
+  position:relative;
+}
+.acc-sw:hover{transform:scale(1.18)}
+.acc-sw.active{border-color:var(--white);box-shadow:0 0 0 2px var(--sw),0 1px 4px rgba(0,0,0,.25)}
+html.dark .acc-sw.active{border-color:#0b1530}
+#sidebar.sb-collapsed .sb-accent-row{display:none}
 /* Override glass.css FAB → pill in sidebar */
 #dark-toggle{
   position:static;
@@ -714,11 +731,49 @@ html.dark .pf-orb{opacity:.22}
   .pf-grid{gap:8px}
   .pf-pw-inp{font-size:16px!important}
 }
+
+/* ── Command Palette ── */
+#cmdk-overlay{
+  display:none;position:fixed;inset:0;z-index:400;
+  background:rgba(15,23,42,0.32);backdrop-filter:blur(3px);
+  align-items:flex-start;justify-content:center;padding-top:14vh;
+  animation:cmdkFade .14s ease;
+}
+#cmdk-overlay.show{display:flex;}
+@keyframes cmdkFade{from{opacity:0}to{opacity:1}}
+.cmdk-box{
+  width:min(92vw,560px);max-height:64vh;display:flex;flex-direction:column;
+  background:var(--glass-bg-card,rgba(255,255,255,0.9));
+  border:1px solid var(--glass-border-sm,rgba(0,0,0,0.08));
+  border-radius:16px;overflow:hidden;
+  box-shadow:0 24px 64px rgba(15,23,42,0.32),0 6px 18px rgba(15,23,42,0.18);
+  backdrop-filter:blur(24px) saturate(160%);
+  animation:cmdkPop .18s cubic-bezier(.22,1,.36,1);
+}
+@keyframes cmdkPop{from{opacity:0;transform:translateY(-10px) scale(.98)}to{opacity:1;transform:none}}
+.cmdk-input-row{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--glass-border-sm,rgba(0,0,0,0.07));}
+.cmdk-search-ico{color:var(--muted);flex-shrink:0;}
+#cmdk-input{flex:1;border:none;background:transparent;outline:none;font-family:inherit;font-size:15.5px;color:var(--text);}
+#cmdk-input::placeholder{color:var(--muted);}
+.cmdk-esc{font-size:10px;font-weight:600;color:var(--muted);border:1px solid var(--glass-border-sm,rgba(0,0,0,0.12));border-radius:5px;padding:2px 6px;}
+.cmdk-list{overflow-y:auto;padding:7px;}
+.cmdk-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--text);transition:background .1s;}
+.cmdk-item .ci{width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:8px;background:var(--glass-bg-subtle,rgba(0,0,0,0.05));color:var(--primary);font-size:15px;}
+.cmdk-item .ci svg{width:15px;height:15px;}
+.cmdk-item .cl{flex:1;font-size:14px;font-weight:500;}
+.cmdk-item .ck{font-size:10.5px;color:var(--muted);}
+.cmdk-item.sel,.cmdk-item:hover{background:var(--sb-item-hover,rgba(59,130,246,0.1));}
+.cmdk-item.sel .ci{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;}
+.cmdk-empty{padding:26px;text-align:center;color:var(--muted);font-size:13px;}
+.cmdk-foot{display:flex;gap:16px;padding:9px 16px;border-top:1px solid var(--glass-border-sm,rgba(0,0,0,0.07));font-size:11px;color:var(--muted);}
+.cmdk-foot kbd{font-family:inherit;border:1px solid var(--glass-border-sm,rgba(0,0,0,0.14));border-radius:4px;padding:1px 5px;margin-right:2px;font-size:10px;}
 </style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <link rel="stylesheet" href="./glass-components.css">
+<script src="./audit.js?v=1"></script>
+<script src="./ui-fx.js?v=1"></script>
+  <link rel="stylesheet" href="./glass-components.css?v=1">
 </head>
 <body>
 <div id="toast" style="position:fixed;bottom:24px;right:18px;background:#333;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:99999;display:none;max-width:280px;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none;"></div>
@@ -766,6 +821,10 @@ html.dark .pf-orb{opacity:.22}
       <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
       <span class="nav-label">เช็คชื่อเข้างาน</span>
     </div>
+    <div class="nav-item" id="nav-audit" data-page="./audit/index.html" title="บันทึกการใช้งาน" onclick="navTo('./audit/index.html','บันทึกการใช้งาน')" style="display:none;">
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+      <span class="nav-label">บันทึกการใช้งาน</span>
+    </div>
     <div class="nav-item" data-page="./help.html" title="คู่มือการใช้งาน" onclick="navTo('./help.html','คู่มือการใช้งาน')">
       <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
       <span class="nav-label">คู่มือการใช้งาน</span>
@@ -776,6 +835,14 @@ html.dark .pf-orb{opacity:.22}
     <div class="sb-theme-row">
       <span class="sb-theme-label"></span>
       <button id="dark-toggle" aria-label="Toggle dark mode"></button>
+    </div>
+    <div class="sb-accent-row" id="accent-row" title="เลือกสีธีม">
+      <button class="acc-sw" data-accent="ocean"   style="--sw:#3b82f6" aria-label="สีฟ้า"></button>
+      <button class="acc-sw" data-accent="teal"    style="--sw:#0891b2" aria-label="สีเขียวน้ำทะเล"></button>
+      <button class="acc-sw" data-accent="violet"  style="--sw:#7c3aed" aria-label="สีม่วง"></button>
+      <button class="acc-sw" data-accent="emerald" style="--sw:#059669" aria-label="สีเขียว"></button>
+      <button class="acc-sw" data-accent="rose"    style="--sw:#e11d48" aria-label="สีชมพู"></button>
+      <button class="acc-sw" data-accent="sunset"  style="--sw:#ea580c" aria-label="สีส้ม"></button>
     </div>
     <div class="sb-copyright">© 2026 TARARIN 999</div>
   </div>
@@ -788,6 +855,7 @@ html.dark .pf-orb{opacity:.22}
     <div class="tb-left">
       <span class="tb-menu-icon" onclick="toggleSidebar()">☰</span>
       <span class="tb-title">User Portal</span>
+      <span id="net-badge" class="net-badge" title="สถานะการเชื่อมต่อ">●</span>
     </div>
     <div class="tb-right">
       <span class="tb-badge">ระบบบริหารจัดการ</span>
@@ -998,6 +1066,23 @@ html.dark .pf-orb{opacity:.22}
   </div>
 </div>
 
+<!-- ── Command Palette (Ctrl/⌘+K) ── -->
+<div id="cmdk-overlay" onclick="if(event.target===this)closeCmdk()">
+  <div class="cmdk-box" role="dialog" aria-label="Command palette">
+    <div class="cmdk-input-row">
+      <svg class="cmdk-search-ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="cmdk-input" type="text" placeholder="ค้นหาเมนู / คำสั่ง..." autocomplete="off" spellcheck="false">
+      <kbd class="cmdk-esc">ESC</kbd>
+    </div>
+    <div id="cmdk-list" class="cmdk-list"></div>
+    <div class="cmdk-foot">
+      <span><kbd>↑</kbd><kbd>↓</kbd> เลื่อน</span>
+      <span><kbd>↵</kbd> เลือก</span>
+      <span><kbd>esc</kbd> ปิด</span>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── Dark mode toggle ─────────────────────────────────────────────────────
 (function(){
@@ -1015,6 +1100,34 @@ html.dark .pf-orb{opacity:.22}
     });
   });
   window.addEventListener('storage',function(e){if(e.key===key)apply(e.newValue==='1');});
+})();
+
+// ── Accent theme picker ──────────────────────────────────────────────────
+(function(){
+  var key='trr_accent';
+  function applyAccent(a){
+    if(a&&a!=='ocean')document.documentElement.setAttribute('data-accent',a);
+    else document.documentElement.removeAttribute('data-accent');
+    // broadcast to open iframe
+    try{var f=document.getElementById('page-frame');if(f&&f.contentWindow)f.contentWindow.postMessage({type:'trr_accent',accent:a},'*');}catch(e){}
+  }
+  function markActive(a){
+    document.querySelectorAll('.acc-sw').forEach(function(b){
+      b.classList.toggle('active',b.getAttribute('data-accent')===(a||'ocean'));
+    });
+  }
+  var saved=localStorage.getItem(key)||'ocean';
+  applyAccent(saved);
+  document.addEventListener('DOMContentLoaded',function(){
+    markActive(saved);
+    var row=document.getElementById('accent-row');
+    if(row)row.addEventListener('click',function(e){
+      var b=e.target.closest('.acc-sw');if(!b)return;
+      var a=b.getAttribute('data-accent');
+      applyAccent(a);localStorage.setItem(key,a);markActive(a);
+    });
+  });
+  window.addEventListener('storage',function(e){if(e.key===key){applyAccent(e.newValue||'ocean');markActive(e.newValue||'ocean');}});
 })();
 </script>
 
@@ -1046,6 +1159,7 @@ var _pfDb=null,_pfSyncing=false;
     var app;
     try{app=firebase.app();}catch(e){app=firebase.initializeApp(cfg);}
     _pfDb=firebase.firestore(app);
+    try{_pfDb.enablePersistence({synchronizeTabs:true}).catch(function(){});}catch(e){}
   }catch(e){console.warn('Firebase init (portal) failed',e);}
 })();
 function showToast(msg,ms){
@@ -1312,11 +1426,13 @@ function navTo(page, title) {
   frame.onload = function(){ loader.classList.remove('show'); };
   frame.src = page;
 }
+function animateHomeCards(){ if(window.TRRfx)TRRfx.stagger('.cards-row .portal-card',70); }
 function navHome() {
   var frame = document.getElementById('page-frame');
   frame.style.display = 'none';
   frame.src = 'about:blank';
   document.getElementById('portal-home').style.display = '';
+  animateHomeCards();
   document.querySelector('.tb-title').textContent = 'User Portal';
   document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
   var homeItem = document.querySelector('.nav-item[data-page="home"]');
@@ -1334,6 +1450,8 @@ function enterPortal(pf){
   localStorage.setItem(SES_KEY,LEGACY_TOKEN);
   document.getElementById('profile-overlay').style.display='none';
   updateHeaderProfile(pf);
+  if(document.getElementById('portal-home').style.display!=='none')setTimeout(animateHomeCards,60);
+  if(window.TRRAudit)TRRAudit.log('portal','login','เข้าใช้งานในชื่อ '+pf.name);
   // Reload iframe if it's currently showing a page (profile changed → stale content)
   var frame=document.getElementById('page-frame');
   if(frame&&frame.style.display!=='none'&&frame.src&&frame.src.indexOf('about:blank')===-1){
@@ -1350,6 +1468,9 @@ function updateHeaderProfile(pf){
   var nm=document.getElementById('hdr-pf-name');
   if(av)av.innerHTML=avHtml(pf,28);
   if(nm)nm.textContent=pf.name;
+  // Audit log nav — exec only
+  var na=document.getElementById('nav-audit');
+  if(na)na.style.display=(pf&&pf.id==='exec')?'':'none';
 }
 function switchProfile(){
   sessionStorage.removeItem(ACTIVE_PF_KEY);
@@ -1370,6 +1491,7 @@ function checkAuth(){
     localStorage.setItem(PW_KEY,LEGACY_TOKEN);localStorage.setItem(SES_KEY,LEGACY_TOKEN);
     document.getElementById('profile-overlay').style.display='none';
     updateHeaderProfile(pf);
+    if(document.getElementById('portal-home').style.display!=='none')setTimeout(animateHomeCards,80);
     // Pull from Firebase first, then push back if local edits are newer
     if(!_pfSyncing){
       _pfSyncing=true;
@@ -1476,6 +1598,7 @@ function savePfEdit(){
   saveProfiles(profs);
   try{localStorage.setItem(PF_EDIT_TS_KEY,Date.now().toString());}catch(e){} // mark explicit edit on this device
   fbSaveProfile(pf);        // push to Firestore (primary sync)
+  if(window.TRRAudit)TRRAudit.log('portal','edit_profile','แก้ไขโปรไฟล์ '+pf.name+(hasPw?' (ตั้งรหัสผ่าน)':''));
   // Update header if editing active profile
   var activeId=sessionStorage.getItem(ACTIVE_PF_KEY);
   if(activeId===_pfEditId)updateHeaderProfile(pf);
@@ -1490,6 +1613,102 @@ function closePfEdit(){
 
 // Run auth check on load
 checkAuth();
+
+// ══ PWA: service worker + offline indicator ═══════════════════════════════
+(function(){
+  // Service workers only run over http(s); skip on file:// to avoid console noise.
+  if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('./sw.js').catch(function(e){console.warn('[SW] register failed',e);});
+    });
+  }
+  function updateNet(){
+    var b=document.getElementById('net-badge');if(!b)return;
+    if(navigator.onLine){
+      b.classList.remove('offline');b.title='ออนไลน์ — ข้อมูล sync แล้ว';
+      if(window.TRRAudit)TRRAudit.flush();
+    } else {
+      b.classList.add('offline');b.title='ออฟไลน์ — บันทึกไว้ จะ sync เมื่อกลับมาออนไลน์';
+    }
+  }
+  window.addEventListener('online',updateNet);
+  window.addEventListener('offline',updateNet);
+  updateNet();
+})();
+
+// ══ Command Palette (Ctrl/⌘+K) ════════════════════════════════════════════
+var _cmdkItems=[],_cmdkSel=0,_cmdkOpen=false;
+function cmdkBuild(){
+  var cmds=[];
+  document.querySelectorAll('.sb-nav .nav-item').forEach(function(el){
+    if(el.style.display==='none')return;
+    var page=el.getAttribute('data-page');
+    var label=el.querySelector('.nav-label')?el.querySelector('.nav-label').textContent.trim():(el.title||'');
+    var icon=el.querySelector('.nav-icon')?el.querySelector('.nav-icon').innerHTML:'';
+    if(page==='home')cmds.push({label:'หน้าหลัก (Portal)',sub:'Home',icon:icon,run:navHome});
+    else cmds.push({label:label,sub:'เปิดหน้า',icon:icon,run:(function(p,l){return function(){navTo(p,l);};})(page,label)});
+  });
+  cmds.push({label:'สลับธีม Dark / Light',sub:'Theme',icon:'🌓',run:function(){var b=document.getElementById('dark-toggle');if(b)b.click();}});
+  cmds.push({label:'แก้ไขโปรไฟล์',sub:'Profile',icon:'✏️',run:openCurrentPfEdit});
+  cmds.push({label:'เปลี่ยนโปรไฟล์',sub:'Profile',icon:'👤',run:switchProfile});
+  return cmds;
+}
+function cmdkRender(){
+  var q=(document.getElementById('cmdk-input').value||'').toLowerCase().trim();
+  var all=cmdkBuild();
+  _cmdkItems=q?all.filter(function(c){return c.label.toLowerCase().indexOf(q)>=0||(c.sub||'').toLowerCase().indexOf(q)>=0;}):all;
+  if(_cmdkSel>=_cmdkItems.length)_cmdkSel=0;
+  var list=document.getElementById('cmdk-list');
+  if(!_cmdkItems.length){list.innerHTML='<div class="cmdk-empty">ไม่พบคำสั่ง "'+q.replace(/</g,'&lt;')+'"</div>';return;}
+  list.innerHTML=_cmdkItems.map(function(c,i){
+    var ic=/^</.test(c.icon)?c.icon:('<span>'+(c.icon||'')+'</span>');
+    return '<div class="cmdk-item'+(i===_cmdkSel?' sel':'')+'" data-i="'+i+'"><span class="ci">'+ic+'</span><span class="cl">'+c.label+'</span><span class="ck">'+(c.sub||'')+'</span></div>';
+  }).join('');
+  Array.prototype.forEach.call(list.querySelectorAll('.cmdk-item'),function(el){
+    el.addEventListener('mousemove',function(){_cmdkSel=+el.getAttribute('data-i');cmdkPaint();});
+    el.addEventListener('click',function(){_cmdkSel=+el.getAttribute('data-i');cmdkExec();});
+  });
+}
+function cmdkPaint(){
+  Array.prototype.forEach.call(document.querySelectorAll('#cmdk-list .cmdk-item'),function(el){
+    el.classList.toggle('sel',(+el.getAttribute('data-i'))===_cmdkSel);
+  });
+}
+function cmdkExec(){
+  var c=_cmdkItems[_cmdkSel];if(!c)return;
+  closeCmdk();
+  setTimeout(function(){try{c.run();}catch(e){console.warn('cmdk run error',e);}},10);
+}
+function openCmdk(){
+  if(_cmdkOpen)return;
+  if(document.getElementById('profile-overlay').style.display==='flex')return; // not before login
+  _cmdkOpen=true;_cmdkSel=0;
+  var ov=document.getElementById('cmdk-overlay');
+  ov.classList.add('show');
+  var inp=document.getElementById('cmdk-input');inp.value='';
+  cmdkRender();
+  setTimeout(function(){inp.focus();},30);
+}
+function closeCmdk(){
+  _cmdkOpen=false;
+  document.getElementById('cmdk-overlay').classList.remove('show');
+}
+document.getElementById('cmdk-input').addEventListener('input',function(){_cmdkSel=0;cmdkRender();});
+document.addEventListener('keydown',function(e){
+  // Open with Ctrl/Cmd+K (when not inside an iframe — iframes forward via postMessage)
+  if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K')){e.preventDefault();_cmdkOpen?closeCmdk():openCmdk();return;}
+  if(!_cmdkOpen)return;
+  if(e.key==='Escape'){e.preventDefault();closeCmdk();}
+  else if(e.key==='ArrowDown'){e.preventDefault();_cmdkSel=Math.min(_cmdkSel+1,_cmdkItems.length-1);cmdkPaint();cmdkScroll();}
+  else if(e.key==='ArrowUp'){e.preventDefault();_cmdkSel=Math.max(_cmdkSel-1,0);cmdkPaint();cmdkScroll();}
+  else if(e.key==='Enter'){e.preventDefault();cmdkExec();}
+});
+function cmdkScroll(){
+  var el=document.querySelector('#cmdk-list .cmdk-item.sel');
+  if(el&&el.scrollIntoView)el.scrollIntoView({block:'nearest'});
+}
+// Iframe pages forward Ctrl+K here
+window.addEventListener('message',function(e){if(e.data&&e.data.type==='trr_cmdk')openCmdk();});
 
 // ══ Sidebar ═══════════════════════════════════════════════════════════════
 function toggleSidebar() {

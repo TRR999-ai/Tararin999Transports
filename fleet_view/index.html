@@ -6,12 +6,15 @@
 <title>Fleet Dashboard — ธรารินทร์ 999</title>
 <link rel="icon" type="image/png" href="../TRR999logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../glass.css">
+<link rel="stylesheet" href="../glass.css?v=1">
+<link rel="stylesheet" href="../ui-fx.css?v=1">
+<script src="../ui-fx.js?v=1"></script>
 <script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="../audit.js?v=1"></script>
 <style>
 :root{
   --sidebar-w:200px;
@@ -254,7 +257,10 @@ table.sub tr.sub-hdr td{background:var(--glass-bg-subtle);font-weight:700;font-s
 .board-header{display:flex;align-items:center;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
 .board-clock{font-size:22px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;}
 .board-date{font-size:13px;color:var(--text2);margin-top:2px;}
+.board-ready-ring{flex-shrink:0;}
+.board-ready-ring .trr-ring-lbl{font-size:13px;}
 .board-summary{display:flex;gap:8px;flex-wrap:wrap;}
+@media(max-width:640px){.board-ready-ring{order:-1;}}
 .bs-chip{padding:5px 16px;border-radius:var(--r-pill);font-size:13px;font-weight:700;cursor:pointer;transition:var(--t);border:1px solid transparent;}
 .bs-chip:hover{opacity:.82;transform:translateY(-1px);}
 .bs-chip.active{box-shadow:0 0 0 2px var(--accent),0 4px 14px rgba(59,130,246,0.22);transform:translateY(-1px);}
@@ -510,7 +516,7 @@ html.in-iframe .page.active{display:flex!important;flex-direction:column!importa
 html.in-iframe .page-body{flex:1!important;min-height:0!important}
 </style>
 <script>if(window.self!==window.top)document.documentElement.classList.add('in-iframe');</script>
-  <link rel="stylesheet" href="../glass-components.css">
+  <link rel="stylesheet" href="../glass-components.css?v=1">
 </head>
 <body>
 <script>(function(){var pw=localStorage.getItem('trr_pw_hash'),ses=localStorage.getItem('trr_session');if(pw&&ses===pw)return;try{sessionStorage.setItem('trr_redirect',location.href);}catch(e){}location.replace('../index.html');})();</script>
@@ -598,6 +604,7 @@ html.in-iframe .page-body{flex:1!important;min-height:0!important}
           <div class="board-clock" id="board-clock"></div>
           <div class="board-date" id="board-date"></div>
         </div>
+        <div class="board-ready-ring" id="board-ring" title="สัดส่วนรถพร้อมรับงาน"></div>
         <div class="board-summary" id="board-summary"></div>
       </div>
       <div id="board-type-chips" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;padding:3px 2px;"></div>
@@ -1100,9 +1107,14 @@ function saveCustomTypes(){try{localStorage.setItem('fleet_custom_types',JSON.st
 function saveVehicleTypeMap(){try{localStorage.setItem('fleet_vehicle_type_map',JSON.stringify(vehicleTypeMap));}catch(e){}syncConfigToGAS('vehicleTypeMap',vehicleTypeMap);}
 
 function setStatus(plate, val){
+  var _prev=statusMap[plate]||'';
   statusMap[plate]=val;
   statusSetAt[plate]=Date.now(); // track when user set this locally
   saveStatus();
+  if(window.TRRAudit&&_prev!==val){
+    var _lbl={ready:'พร้อมรับงาน',busy:'ไม่พร้อม',leave:'ลา','':'ล้างสถานะ'};
+    TRRAudit.log('fleet_view','set_status','ทะเบียน '+plate+' → '+(_lbl[val]||val||'ล้างสถานะ'));
+  }
   // Targeted DOM update
   var card=document.querySelector('[data-plate="'+plate.replace(/"/g,'&quot;')+'"]');
   if(card){
@@ -1301,6 +1313,7 @@ var _fbFleetReady=false;
     var cfg={apiKey:"AIzaSyAQbnhjkyVuRIpe4UfOzCyXyAo6TB2Tlok",authDomain:"tararin999.firebaseapp.com",projectId:"tararin999",storageBucket:"tararin999.firebasestorage.app",messagingSenderId:"167015953995",appId:"1:167015953995:web:9a1efe5ce392a78886ffce"};
     var app;try{app=firebase.app();}catch(e){app=firebase.initializeApp(cfg);}
     _db=firebase.firestore(app);
+    try{_db.enablePersistence({synchronizeTabs:true}).catch(function(){});}catch(e){}
   }catch(e){console.warn('Firebase init (fleet) failed',e);}
 })();
 
@@ -1697,6 +1710,13 @@ function renderBoard(){
     +'<span class="bs-chip c-busy'+(bsf==='busy'?' active':'')+'" onclick="setBoardStatusFilter(\'busy\')">ไม่พร้อม '+counts.busy+'</span>'
     +'<span class="bs-chip c-leave'+(bsf==='leave'?' active':'')+'" onclick="setBoardStatusFilter(\'leave\')">ลา '+counts.leave+'</span>'
     +'<span class="bs-chip c-none'+(bsf==='_none'?' active':'')+'" onclick="setBoardStatusFilter(\'_none\')">⬜ ไม่ระบุ '+counts.none+'</span>';
+  // Readiness progress ring (% of fleet marked พร้อมรับงาน)
+  var ringEl=document.getElementById('board-ring');
+  if(ringEl&&window.TRRfx){
+    var totalR=counts.ready+counts.busy+counts.leave+counts.none;
+    var pct=totalR?Math.round(counts.ready/totalR*100):0;
+    TRRfx.ring(ringEl,pct,{size:66,stroke:7,color:'var(--green)',label:pct+'%'});
+  }
   if(bsf==='_none')allPlates=allPlates.filter(function(p){return !statusMap[p];});
   else if(bsf)allPlates=allPlates.filter(function(p){return statusMap[p]===bsf;});
   var stLabels={ready:'พร้อมรับงาน',busy:'ไม่พร้อมรับงาน',leave:'ลา','':'— ไม่ระบุ —'};

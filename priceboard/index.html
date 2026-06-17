@@ -10,7 +10,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>if(localStorage.getItem('trr_dark_mode')==='1')document.documentElement.classList.add('dark');</script>
-<link rel="stylesheet" href="../glass.css">
+<link rel="stylesheet" href="../glass.css?v=1">
+<link rel="stylesheet" href="../ui-fx.css?v=1">
+<script src="../ui-fx.js?v=1"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -236,7 +238,7 @@ html.dark #matrix-table td.markup-cell{background:rgba(124,58,237,0.18);color:#c
 html.dark #matrix-table tbody tr:hover td.markup-cell{background:rgba(124,58,237,0.28);}
 </style>
 <script>if(window.self!==window.top)document.documentElement.classList.add('in-iframe');</script>
-  <link rel="stylesheet" href="../glass-components.css">
+  <link rel="stylesheet" href="../glass-components.css?v=1">
 </head>
 <body>
 <script>(function(){var pw=localStorage.getItem('trr_pw_hash'),ses=localStorage.getItem('trr_session');if(pw&&ses===pw)return;try{sessionStorage.setItem('trr_redirect',location.href);}catch(e){}location.replace('../index.html');})();</script>
