@@ -33,6 +33,22 @@
     if(e.data&&e.data.type==='trr_accent')applyAccent(e.data.accent||'');
   });
 
+  // ── In-iframe: links back to the portal must navigate the PARENT, not load
+  //    the portal inside this iframe (which would nest the whole UI). ──
+  if(window.self!==window.top){
+    document.addEventListener('click',function(e){
+      var a=e.target.closest&&e.target.closest('a[href]');
+      if(!a)return;
+      var url;try{url=new URL(a.href);}catch(_){return;}
+      try{
+        if(url.origin===window.top.location.origin && url.pathname===window.top.location.pathname){
+          e.preventDefault();
+          window.parent.postMessage({type:'trr_gohome'},'*');
+        }
+      }catch(_){}
+    },true);
+  }
+
   // ── Forward Ctrl/⌘+K to parent portal so command palette opens from any page ──
   document.addEventListener('keydown',function(e){
     if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K')){

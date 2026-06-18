@@ -1486,6 +1486,49 @@ function navTo(page, title) {
   pool.appendChild(f);
   f.src = page;
 }
+
+// ── Background prefetch: silently load every module after login so the first
+//    click on any tab is instant. Staggered + idle so it never blocks the UI. ──
+var _prefetched=false;
+function prefetchPages(){
+  if(_prefetched)return; _prefetched=true;
+  // Respect data-saver / very slow connections
+  try{var c=navigator.connection;if(c&&(c.saveData||/(^|-)2g$/.test(c.effectiveType||'')))return;}catch(e){}
+  var pool=document.getElementById('frame-pool');
+  var pages=Array.prototype.slice.call(document.querySelectorAll('.sb-nav .nav-item'))
+    .filter(function(el){return el.style.display!=='none';})
+    .map(function(el){return el.getAttribute('data-page');})
+    .filter(function(p){return p && p!=='home';});
+  // Preferred load order: เช็คชื่อเข้างาน first, then the rest in menu order.
+  var PREFETCH_PRIORITY=['./attendance/index.html'];
+  pages.sort(function(a,b){
+    var ia=PREFETCH_PRIORITY.indexOf(a), ib=PREFETCH_PRIORITY.indexOf(b);
+    if(ia<0)ia=999; if(ib<0)ib=999;
+    return ia-ib;   // priority pages first (stable for the rest)
+  });
+  var i=0;
+  function loadNext(){
+    if(i>=pages.length)return;
+    var page=pages[i++];
+    var has=false;
+    pool.querySelectorAll('.page-frame').forEach(function(f){if(f.getAttribute('data-page')===page)has=true;});
+    if(!has && pool.querySelectorAll('.page-frame').length<FRAME_POOL_MAX){
+      var f=document.createElement('iframe');
+      f.className='page-frame';            // not .active → stays hidden
+      f.title='prefetch';
+      f.setAttribute('data-page',page);
+      f.setAttribute('data-used','1');     // low priority for LRU eviction
+      f.src=page;
+      pool.appendChild(f);
+    }
+    schedule();
+  }
+  function schedule(){
+    if('requestIdleCallback' in window) requestIdleCallback(function(){ setTimeout(loadNext,300); },{timeout:4000});
+    else setTimeout(loadNext,1400);
+  }
+  setTimeout(schedule,2500);              // let the portal home settle first
+}
 // ── Top progress bar (slim, indeterminate-style) ──
 // Only appears if the load takes >150ms, so fast/cached switches don't flicker.
 var _topbarTimer=null;
@@ -1547,6 +1590,7 @@ function enterPortal(pf){
   document.getElementById('profile-overlay').style.display='none';
   updateHeaderProfile(pf);
   if(document.getElementById('portal-home').style.display!=='none')setTimeout(animateHomeCards,60);
+  prefetchPages();
   if(window.TRRAudit)TRRAudit.log('portal','login','เข้าใช้งานในชื่อ '+pf.name);
   // Profile changed → evict cached frames so pages reload fresh with new identity
   var pool=document.getElementById('frame-pool');
@@ -1593,6 +1637,7 @@ function checkAuth(){
     document.getElementById('profile-overlay').style.display='none';
     updateHeaderProfile(pf);
     if(document.getElementById('portal-home').style.display!=='none')setTimeout(animateHomeCards,80);
+    prefetchPages();
     // Pull from Firebase first, then push back if local edits are newer
     if(!_pfSyncing){
       _pfSyncing=true;
@@ -1810,6 +1855,8 @@ function cmdkScroll(){
 }
 // Iframe pages forward Ctrl+K here
 window.addEventListener('message',function(e){if(e.data&&e.data.type==='trr_cmdk')openCmdk();});
+// Iframe pages request "back to portal home" here (avoids nested portal)
+window.addEventListener('message',function(e){if(e.data&&e.data.type==='trr_gohome')navHome();});
 
 // ══ Sidebar ═══════════════════════════════════════════════════════════════
 function toggleSidebar() {
