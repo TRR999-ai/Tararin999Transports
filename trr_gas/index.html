@@ -1314,11 +1314,11 @@ function calcEmptyRun(depotId, pickupId, truck, fp) {
   const dist = DB.getDist(depotId, pickupId);
   if (dist === null) throw new Error('ไม่พบระยะทาง: ที่พัก → จุดขึ้นงาน');
   const rate = truck.base_rate;
-  const cost = dist / rate * fp;
+  const cost = (dist * 2) / rate * fp;
   return {
     mode:'empty_run', legs:{'ที่พัก → จุดขึ้นงาน': dist},
     total_distance: dist, fuel_rate: rate, fuel_price: fp, total_cost: cost,
-    formula: `${dist.toFixed(1)} ÷ ${rate} × ${fp.toFixed(2)} (ขาเดียว)`,
+    formula: `(${dist.toFixed(1)} × 2) ÷ ${rate} × ${fp.toFixed(2)}`,
   };
 }
 
@@ -1996,7 +1996,7 @@ function buildCalcPage() {
     <div class="step-label">ขั้นที่ 2  —  เลือกโหมดการคำนวณ</div>
     <div class="mode-btns">
       <button class="mode-btn ${CS.mode==='normal'    ?'active':''}" onclick="setCalcMode('normal')">🔄 คำนวณปกติ (ไป-กลับ)</button>
-      ${truck.empty_run ? `<button class="mode-btn ${CS.mode==='empty_run'?'active':''}" onclick="setCalcMode('empty_run')">➡️ งานตีเปล่า (ขาเดียว)</button>` : ''}
+      ${truck.empty_run ? `<button class="mode-btn ${CS.mode==='empty_run'?'active':''}" onclick="setCalcMode('empty_run')">➡️ งานตีเปล่า</button>` : ''}
       ${truck.backhaul  ? `<button class="mode-btn ${CS.mode==='backhaul' ?'active':''}" onclick="setCalcMode('backhaul')">↩️ รับงานเพิ่ม (Backhaul)</button>` : ''}
       <button class="mode-btn ${CS.mode==='multistop'?'active':''}" onclick="setCalcMode('multistop')">🚚 หลายจุดส่ง</button>
     </div>` : '';
@@ -2094,7 +2094,7 @@ function buildEmptyForm() {
   const origins = DB.getLocs('origin');
   const allPick = [...DB.getLocs('origin'), ...DB.getLocs('destination'), ...DB.getLocs('depot')];
   return `<div class="form-section">
-    <h3>งานขึ้นแป้งตีเปล่า — คำนวณระยะทางขาเดียว (ไม่คูณ 2)</h3>
+    <h3>งานขึ้นแป้งตีเปล่า — ระยะทาง × 2 (ไป-กลับ)</h3>
     <div class="form-grid" style="gap:12px;">
       <label>ที่พัก / หอพัก:</label>
       <select id="ce-depot"  onchange="ceAutoDistance()">${locOpts([...depots,...origins],'เลือกที่พัก',null)}</select>
@@ -2113,7 +2113,7 @@ function ceAutoDistance() {
   if (d && p) {
     const km = DB.getDist(d, p);
     el.style.display = '';
-    el.textContent = km != null ? `✅ ระยะทาง: ${km.toFixed(1)} กม. (ขาเดียว)` : `⚠️ ยังไม่มีข้อมูลระยะทางคู่นี้`;
+    el.textContent = km != null ? `✅ ระยะทาง: ${km.toFixed(1)} กม. (× 2 = ${(km*2).toFixed(1)} กม.)` : `⚠️ ยังไม่มีข้อมูลระยะทางคู่นี้`;
     el.style.background = km != null ? '#EAFAF1' : '#FFF7E6';
     el.style.color = km != null ? '#1E8449' : '#92400E';
   } else { el.style.display = 'none'; }
@@ -2348,9 +2348,9 @@ function doCalculate() {
       if (!km||km<=0) throw new Error('กรุณากรอกระยะทางรวม');
       DB.setMS(oid, dids, km);
       const rate = getFuelRate(truck, km);
-      const cost = (km / rate) * fp;
+      const cost = (km * 2 / rate) * fp;
       const names = _msStops.map(s => { const sel=s.querySelector('select'); return sel?.options[sel.selectedIndex]?.text||'?'; });
-      const formula = `${km.toFixed(1)} ÷ ${rate} × ${fp.toFixed(2)}`;
+      const formula = `(${km.toFixed(1)} × 2) ÷ ${rate} × ${fp.toFixed(2)}`;
       const routeLbl = names.join(' → ') + ` → ${names[0]} (กลับ)`;
       result = { mode:'multistop', total_distance:km, fuel_rate:rate, fuel_price:fp, total_cost:cost,
         formula, legs:{[routeLbl]:km},
