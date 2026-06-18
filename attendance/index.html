@@ -349,10 +349,11 @@ html.dark .att-late-reason{color:#fbbf24;}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);z-index:2000;background:#1e293b;color:#fff;padding:12px 22px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;transition:transform .3s,opacity .3s;white-space:nowrap;}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 html.in-iframe #view-manager{flex-direction:column!important}
-html.in-iframe #mgr-sidebar{width:100%!important;height:auto!important;flex-direction:row!important;background:var(--sb-bg)!important}
+html.in-iframe #mgr-sidebar{position:static!important;transform:none!important;left:auto!important;top:auto!important;bottom:auto!important;z-index:auto!important;box-shadow:none!important;width:100%!important;height:auto!important;min-height:0!important;max-height:56px!important;flex-direction:row!important;align-items:center!important;overflow-x:auto!important;overflow-y:hidden!important;background:var(--sb-bg)!important}
 html.in-iframe .mgr-sb-top,html.in-iframe .mgr-sb-foot,html.in-iframe .mgr-topbar,html.in-iframe .emp-back,html.in-iframe #mgr-overlay,html.in-iframe #qnav{display:none!important}
-html.in-iframe .mgr-nav{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;padding:2px 6px!important;gap:2px!important;flex:unset!important}
-html.in-iframe .mgr-nav-btn{width:auto!important;display:inline-flex!important;padding:8px 14px!important;font-size:12px!important;min-height:unset!important;border-bottom:3px solid transparent!important}
+html.in-iframe .mgr-nav{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;padding:4px 6px!important;gap:2px!important;flex:unset!important;overflow-x:auto!important;scrollbar-width:none!important}
+html.in-iframe .mgr-nav::-webkit-scrollbar{display:none!important}
+html.in-iframe .mgr-nav-btn{width:auto!important;display:inline-flex!important;align-items:center!important;align-self:center!important;height:auto!important;white-space:nowrap!important;flex-shrink:0!important;padding:8px 14px!important;font-size:12px!important;min-height:unset!important;border-bottom:3px solid transparent!important}
 html.in-iframe .mgr-nav-btn:hover{border-bottom-color:var(--accent3)!important}
 html.in-iframe .mgr-nav-btn.active{background:var(--sb-item-active)!important;color:var(--sb-text-active)!important;border-bottom-color:var(--sb-accent)!important}
 html.in-iframe #mgr-main{overflow:hidden!important;flex:1!important}
