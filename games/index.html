@@ -299,6 +299,8 @@ function tada(){[0,4,7,12,16].forEach(function(st,i){setTimeout(function(){beep(
 // Move the stage to <body> so position:fixed always covers the true viewport,
 // regardless of any ancestor that creates a containing block (portal iframe, transforms).
 var _stageHome={};
+function fsEl(){return document.fullscreenElement||document.webkitFullscreenElement;}
+function nativeFS(on){try{if(on){var el=document.documentElement,rq=el.requestFullscreen||el.webkitRequestFullscreen;if(rq&&!fsEl())rq.call(el).catch(function(){});}else{var ex=document.exitFullscreen||document.webkitExitFullscreen;if(ex&&fsEl())ex.call(document).catch(function(){});}}catch(e){}}
 function stageFull(id,btn){
   var el=document.getElementById(id);var on=!el.classList.contains('fs');
   if(on){
@@ -309,10 +311,17 @@ function stageFull(id,btn){
     el.classList.remove('fs');document.body.classList.remove('stage-open');
     var h=_stageHome[id];if(h&&h.parent){h.parent.insertBefore(el,h.next);}
   }
+  nativeFS(on);
   var b=btn||el.querySelector('.stage-expand');
   if(b){b.textContent=on?'✕':'⛶';b.title=on?'ออกจากเต็มจอ (Esc)':'ขยายเต็มจอ';}
 }
 document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;var f=document.querySelector('.stage.fs');if(f)stageFull(f.id);});
+// if the user leaves browser fullscreen (Esc/gesture), fold any open game fullscreen back
+document.addEventListener('fullscreenchange',function(){
+  if(fsEl())return;
+  var f=document.querySelector('.stage.fs'); if(f)stageFull(f.id);
+  var rf=document.getElementById('roul-fs'); if(rf&&rf.classList.contains('show'))rf.classList.remove('show');
+});
 function hap(p){if(window.TRRfx)TRRfx.haptic(p);}
 function flash(){var f=document.getElementById('flash');f.classList.add('on');setTimeout(function(){f.classList.remove('on');},130);}
 function shake(el){el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');}
@@ -401,8 +410,8 @@ function rChips(){
   R_BULLETS.forEach(function(v){var dis=v>R.n-1;var b=document.createElement('button');b.className='rchip'+(v===R.bullets?' active':'');b.textContent=v;if(dis){b.style.opacity=.3;b.style.pointerEvents='none';}b.onclick=function(){ac();R.bullets=v;rChips();};d.appendChild(b);});
 }
 function rSetPhase(p){R.phase=p;document.getElementById('roul-fs').setAttribute('data-phase',p);}
-function rOpen(){ac();R.streak=0;rChips();rSetPhase('setup');document.getElementById('roul-fs').classList.add('show');}
-function rClose(){document.getElementById('roul-fs').classList.remove('show');}
+function rOpen(){ac();R.streak=0;rChips();rSetPhase('setup');document.getElementById('roul-fs').classList.add('show');nativeFS(true);}
+function rClose(){document.getElementById('roul-fs').classList.remove('show');nativeFS(false);}
 function rReset(){if(R.busy)return;R.streak=0;rChips();rSetPhase('setup');}
 function rBuildHoles(){
   var n=R.n, g=document.getElementById('fs-holes'); g.innerHTML='';

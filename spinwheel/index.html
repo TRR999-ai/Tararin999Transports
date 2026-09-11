@@ -483,10 +483,13 @@ document.getElementById('btn-drivers').addEventListener('click',loadDrivers);
 document.getElementById('win-again').addEventListener('click',function(){closeWin();setTimeout(spin,250);});
 document.getElementById('win-remove').addEventListener('click',removeWinner);
 window.addEventListener('resize',sizeCanvas);
-function setFull(on){document.body.classList.toggle('wheel-full',on);document.getElementById('btnExpand').textContent=on?'⤢ ย่อ':'⛶ เต็มจอ';setTimeout(sizeCanvas,60);}
+function fsEl(){return document.fullscreenElement||document.webkitFullscreenElement;}
+function nativeFS(on){try{if(on){var el=document.documentElement,rq=el.requestFullscreen||el.webkitRequestFullscreen;if(rq&&!fsEl())rq.call(el).catch(function(){});}else{var ex=document.exitFullscreen||document.webkitExitFullscreen;if(ex&&fsEl())ex.call(document).catch(function(){});}}catch(e){}}
+function setFull(on){document.body.classList.toggle('wheel-full',on);document.getElementById('btnExpand').textContent=on?'⤢ ย่อ':'⛶ เต็มจอ';nativeFS(on);setTimeout(sizeCanvas,120);}
 document.getElementById('btnExpand').addEventListener('click',function(){setFull(!document.body.classList.contains('wheel-full'));});
 document.getElementById('btnClose').addEventListener('click',function(){setFull(false);});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('wheel-full'))setFull(false);});
+document.addEventListener('fullscreenchange',function(){if(!fsEl()&&document.body.classList.contains('wheel-full')){document.body.classList.remove('wheel-full');document.getElementById('btnExpand').textContent='⛶ เต็มจอ';}setTimeout(sizeCanvas,120);});
 window.addEventListener('message',function(e){if(e.data&&e.data.type==='trr_accent')draw();if(e.data&&e.data.type==='trr_dark_mode')draw();});
 
 // ── Persist settings ──

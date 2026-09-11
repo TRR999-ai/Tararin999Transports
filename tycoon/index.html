@@ -546,11 +546,20 @@ document.getElementById('tile-modal').addEventListener('click',function(e){if(e.
 
 buildSetup();
 
-// ── Fullscreen board ──
-function setFull(on){document.body.classList.toggle('game-full',on);document.getElementById('btnExpand').textContent=on?'⤢ ย่อ':'⛶ เต็มจอ';}
+// ── Fullscreen board (real browser fullscreen — no portal chrome / top border) ──
+function nativeFS(on){
+  try{
+    if(on){var el=document.documentElement;var rq=el.requestFullscreen||el.webkitRequestFullscreen;if(rq&&!fsEl())rq.call(el).catch(function(){});}
+    else{var ex=document.exitFullscreen||document.webkitExitFullscreen;if(ex&&fsEl())ex.call(document).catch(function(){});}
+  }catch(e){}
+}
+function fsEl(){return document.fullscreenElement||document.webkitFullscreenElement;}
+function setFull(on){document.body.classList.toggle('game-full',on);document.getElementById('btnExpand').textContent=on?'⤢ ย่อ':'⛶ เต็มจอ';nativeFS(on);}
 document.getElementById('btnExpand').addEventListener('click',function(){setFull(!document.body.classList.contains('game-full'));});
 document.getElementById('btnClose').addEventListener('click',function(){setFull(false);});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('game-full'))setFull(false);});
+// keep CSS state in sync if user leaves fullscreen via browser (Esc/gesture)
+document.addEventListener('fullscreenchange',function(){if(!fsEl()&&document.body.classList.contains('game-full')){document.body.classList.remove('game-full');document.getElementById('btnExpand').textContent='⛶ เต็มจอ';}});
 </script>
 </body>
 </html>

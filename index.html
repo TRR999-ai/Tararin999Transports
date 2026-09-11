@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="./ui-fx.css?v=1">
 <script>
 /* App version — bump on every deploy so you can tell if the live site updated */
-var APP_VERSION='v1.19.5 (2026-09-09)';
+var APP_VERSION='v1.20.0 (2026-09-10)';
 /* Dark mode + accent — apply BEFORE render to prevent flash */
 (function(){
   if(localStorage.getItem('trr_dark_mode')==='1')
@@ -1502,6 +1502,7 @@ function navTo(page, title) {
   var f = document.createElement('iframe');
   f.className = 'page-frame active';
   f.title = title || 'TRR';
+  f.setAttribute('allowfullscreen','true'); f.setAttribute('allow','fullscreen');
   f.setAttribute('data-page', page);
   f.setAttribute('data-used', Date.now());
   topbarStart();
@@ -1545,6 +1546,7 @@ function prefetchPages(){
       var f=document.createElement('iframe');
       f.className='page-frame';            // not .active → stays hidden
       f.title='prefetch';
+      f.setAttribute('allowfullscreen','true'); f.setAttribute('allow','fullscreen');
       f.setAttribute('data-page',page);
       f.setAttribute('data-used','1');     // low priority for LRU eviction
       f.src=page;
