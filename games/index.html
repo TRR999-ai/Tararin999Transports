@@ -119,6 +119,8 @@ body.stage-open{overflow:hidden;}
 #roul-fs[data-phase="setup"] .r-setup{display:flex;}
 #roul-fs[data-phase="spin"] .r-gun,#roul-fs[data-phase="spin"] .r-spinctl{display:flex;}
 #roul-fs[data-phase="play"] .r-gun,#roul-fs[data-phase="play"] .r-playctl{display:flex;}
+/* keep the gun capped (it also carries .r-gun, whose width:100% would blow it up full-screen) */
+#roul-fs .r-gun{width:min(90vw,520px,60vh)!important;}
 .rs-label{color:#cbd5e1;font-size:14px;font-weight:600;margin-bottom:2px;}
 .rchips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:340px;}
 .rchip{font-family:inherit;font-size:16px;font-weight:800;min-width:52px;padding:11px 8px;border-radius:12px;border:1.5px solid #3a4048;background:#1a1f26;color:#e5e7eb;cursor:pointer;transition:.12s;}

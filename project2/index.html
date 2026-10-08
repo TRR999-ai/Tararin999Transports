@@ -51,6 +51,13 @@
     #info-toggle { width: 28px; height: 28px; border-radius: 50%; background: var(--glass-bg-subtle); color: var(--primary); border: 1.5px solid var(--glass-border-sm); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s; font-family: inherit; }
     #info-toggle:hover { background: var(--glass-bg); }
 
+    /* ─── Credit-limit set switcher ─── */
+    .set-switch { display: inline-flex; align-items: center; gap: 4px; background: var(--glass-bg-subtle); border: 1.5px solid var(--glass-border-sm); border-radius: 9px; padding: 3px; }
+    .set-switch .lbl { font-size: 12px; font-weight: 600; color: var(--muted); padding: 0 6px 0 4px; }
+    .setbtn { padding: 5px 13px; border-radius: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: var(--text); font-family: inherit; transition: .15s; }
+    .setbtn:hover { background: var(--glass-bg); }
+    .setbtn.active { background: linear-gradient(135deg,var(--primary2),var(--accent)); color: #fff; box-shadow: 0 2px 8px rgba(31,60,180,.25); }
+
     /* ─── Instructions (collapsible) ─── */
     #instructions { background: var(--glass-bg-subtle); backdrop-filter: var(--blur-xs); border-left: 4px solid var(--accent); padding: 8px 14px; font-size: 13px; color: var(--text); line-height: 1.7; }
     #instructions code { background: #dde3ff; padding: 1px 5px; border-radius: 3px; font-family: monospace; }
@@ -177,6 +184,11 @@
     <button id="add-card-btn" class="btn" onclick="openAddCardModal()">＋ เพิ่มบัตร</button>
     <button id="del-card-btn" class="btn" onclick="deleteSelectedRows()" disabled>ลบที่เลือก</button>
     <button id="paste-btn" class="btn" onclick="openPasteModal()">วางวงเงิน</button>
+    <span class="set-switch">
+      <span class="lbl">ชุดวงเงิน</span>
+      <button id="set-1" class="setbtn active" onclick="switchSet(1)">ชุด 1</button>
+      <button id="set-2" class="setbtn" onclick="switchSet(2)">ชุด 2</button>
+    </span>
   </div>
   <div class="tb-right">
     <span class="card-mgmt-hint" id="sel-hint"></span>
@@ -304,10 +316,60 @@ function calcTableHeight(){
 }
 window.addEventListener('resize',function(){if(hot)hot.updateSettings({height:calcTableHeight()});});
 
+// ─────────────────────────────────────────────
+// Two credit-limit sets (ชุด 1 / ชุด 2) — pick which one to apply/export
+// so you don't have to retype every card. Both sets persist per card number.
+// ─────────────────────────────────────────────
+var activeSet = (function(){ var v = parseInt(localStorage.getItem('fleet_card_active_set'),10); return (v===2)?2:1; })();
+function loadSets(){ try { return JSON.parse(localStorage.getItem('fleet_card_sets')||'{}'); } catch(e){ return {}; } }
+function saveSets(){
+  if(!hot) return;
+  var map = {};
+  hot.getSourceData().forEach(function(r){ if(r.cardNumber) map[r.cardNumber] = { s1: r.limit1, s2: r.limit2 }; });
+  try { localStorage.setItem('fleet_card_sets', JSON.stringify(map)); } catch(e){}
+}
+// seed limit1/limit2 on a row from saved sets (fallback: sheet limit / 1)
+function seedRowSets(r, saved){
+  var s = (saved && saved[r.cardNumber]) || {};
+  r.limit1 = (s.s1 != null) ? s.s1 : (r.limit != null ? r.limit : 1);
+  r.limit2 = (s.s2 != null) ? s.s2 : 1;
+  r.limit  = (activeSet === 2) ? r.limit2 : r.limit1;
+  return r;
+}
+function setColTitle(){
+  if(!hot) return;
+  // per-column title overrides colHeaders in Handsontable, so update the columns
+  var cols = hot.getSettings().columns.map(function(c){ var n = {}; for(var k in c) n[k]=c[k]; return n; });
+  cols.forEach(function(c){ if(c.data==='limit') c.title = 'วงเงิน ชุด '+activeSet+' (บาท/เดือน)'; });
+  hot.updateSettings({ columns: cols, colHeaders: cols.map(function(c){ return c.title; }) });
+}
+function switchSet(n){
+  if(n!==1 && n!==2) return;
+  if(hot){ // commit current visible column into the active set before switching
+    hot.getSourceData().forEach(function(r){ r['limit'+activeSet] = r.limit; });
+  }
+  activeSet = n;
+  try { localStorage.setItem('fleet_card_active_set', String(n)); } catch(e){}
+  document.getElementById('set-1').classList.toggle('active', n===1);
+  document.getElementById('set-2').classList.toggle('active', n===2);
+  if(hot){
+    var src = hot.getSourceData();
+    src.forEach(function(r){ r.limit = (n===2) ? r.limit2 : r.limit1; });
+    hot.loadData(src);
+    setColTitle();
+    saveSets(); updateStats();
+    setStatus('สลับไปชุด ' + n, 'ok');
+  }
+}
+
 // Init table
 // ─────────────────────────────────────────────
 function initTable(data) {
   _origLen = data.length;
+  var saved = loadSets();
+  data.forEach(function(r){ seedRowSets(r, saved); });
+  document.getElementById('set-1').classList.toggle('active', activeSet===1);
+  document.getElementById('set-2').classList.toggle('active', activeSet===2);
   var container = document.getElementById('hot-container');
 
   hot = new Handsontable(container, {
@@ -384,6 +446,7 @@ function initTable(data) {
     afterChange: function(changes, source) {
       if (!changes || source === '_auto0to1') return;
       var self = this;
+      var touched = false;
       changes.forEach(function(change) {
         if (change[1] !== 'limit') return;
         var val = change[3];
@@ -391,11 +454,18 @@ function initTable(data) {
         if (val === null || val === '' || val === undefined || num === 0 || isNaN(num)) {
           self.setDataAtRowProp(change[0], 'limit', 1, '_auto0to1');
         }
+        // mirror the edit into the active set, then persist both sets
+        var sd = self.getSourceDataAtRow(change[0]);
+        if (sd) sd['limit'+activeSet] = sd.limit;
+        touched = true;
       });
+      if (touched) saveSets();
       updateStats();
     },
 
     afterInit: function() {
+      setColTitle();
+      setTimeout(setColTitle, 0);
       updateStats();
       checkNameWarnings();
       document.getElementById('export-btn').disabled = false;
@@ -614,6 +684,8 @@ if (typeof google === 'undefined') {
 // Paste modal (mobile-friendly bulk paste)
 // ─────────────────────────────────────────────
 function openPasteModal() {
+  var h = document.querySelector('#paste-modal h3');
+  if (h) h.textContent = 'วางวงเงิน → ชุด ' + activeSet;
   document.getElementById('paste-modal').classList.remove('hidden');
   setTimeout(function() { document.getElementById('paste-area').focus(); }, 100);
 }
@@ -646,8 +718,9 @@ function applyPastedLimits() {
   });
 
   closePasteModal();
+  saveSets();
   updateStats();
-  setStatus('วางวงเงินแล้ว ' + applied + ' แถว', 'ok');
+  setStatus('วางวงเงิน ชุด ' + activeSet + ' แล้ว ' + applied + ' แถว', 'ok');
 }
 
 // ─────────────────────────────────────────────
@@ -659,6 +732,7 @@ function removeRow(row) {
   src.forEach(function(r, i) { r.no = i + 1; });
   _origLen = Math.max(0, _origLen - (row < _origLen ? 1 : 0));
   hot.loadData(src);
+  saveSets();
   updateStats();
   document.getElementById('del-card-btn').disabled = true;
   document.getElementById('sel-hint').textContent = '';
@@ -683,6 +757,7 @@ function deleteSelectedRows() {
   });
   src.forEach(function(r, i) { r.no = i + 1; });
   hot.loadData(src);
+  saveSets();
   updateStats();
   document.getElementById('del-card-btn').disabled = true;
   document.getElementById('sel-hint').textContent = '';
@@ -722,12 +797,15 @@ function applyAddCard() {
     var cardNo = document.getElementById('ac-cardno').value.trim();
     if (!cardNo) { alert('กรุณากรอกหมายเลขบัตร'); return; }
     var lim = parseFloat(document.getElementById('ac-limit').value) || 1;
+    var la = lim < 1 ? 1 : lim;
     src.push({
       no:         src.length + 1,
       cardNumber: cardNo,
       name:       document.getElementById('ac-name').value.trim(),
       department: document.getElementById('ac-dept').value.trim(),
-      limit:      lim < 1 ? 1 : lim
+      limit:      la,
+      limit1:     activeSet === 1 ? la : 1,
+      limit2:     activeSet === 2 ? la : 1
     });
     added = 1;
   } else {
@@ -737,12 +815,13 @@ function applyAddCard() {
       .filter(function(l){ return l !== ''; });
     if (!lines.length) { alert('ไม่พบหมายเลขบัตร'); return; }
     lines.forEach(function(cardNo) {
-      src.push({ no: src.length+1, cardNumber: cardNo, name:'', department:'', limit:1 });
+      src.push({ no: src.length+1, cardNumber: cardNo, name:'', department:'', limit:1, limit1:1, limit2:1 });
       added++;
     });
   }
 
   hot.loadData(src);
+  saveSets();
   updateStats();
   closeAddCardModal();
   setStatus('เพิ่ม ' + added + ' บัตรแล้ว (สีเขียว = บัตรใหม่)', 'ok');
