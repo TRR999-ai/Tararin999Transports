@@ -317,59 +317,61 @@ function calcTableHeight(){
 window.addEventListener('resize',function(){if(hot)hot.updateSettings({height:calcTableHeight()});});
 
 // ─────────────────────────────────────────────
-// Two credit-limit sets (ชุด 1 / ชุด 2) — pick which one to apply/export
-// so you don't have to retype every card. Both sets persist per card number.
+// Two CARD SETS: ชุด 1 = column B cards, ชุด 2 = column F cards.
+// Switching sets swaps which list of fuel cards is loaded into the table.
+// Credit limit is stored per card number (localStorage), shared across sets.
 // ─────────────────────────────────────────────
 var activeSet = (function(){ var v = parseInt(localStorage.getItem('fleet_card_active_set'),10); return (v===2)?2:1; })();
-function loadSets(){ try { return JSON.parse(localStorage.getItem('fleet_card_sets')||'{}'); } catch(e){ return {}; } }
-function saveSets(){
+var CARD_SETS = { 1: [], 2: [] };
+function loadLimits(){ try { return JSON.parse(localStorage.getItem('fleet_card_limits')||'{}'); } catch(e){ return {}; } }
+function saveLimits(){
   if(!hot) return;
-  var map = {};
-  hot.getSourceData().forEach(function(r){ if(r.cardNumber) map[r.cardNumber] = { s1: r.limit1, s2: r.limit2 }; });
-  try { localStorage.setItem('fleet_card_sets', JSON.stringify(map)); } catch(e){}
+  var map = loadLimits();
+  hot.getSourceData().forEach(function(r){ if(r.cardNumber) map[r.cardNumber] = r.limit; });
+  try { localStorage.setItem('fleet_card_limits', JSON.stringify(map)); } catch(e){}
 }
-// seed limit1/limit2 on a row from saved sets (fallback: sheet limit / 1)
-function seedRowSets(r, saved){
-  var s = (saved && saved[r.cardNumber]) || {};
-  r.limit1 = (s.s1 != null) ? s.s1 : (r.limit != null ? r.limit : 1);
-  r.limit2 = (s.s2 != null) ? s.s2 : 1;
-  r.limit  = (activeSet === 2) ? r.limit2 : r.limit1;
-  return r;
+// build table rows for a set, merging the saved limit for each card number
+function rowsForSet(n){
+  var saved = loadLimits();
+  return (CARD_SETS[n]||[]).map(function(r, i){
+    var lim = (saved[r.cardNumber] != null) ? saved[r.cardNumber] : (r.limit != null ? r.limit : 1);
+    return { no: i+1, cardNumber: r.cardNumber, name: r.name||'', department: r.department||'', limit: (lim>0?lim:1) };
+  });
 }
-function setColTitle(){
-  if(!hot) return;
-  // per-column title overrides colHeaders in Handsontable, so update the columns
-  var cols = hot.getSettings().columns.map(function(c){ var n = {}; for(var k in c) n[k]=c[k]; return n; });
-  cols.forEach(function(c){ if(c.data==='limit') c.title = 'วงเงิน ชุด '+activeSet+' (บาท/เดือน)'; });
-  hot.updateSettings({ columns: cols, colHeaders: cols.map(function(c){ return c.title; }) });
+function setSetButtons(){
+  var b1=document.getElementById('set-1'), b2=document.getElementById('set-2');
+  b1.classList.toggle('active', activeSet===1);
+  b2.classList.toggle('active', activeSet===2);
+  b1.textContent = 'ชุด 1 ('+(CARD_SETS[1]||[]).length+')';
+  b2.textContent = 'ชุด 2 ('+(CARD_SETS[2]||[]).length+')';
+}
+function loadSetIntoTable(n){
+  activeSet = n;
+  try { localStorage.setItem('fleet_card_active_set', String(n)); } catch(e){}
+  setSetButtons();
+  var rows = rowsForSet(n);
+  if(hot){ _origLen = rows.length; hot.loadData(rows); updateStats(); checkNameWarnings(); }
+  else { initTable(rows); }
 }
 function switchSet(n){
   if(n!==1 && n!==2) return;
-  if(hot){ // commit current visible column into the active set before switching
-    hot.getSourceData().forEach(function(r){ r['limit'+activeSet] = r.limit; });
-  }
-  activeSet = n;
-  try { localStorage.setItem('fleet_card_active_set', String(n)); } catch(e){}
-  document.getElementById('set-1').classList.toggle('active', n===1);
-  document.getElementById('set-2').classList.toggle('active', n===2);
-  if(hot){
-    var src = hot.getSourceData();
-    src.forEach(function(r){ r.limit = (n===2) ? r.limit2 : r.limit1; });
-    hot.loadData(src);
-    setColTitle();
-    saveSets(); updateStats();
-    setStatus('สลับไปชุด ' + n, 'ok');
-  }
+  if(n===activeSet) return;
+  if(hot) saveLimits();                 // persist current set's limits before swapping
+  loadSetIntoTable(n);
+  setStatus('สลับไปชุด ' + n + ' (' + (CARD_SETS[n]||[]).length + ' บัตร)', 'ok');
+}
+// keep the active set's stored card list in sync with the table (after add/remove)
+function syncActiveSetFromTable(){
+  if(!hot) return;
+  CARD_SETS[activeSet] = hot.getSourceData().map(function(r){ return { cardNumber:r.cardNumber, name:r.name||'', department:r.department||'', limit:r.limit }; });
+  setSetButtons();
 }
 
 // Init table
 // ─────────────────────────────────────────────
 function initTable(data) {
   _origLen = data.length;
-  var saved = loadSets();
-  data.forEach(function(r){ seedRowSets(r, saved); });
-  document.getElementById('set-1').classList.toggle('active', activeSet===1);
-  document.getElementById('set-2').classList.toggle('active', activeSet===2);
+  setSetButtons();
   var container = document.getElementById('hot-container');
 
   hot = new Handsontable(container, {
@@ -454,18 +456,13 @@ function initTable(data) {
         if (val === null || val === '' || val === undefined || num === 0 || isNaN(num)) {
           self.setDataAtRowProp(change[0], 'limit', 1, '_auto0to1');
         }
-        // mirror the edit into the active set, then persist both sets
-        var sd = self.getSourceDataAtRow(change[0]);
-        if (sd) sd['limit'+activeSet] = sd.limit;
         touched = true;
       });
-      if (touched) saveSets();
+      if (touched) saveLimits();          // persist limit per card number
       updateStats();
     },
 
     afterInit: function() {
-      setColTitle();
-      setTimeout(setColTitle, 0);
       updateStats();
       checkNameWarnings();
       document.getElementById('export-btn').disabled = false;
@@ -631,7 +628,7 @@ function exportToExcel() {
 // ─────────────────────────────────────────────
 if (typeof google === 'undefined') {
   // ── ดึงข้อมูลจาก Google Sheet โดยตรง (Sheet ต้องแชร์ "Anyone with the link") ──
-  // คอลัมน์ใน Sheet: A=ลำดับ  B=หมายเลขบัตร  C=ชื่อ  D=แผนก  E=วงเงิน
+  // คอลัมน์ใน Sheet: A=ลำดับ  B=หมายเลขบัตร  C=ชื่อ  D=แผนก  E=วงเงิน ชุด1  F=วงเงิน ชุด2
   var FLEET_SHEET_ID  = '12o1drcocyTl51GnW6z5_nHvwQPtw3aoln67YHnWGcLI';
   var FLEET_SHEET_GID = '0';
   var FLEET_URL = 'https://docs.google.com/spreadsheets/d/' + FLEET_SHEET_ID +
@@ -650,21 +647,19 @@ if (typeof google === 'undefined') {
           window[cb] = function(json) {
             delete window[cb];
             var rows = (json.table && json.table.rows) ? json.table.rows : [];
-            var data = [];
+            // ชุด 1 = คอลัมน์ B (บัตร) + C ชื่อ + D แผนก + E วงเงิน
+            // ชุด 2 = คอลัมน์ F (บัตร) + C ชื่อ + D แผนก + G วงเงิน (ถ้ามี)
+            var set1 = [], set2 = [];
             rows.forEach(function(row, i) {
               var c   = row.c || [];
               var get = function(idx) { return (c[idx] && c[idx].v != null) ? c[idx].v : ''; };
-              var cardNum = String(get(1)).trim();
-              if (!cardNum) return;
-              data.push({
-                no:         Number(get(0)) || (i + 1),
-                cardNumber: cardNum,
-                name:       String(get(2)).trim(),
-                department: String(get(3)).trim(),
-                limit:      Number(get(4)) || 1
-              });
+              var name = String(get(2)).trim(), dept = String(get(3)).trim();
+              var c1 = String(get(1)).trim();   // B
+              var c2 = String(get(5)).trim();   // F
+              if (c1) { var e = Number(get(4)); set1.push({ cardNumber:c1, name:name, department:dept, limit:(e>0?e:1) }); }
+              if (c2) { var g = Number(get(6)); set2.push({ cardNumber:c2, name:name, department:dept, limit:(g>0?g:1) }); }
             });
-            self._ok(data);
+            self._ok({ set1: set1, set2: set2 });
           };
           var s = document.createElement('script');
           s.onerror = function() {
@@ -718,7 +713,7 @@ function applyPastedLimits() {
   });
 
   closePasteModal();
-  saveSets();
+  saveLimits();
   updateStats();
   setStatus('วางวงเงิน ชุด ' + activeSet + ' แล้ว ' + applied + ' แถว', 'ok');
 }
@@ -732,7 +727,8 @@ function removeRow(row) {
   src.forEach(function(r, i) { r.no = i + 1; });
   _origLen = Math.max(0, _origLen - (row < _origLen ? 1 : 0));
   hot.loadData(src);
-  saveSets();
+  saveLimits();
+  syncActiveSetFromTable();
   updateStats();
   document.getElementById('del-card-btn').disabled = true;
   document.getElementById('sel-hint').textContent = '';
@@ -757,7 +753,8 @@ function deleteSelectedRows() {
   });
   src.forEach(function(r, i) { r.no = i + 1; });
   hot.loadData(src);
-  saveSets();
+  saveLimits();
+  syncActiveSetFromTable();
   updateStats();
   document.getElementById('del-card-btn').disabled = true;
   document.getElementById('sel-hint').textContent = '';
@@ -803,9 +800,7 @@ function applyAddCard() {
       cardNumber: cardNo,
       name:       document.getElementById('ac-name').value.trim(),
       department: document.getElementById('ac-dept').value.trim(),
-      limit:      la,
-      limit1:     activeSet === 1 ? la : 1,
-      limit2:     activeSet === 2 ? la : 1
+      limit:      la
     });
     added = 1;
   } else {
@@ -815,13 +810,14 @@ function applyAddCard() {
       .filter(function(l){ return l !== ''; });
     if (!lines.length) { alert('ไม่พบหมายเลขบัตร'); return; }
     lines.forEach(function(cardNo) {
-      src.push({ no: src.length+1, cardNumber: cardNo, name:'', department:'', limit:1, limit1:1, limit2:1 });
+      src.push({ no: src.length+1, cardNumber: cardNo, name:'', department:'', limit:1 });
       added++;
     });
   }
 
   hot.loadData(src);
-  saveSets();
+  saveLimits();
+  syncActiveSetFromTable();
   updateStats();
   closeAddCardModal();
   setStatus('เพิ่ม ' + added + ' บัตรแล้ว (สีเขียว = บัตรใหม่)', 'ok');
@@ -836,12 +832,18 @@ google.script.run
   .withSuccessHandler(function(data) {
     document.getElementById('loading').classList.add('hidden');
 
-    if (!Array.isArray(data) || data.length === 0) {
-      setStatus('ไม่พบข้อมูลพนักงานใน Sheet "MasterData"', 'error');
+    // Back-compat: old backend returns a flat array (ชุด 1 only)
+    if (Array.isArray(data)) data = { set1: data, set2: [] };
+    CARD_SETS[1] = (data && data.set1) || [];
+    CARD_SETS[2] = (data && data.set2) || [];
+
+    if (!CARD_SETS[1].length && !CARD_SETS[2].length) {
+      setStatus('ไม่พบข้อมูลบัตรใน Sheet', 'error');
       return;
     }
+    if (activeSet === 2 && !CARD_SETS[2].length) activeSet = 1;
 
-    initTable(data);
+    loadSetIntoTable(activeSet);
 
     // Pre-load template in background so Export is instant
     google.script.run
